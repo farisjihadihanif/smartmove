@@ -1,0 +1,33 @@
+name: smartmove
+description: "SmartMove Medan – aplikasi mobilitas kota Medan (Android)."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.14.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_map: ^8.3.2
+  flutter_secure_storage: ^11.2.0
+  geolocator: ^14.1.2
+  google_fonts: ^9.0.0
+  http: ^1.6.0
+  latlong2: ^0.10.1
+  material_ui: ^1.1.0
+  shared_preferences: ^2.5.6
+  url_launcher: ^6.3.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Font dibundel (google_fonts mencocokkan nama file, mis. OpenSans-SemiBold.ttf).
+  # Unduhan saat runtime dimatikan di main.dart.
+  assets:
+    - assets/google_fonts/
