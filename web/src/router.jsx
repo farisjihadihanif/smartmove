@@ -10,6 +10,10 @@ export const router = createBrowserRouter([
     errorElement: <NotFound />,
     children: [
       { index: true, element: <Home /> },
+      // Pratinjau komponen bersama, hanya saat dev (tidak ikut build produksi).
+      ...(import.meta.env.DEV
+        ? [{ path: 'komponen', lazy: async () => ({ Component: (await import('./pages/Komponen.jsx')).default }) }]
+        : []),
       { path: '*', element: <NotFound /> },
     ],
   },

@@ -126,3 +126,18 @@
     @apply outline-2 outline-offset-2 outline-pill-via;
   }
 }
+
+/* Atribusi OSM wajib selalu terlihat dan terbaca (AGENTS §UI). */
+.leaflet-container {
+  font-family: var(--font-sans);
+}
+.leaflet-container .leaflet-control-attribution {
+  background: rgb(255 255 255 / 0.85);
+  color: var(--color-ink);
+  font-size: 11px;
+  padding: 1px 6px;
+  border-top-left-radius: 6px;
+}
+.leaflet-container .leaflet-control-attribution a {
+  color: var(--color-ink-violet);
+}
