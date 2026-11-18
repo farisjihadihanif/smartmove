@@ -24,7 +24,8 @@ const app = (extra = {}) =>
     nodeEnv: 'test',
     mailer: { send: async () => {} },
     fetch: fetchPalsu,
-    osrmUrl: 'https://osrm.contoh/',
+    osrmUrlCar: 'https://osrm.contoh/mobil/',
+    osrmUrlFoot: 'https://osrm.contoh/kaki',
     ...extra,
   });
 
@@ -93,14 +94,14 @@ describe('langkah bahasa Indonesia', () => {
     for (const [step, teks] of cases) assert.equal(teksLangkah(step), teks);
   });
 
-  test('keRute membentuk respons API_SPECS §6.1; walking pakai kecepatan jalan kaki', () => {
+  test('keRute membentuk respons API_SPECS §6.1; durasi dari OSRM untuk semua moda', () => {
     const r = keRute(OSRM_OK, 'driving');
     assert.equal(r.mode, 'driving');
     assert.equal(r.jarakM, 4900);
     assert.equal(r.durasiS, 720);
     assert.deepEqual(r.garis[0], [98.6566, 3.5617]);
     assert.deepEqual(r.langkah[1], { teks: 'Belok kiri ke Jalan Dr. Mansyur', jarakM: 350, lokasi: [98.66, 3.57] });
-    assert.equal(keRute(OSRM_OK, 'walking').durasiS, Math.round(4900 / (5000 / 3600)));
+    assert.equal(keRute(OSRM_OK, 'walking').durasiS, 720);
     assert.equal(keRute({ code: 'NoRoute', routes: [] }, 'driving'), null);
   });
 });
@@ -115,21 +116,32 @@ describe('GET /api/routes', () => {
 
     const { url, headers } = panggilan[0];
     assert.equal(url.origin, 'https://osrm.contoh');
-    assert.equal(url.pathname, '/route/v1/driving/98.6566,3.5617;98.6782,3.5913');
+    assert.equal(url.pathname, '/mobil/route/v1/driving/98.6566,3.5617;98.6782,3.5913');
     assert.equal(url.searchParams.get('steps'), 'true');
     assert.equal(url.searchParams.get('geometries'), 'geojson');
     assert.equal(url.searchParams.get('overview'), 'full');
     assert.match(headers['User-Agent'], /^SmartMoveMedan\//);
   });
 
-  test('moda: bawaan driving, motor → profil driving, jalan kaki → foot', async () => {
+  test('moda: bawaan driving, motor → server mobil, jalan kaki → server kaki', async () => {
     const a = app();
     assert.equal((await request(a).get('/api/routes').query({ from: USU, to: MERDEKA })).body.mode, 'driving');
     const motor = await request(a).get('/api/routes').query({ from: USU, to: MERDEKA, mode: 'motorcycle' });
     assert.equal(motor.body.mode, 'motorcycle');
-    assert.match(panggilan[1].url.pathname, /^\/route\/v1\/driving\//);
+    assert.match(panggilan[1].url.pathname, /^\/mobil\/route\/v1\/driving\//);
+    const kaki = await request(a).get('/api/routes').query({ from: USU, to: MERDEKA, mode: 'walking' });
+    assert.equal(kaki.body.durasiS, 720); // durasi asli OSRM foot, bukan hitungan 5 km/jam
+    assert.match(panggilan[2].url.pathname, /^\/kaki\/route\/v1\/foot\//);
+    assert.match(panggilan[2].headers['User-Agent'], /^SmartMoveMedan\//);
+  });
+
+  test('tanpa OSRM_URL_* → server FOSSGIS routed-car / routed-foot', async () => {
+    const a = app({ osrmUrlCar: undefined, osrmUrlFoot: undefined });
+    await request(a).get('/api/routes').query({ from: USU, to: MERDEKA }).expect(200);
     await request(a).get('/api/routes').query({ from: USU, to: MERDEKA, mode: 'walking' }).expect(200);
-    assert.match(panggilan[2].url.pathname, /^\/route\/v1\/foot\//);
+    assert.equal(panggilan[0].url.origin, 'https://routing.openstreetmap.de');
+    assert.match(panggilan[0].url.pathname, /^\/routed-car\/route\/v1\/driving\//);
+    assert.match(panggilan[1].url.pathname, /^\/routed-foot\/route\/v1\/foot\//);
   });
 
   test('cache: titik sama setelah dibulatkan 4 desimal + moda sama → OSRM dipanggil sekali', async () => {

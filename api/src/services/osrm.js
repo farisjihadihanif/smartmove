@@ -5,19 +5,25 @@ const gagal = () => httpError(502, 'Layanan peta sedang bermasalah, coba lagi na
 // Moda SmartMove → profil OSRM. Motor memakai jaringan jalan mobil.
 export const PROFIL = { driving: 'driving', motorcycle: 'driving', walking: 'foot' };
 
-// Server demo OSRM hanya punya profil mobil, jadi durasi jalan kaki dihitung
-// dari jarak (±5 km/jam) agar tetap masuk akal di server mana pun.
-const KECEPATAN_JALAN_MS = 5000 / 3600;
+// Bawaan: server FOSSGIS (routing.openstreetmap.de), satu server per profil.
+// Untuk produksi ramai sebaiknya pasang OSRM sendiri (ARCHITECTURE §9).
+export const OSRM_CAR_BAWAAN = 'https://routing.openstreetmap.de/routed-car';
+export const OSRM_FOOT_BAWAAN = 'https://routing.openstreetmap.de/routed-foot';
 
 // Klien OSRM: User-Agent khusus aplikasi + batas waktu. Mengembalikan JSON mentah.
 export function createOsrm(cfg, { fetch = globalThis.fetch } = {}) {
-  const base = (cfg.osrmUrl || 'https://router.project-osrm.org').replace(/\/+$/, '');
+  const bersih = (u) => u.replace(/\/+$/, '');
+  const base = {
+    driving: bersih(cfg.osrmUrlCar || OSRM_CAR_BAWAAN),
+    foot: bersih(cfg.osrmUrlFoot || OSRM_FOOT_BAWAAN),
+  };
   const timeout = cfg.osrmTimeoutMs ?? 10000;
 
   return {
     async route(from, to, profil) {
+      if (!base[profil]) throw new Error(`Profil OSRM tidak dikenal: ${profil}`);
       const titik = `${from.lng},${from.lat};${to.lng},${to.lat}`;
-      const url = new URL(`${base}/route/v1/${profil}/${titik}`);
+      const url = new URL(`${base[profil]}/route/v1/${profil}/${titik}`);
       url.searchParams.set('overview', 'full');
       url.searchParams.set('geometries', 'geojson');
       url.searchParams.set('steps', 'true');
@@ -119,7 +125,7 @@ export function keRute(body, mode) {
   return {
     mode,
     jarakM,
-    durasiS: Math.round(mode === 'walking' ? jarakM / KECEPATAN_JALAN_MS : r.duration),
+    durasiS: Math.round(r.duration),
     garis: r.geometry?.coordinates || [],
     langkah,
   };
