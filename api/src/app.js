@@ -10,6 +10,7 @@ import { loadUser } from './middleware/auth.js';
 import { createMailer } from './services/mail.js';
 import { authRouter } from './routes/auth.js';
 import { usersRouter } from './routes/users.js';
+import { homeRouter } from './routes/home.js';
 
 export function createApp(opts = {}) {
   const cfg = { ...config, ...opts };
@@ -51,6 +52,7 @@ export function createApp(opts = {}) {
   api.use(loadUser(cfg));
   api.use('/auth', authRouter(cfg, { mailer }));
   api.use('/users', usersRouter(cfg));
+  api.use('/home', homeRouter(cfg));
   // Router fitur lain (places, routes, ...) dipasang di tugas berikutnya.
 
   app.use('/api', api);
