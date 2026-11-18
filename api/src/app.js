@@ -11,6 +11,7 @@ import { createMailer } from './services/mail.js';
 import { authRouter } from './routes/auth.js';
 import { usersRouter } from './routes/users.js';
 import { homeRouter } from './routes/home.js';
+import { placesRouter } from './routes/places.js';
 
 export function createApp(opts = {}) {
   const cfg = { ...config, ...opts };
@@ -53,7 +54,8 @@ export function createApp(opts = {}) {
   api.use('/auth', authRouter(cfg, { mailer }));
   api.use('/users', usersRouter(cfg));
   api.use('/home', homeRouter(cfg));
-  // Router fitur lain (places, routes, ...) dipasang di tugas berikutnya.
+  api.use('/places', placesRouter(cfg));
+  // Router fitur lain (routes, ...) dipasang di tugas berikutnya.
 
   app.use('/api', api);
   app.use(notFound);

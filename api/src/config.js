@@ -36,6 +36,15 @@ const config = {
     windowMs: 15 * 60 * 1000,
     limit: Number(env.AUTH_RATE_LIMIT) || 20,
   },
+  // Layanan peta (places, routes): 60 permintaan/menit/IP (ARCHITECTURE §8).
+  mapRateLimit: {
+    windowMs: 60 * 1000,
+    limit: Number(env.MAP_RATE_LIMIT) || 60,
+  },
+  nominatimUrl: env.NOMINATIM_URL || 'https://nominatim.openstreetmap.org',
+  nominatimEmail: env.NOMINATIM_EMAIL,
+  // Kebijakan OSM: User-Agent yang mengenali aplikasi + alamat kontak.
+  mapUserAgent: `SmartMoveMedan/1.0 (+${env.APP_URL || 'http://localhost:4200'})`,
   // console | smtp (lihat services/mail.js). Diabaikan di produksi.
   mailMode: env.MAIL_MODE || 'console',
   smtp: {
