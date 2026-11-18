@@ -15,6 +15,10 @@ const config = {
     .map((s) => s.trim())
     .filter(Boolean),
   appUrl: env.APP_URL || 'http://localhost:4200',
+  dnsServers: (env.DNS_SERVERS || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
   admin: {
     email: env.ADMIN_EMAIL,
     username: env.ADMIN_USERNAME,
