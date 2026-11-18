@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+/* Token warna mockup – DESIGN.md §2. Jangan diubah tanpa memperbarui DESIGN.md. */
+@theme {
+  --color-primary-deep: #361254;
+  --color-primary: #4B1D6D;
+  --color-magenta: #8B3AA8;
+  --color-violet: #6D28D9;
+  --color-lavender: #F3E8FF;
+  --color-accent: #D35428;
+  --color-route: #0D3AA9;
+  --color-traffic-lancar: #2E9E5B;
+  --color-traffic-padat: #F2A20C;
+  --color-traffic-macet: #D93636;
+
+  --font-sans: "Open Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Bree Serif", ui-serif, Georgia, serif;
+
+  /* Target sentuh minimal (DESIGN §2.3): min-h-touch, min-w-touch, size-touch */
+  --spacing-touch: 48px;
+}
+
+/* Gradasi header nebula: #361254 → #4B1D6D → #8B3AA8 */
+@utility bg-nebula {
+  background-image: linear-gradient(
+    135deg,
+    var(--color-primary-deep),
+    var(--color-primary) 50%,
+    var(--color-magenta)
+  );
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-white font-sans text-primary-deep antialiased;
+    min-width: 360px;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-violet;
+  }
+}
