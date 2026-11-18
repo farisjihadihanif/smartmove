@@ -11,12 +11,13 @@ class PillOption<T> {
 
 enum PillTone { pill, deep, soft }
 
-/// Deretan kapsul gradasi ungu → magenta (mockup hal. 4, 6).
+/// Deretan kapsul (mockup hal. 4, 6). Yang aktif bergradasi ungu → magenta,
+/// yang tidak aktif putih tembus pandang – gradasi hanya untuk pilihan aktif.
 ///
 /// - Tunggal (tab Estimasi Waktu · Peta Interaktif): [multiple] = false,
 ///   [onChanged] menerima himpunan berisi satu nilai.
 /// - [multiple] (lapisan Traffic · Transportasi umum · Street view).
-/// Yang aktif diberi cincin putih tebal + teks tebal (bukan warna saja).
+/// Yang aktif juga diberi ikon centang + teks tebal (bukan warna saja).
 class PillToggle<T> extends StatelessWidget {
   const PillToggle({
     super.key,
@@ -77,7 +78,8 @@ class PillToggle<T> extends StatelessWidget {
   }
 }
 
-/// Satu kapsul gradasi; dipakai ulang oleh PillToggle, MenuTile, EmptyState.
+/// Satu kapsul; dipakai ulang oleh PillToggle dan MenuTile.
+/// [selected] null = label biasa (selalu gradasi); false = putih; true = gradasi + centang.
 class GradientPill extends StatelessWidget {
   const GradientPill({
     super.key,
@@ -109,9 +111,11 @@ class GradientPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final on = selected ?? false;
+    final plain = selected == false;
+    final fg = plain ? AppColors.inkViolet : AppColors.white;
     final shape = StadiumBorder(
-      side: on
-          ? const BorderSide(color: AppColors.white, width: 3)
+      side: plain
+          ? BorderSide(color: AppColors.inkViolet.withValues(alpha: 0.15))
           : BorderSide.none,
     );
     return Semantics(
@@ -121,16 +125,23 @@ class GradientPill extends StatelessWidget {
         type: MaterialType.transparency,
         child: Ink(
           decoration: ShapeDecoration(
-            color: tone == PillTone.soft ? AppColors.pillSoft : null,
-            gradient: _gradient,
+            color: plain
+                ? AppColors.white.withValues(alpha: 0.8)
+                : tone == PillTone.soft
+                ? AppColors.pillSoft
+                : null,
+            gradient: plain ? null : _gradient,
             shape: shape,
-            shadows: [
-              BoxShadow(
-                color: AppColors.barDark.withValues(alpha: 0.25),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            shadows: plain
+                ? const []
+                : [
+                    BoxShadow(
+                      color: AppColors.pillDeepVia.withValues(alpha: 0.8),
+                      blurRadius: 14,
+                      spreadRadius: -6,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
           ),
           child: InkWell(
             onTap: onTap,
@@ -139,19 +150,30 @@ class GradientPill extends StatelessWidget {
               constraints: const BoxConstraints(minHeight: AppSizes.touch),
               child: Padding(
                 padding: padding,
-                child: Center(
-                  widthFactor: 1,
-                  child: Text(
-                    label,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    style: sans(
-                      color: AppColors.white,
-                      size: fontSize,
-                      height: 1.15,
-                      weight: on || bold ? FontWeight.w600 : FontWeight.w400,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (on) ...[
+                      Icon(Icons.check, size: 16, color: fg),
+                      const SizedBox(width: 4),
+                    ],
+                    Flexible(
+                      child: Text(
+                        label,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        style: sans(
+                          color: fg,
+                          size: fontSize,
+                          height: 1.15,
+                          weight: on || bold
+                              ? FontWeight.w600
+                              : FontWeight.w400,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),

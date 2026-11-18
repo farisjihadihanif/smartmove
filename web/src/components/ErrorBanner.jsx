@@ -13,9 +13,11 @@ export default function ErrorBanner({ error, message, onRetry, retryLabel = 'Cob
   return (
     <div
       role="alert"
-      className={`flex items-center gap-3 rounded-2xl border-l-4 border-traffic-macet bg-login-field py-1 pl-3 pr-1 text-ink shadow-[0_1px_3px_rgb(0_0_0/0.12)] ${className}`}
+      className={`flex items-center gap-3 rounded-2xl bg-login-field py-1.5 pl-2 pr-1 text-ink ring-1 ring-traffic-macet/20 ${className}`}
     >
-      <Icon size={22} strokeWidth={2.25} className="shrink-0 text-traffic-macet" aria-hidden="true" />
+      <span className="grid size-9 shrink-0 place-items-center rounded-full bg-traffic-macet/12 text-[#C62828]">
+        <Icon size={20} strokeWidth={2.25} aria-hidden="true" />
+      </span>
       <p className="flex-1 py-2 text-sm leading-snug">{text}</p>
       {onRetry && (
         <button

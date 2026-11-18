@@ -71,31 +71,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return AuthShell(
-      title: 'BUAT AKUN',
+      title: 'Buat akun',
+      subtitle: 'Simpan rencana perjalanan, kumpulkan poin, dan pesan tiket simulasi.',
       showBack: true,
-      footer: Wrap(
-        alignment: WrapAlignment.center,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          Text(
-            'Sudah punya akun?',
-            style: sans(
-              color: AppColors.white,
-              size: 15,
-              weight: FontWeight.w600,
-            ),
-          ),
-          AuthLink(label: 'Masuk', onTap: () => Navigator.pop(context)),
-        ],
+      footer: AuthFooter(
+        text: 'Sudah punya akun?',
+        link: AuthLink(label: 'Masuk', onTap: () => Navigator.pop(context)),
       ),
       children: [
-        const SizedBox(height: 32),
+        const SizedBox(height: 28),
         AutofillGroup(
           child: Column(
             children: [
               AuthField(
                 icon: Icons.badge,
                 label: 'Nama lengkap',
+                placeholder: 'mis. Budi Siregar',
                 controller: _nama,
                 keyboardType: TextInputType.name,
                 autofillHints: const [AutofillHints.name],
@@ -104,6 +95,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               AuthField(
                 icon: Icons.person,
                 label: 'Username',
+                placeholder: 'mis. budi_medan',
+                helper: 'Huruf kecil, angka, titik, atau garis bawah.',
                 controller: _username,
                 autofillHints: const [AutofillHints.newUsername],
               ),
@@ -111,6 +104,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               AuthField(
                 icon: Icons.email,
                 label: 'Email',
+                placeholder: 'nama@email.com',
                 controller: _email,
                 keyboardType: TextInputType.emailAddress,
                 autofillHints: const [AutofillHints.email],
@@ -119,6 +113,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               AuthField(
                 icon: Icons.lock,
                 label: 'Password',
+                helper: 'Minimal 8 karakter.',
                 controller: _password,
                 password: true,
                 autofillHints: const [AutofillHints.newPassword],
@@ -126,17 +121,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 onSubmitted: (_) => _submit(),
               ),
             ],
-          ),
-        ),
-        const SizedBox(height: AppSizes.s3),
-        Text(
-          'Username pakai huruf kecil, angka, titik, atau garis bawah. '
-          'Password minimal 8 karakter.',
-          textAlign: TextAlign.center,
-          style: sans(
-            color: AppColors.white.withValues(alpha: 0.92),
-            size: 14,
-            height: 1.45,
           ),
         ),
         AuthError(_error),

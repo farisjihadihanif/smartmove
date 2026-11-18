@@ -2,9 +2,10 @@ import 'package:material_ui/material_ui.dart';
 
 import '../theme.dart';
 
-/// Header bertekstur cat air lilac (mockup hal. 3–7).
+/// Header bertekstur cat air lilac (mockup hal. 3–7), sudut bawah membulat
+/// agar isi di bawahnya (peta, menu) terasa naik. Sama dengan web NebulaHeader.
 ///
-/// - [leading]: ikon fitur / avatar dalam lingkaran putih bertepi ungu.
+/// - [leading]: ikon fitur / avatar dalam lingkaran putih.
 /// - [title]: judul layar (Open Sans tebal); [serif] = sapaan Bree Serif (Beranda).
 /// - [unread] + [onNotifications]: tombol amplop dengan lencana jumlah.
 /// - [children]: isi di bawah judul (SearchField, PillToggle, …).
@@ -33,16 +34,26 @@ class NebulaHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final titleStyle = serif
-        ? titleSerif(size: 20)
+        ? titleSerif(size: 22)
         : sans(
             size: 20,
-            weight: FontWeight.w600,
+            weight: FontWeight.w700,
             color: AppColors.ink,
             height: 1.2,
           );
 
     return DecoratedBox(
-      decoration: AppTextures.lilacWash,
+      decoration: AppTextures.lilacWash.copyWith(
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.inkViolet.withValues(alpha: 0.5),
+            blurRadius: 20,
+            spreadRadius: -8,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
       child: SafeArea(
         bottom: false,
         child: Padding(
@@ -68,10 +79,16 @@ class NebulaHeader extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: AppColors.white,
                           shape: BoxShape.circle,
-                          border: Border.all(
-                            color: AppColors.inkViolet.withValues(alpha: 0.8),
-                            width: 2,
-                          ),
+                          border: Border.all(color: AppColors.white, width: 2),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.inkViolet.withValues(
+                                alpha: 0.25,
+                              ),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: leading,
                       ),
@@ -80,11 +97,7 @@ class NebulaHeader extends StatelessWidget {
                     Expanded(
                       child: Semantics(
                         header: true,
-                        child: Text(
-                          title,
-                          style: titleStyle,
-                          textAlign: serif ? TextAlign.center : TextAlign.start,
-                        ),
+                        child: Text(title, style: titleStyle),
                       ),
                     ),
                     if (onNotifications != null)
@@ -132,12 +145,18 @@ class _NotificationButton extends StatelessWidget {
             alignment: Alignment.center,
             children: [
               Container(
-                width: 36,
-                height: 36,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.white.withValues(alpha: 0.3),
-                  border: Border.all(color: AppColors.ink, width: 1.5),
+                  color: AppColors.white.withValues(alpha: 0.75),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.inkViolet.withValues(alpha: 0.18),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: const Icon(
                   Icons.mail_outline,
@@ -147,8 +166,8 @@ class _NotificationButton extends StatelessWidget {
               ),
               if (unread > 0)
                 Positioned(
-                  top: 2,
-                  right: 2,
+                  top: 0,
+                  right: 0,
                   child: Container(
                     constraints: const BoxConstraints(
                       minWidth: 18,
@@ -157,16 +176,16 @@ class _NotificationButton extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: AppColors.ink,
+                      color: AppColors.trafficMacet,
                       borderRadius: BorderRadius.circular(9),
-                      border: Border.all(color: AppColors.white),
+                      border: Border.all(color: AppColors.white, width: 2),
                     ),
                     child: Text(
                       unread > 9 ? '9+' : '$unread',
                       style: sans(
                         color: AppColors.white,
-                        size: 11,
-                        weight: FontWeight.w600,
+                        size: 10,
+                        weight: FontWeight.w700,
                         height: 1,
                       ),
                     ),

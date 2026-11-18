@@ -64,49 +64,51 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return AuthShell(
-      title: 'MEMBER LOGIN',
+      title: 'Member Login',
+      subtitle: 'Masuk untuk melanjutkan rencana perjalananmu di Medan.',
       footer: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'Belum punya akun?',
-            style: sans(
-              color: AppColors.white,
-              size: 15,
-              weight: FontWeight.w600,
-            ),
+          Row(
+            children: [
+              const Expanded(child: Divider(color: Color(0x1A000000))),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSizes.s3),
+                child: Text(
+                  'Belum punya akun?',
+                  style: sans(
+                    size: 14,
+                    color: AppColors.ink.withValues(alpha: 0.55),
+                  ),
+                ),
+              ),
+              const Expanded(child: Divider(color: Color(0x1A000000))),
+            ],
           ),
-          const SizedBox(height: AppSizes.s2),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 288),
-            child: OutlinedButton(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const RegisterScreen()),
-              ),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.white,
-                minimumSize: const Size.fromHeight(56),
-                side: const BorderSide(color: AppColors.loginButton, width: 2),
-                textStyle: sans(size: 20, weight: FontWeight.w600),
-              ),
-              child: const Text('Buat akun'),
+          const SizedBox(height: AppSizes.s3),
+          AuthSecondary(
+            label: 'Buat akun',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const RegisterScreen()),
             ),
           ),
         ],
       ),
       children: [
-        const SizedBox(height: 40),
+        const SizedBox(height: 28),
         AutofillGroup(
           child: Column(
             children: [
               AuthField(
                 icon: Icons.person,
                 label: 'Username atau email',
+                placeholder: 'mis. budi_medan',
                 controller: _username,
                 keyboardType: TextInputType.emailAddress,
                 autofillHints: const [AutofillHints.username],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSizes.s4),
               AuthField(
                 icon: Icons.lock,
                 label: 'Password',
@@ -136,8 +138,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           onChanged: (v) => setState(() => _remember = v!),
                           activeColor: AppColors.loginButton,
                           checkColor: AppColors.white,
-                          side: const BorderSide(
-                            color: AppColors.white,
+                          side: BorderSide(
+                            color: AppColors.ink.withValues(alpha: 0.4),
                             width: 2,
                           ),
                           materialTapTargetSize:
@@ -149,9 +151,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             'Ingat saya',
                             overflow: TextOverflow.ellipsis,
                             style: sans(
-                              color: AppColors.white,
+                              color: AppColors.ink.withValues(alpha: 0.8),
                               size: 15,
-                              weight: FontWeight.w600,
                             ),
                           ),
                         ),
@@ -171,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ],
         ),
         AuthError(_error),
-        const SizedBox(height: AppSizes.s6),
+        const SizedBox(height: AppSizes.s4),
         AuthButton(label: 'Masuk', busy: _busy, onPressed: _submit),
       ],
     );

@@ -4,7 +4,8 @@ import 'package:material_ui/material_ui.dart';
 
 import '../theme.dart';
 
-/// Fitur unggulan, teks persis dari poster (mockup hal. 1).
+/// Fitur unggulan, teks dari poster (mockup hal. 1); ikon garis menggantikan
+/// centang clip-art. Sama dengan FITUR di web/src/pages/Splash.jsx.
 const splashFeatures = [
   'Navigasi rute alternatif',
   'Pemantau lalu lintas real time',
@@ -12,7 +13,15 @@ const splashFeatures = [
   'Kampanye kesadaran penggunaan transportasi umum',
 ];
 
-/// Splash (mockup hal. 1): latar mint, logo, judul olive, 4 fitur unggulan.
+const _featureIcons = [
+  Icons.alt_route,
+  Icons.traffic_outlined,
+  Icons.confirmation_number_outlined,
+  Icons.campaign_outlined,
+];
+
+/// Splash (identitas mockup hal. 1, dimodernkan): latar mint, logo, judul
+/// olive rata kiri, dan satu panel olive berisi 4 fitur unggulan.
 /// Tampil sebentar saat aplikasi dibuka; perpindahan diatur oleh pemanggil.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -67,34 +76,35 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
-    final titleSize = (width * 0.125).clamp(36.0, 64.0);
+    final titleSize = (width * 0.13).clamp(36.0, 64.0);
 
     return Scaffold(
       backgroundColor: AppColors.splashBg,
       body: Stack(
         children: [
           const Positioned(
-            left: -40,
-            top: 64,
+            left: -48,
+            top: 96,
             width: 140,
             child: Leaf(angle: -0.2),
           ),
           const Positioned(
-            right: -48,
-            top: -8,
+            right: -56,
+            top: -24,
             width: 176,
             child: Leaf(angle: 0.32),
           ),
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 32, 16, 32),
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 480),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       _rise(0, const _LogoLockup()),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 36),
                       _rise(
                         1,
                         Semantics(
@@ -103,13 +113,12 @@ class _SplashScreenState extends State<SplashScreen>
                           child: ExcludeSemantics(
                             child: Text(
                               'PERMUDAH\nKEGIATANMU',
-                              textAlign: TextAlign.center,
                               style: sans(
                                 color: AppColors.olive,
                                 size: titleSize,
                                 weight: FontWeight.w800,
-                                height: 0.98,
-                                letterSpacing: -0.5,
+                                height: 0.95,
+                                letterSpacing: -0.8,
                               ),
                             ),
                           ),
@@ -119,16 +128,17 @@ class _SplashScreenState extends State<SplashScreen>
                       _rise(
                         2,
                         Text(
-                          'Dengan aplikasi rencana SmartMove',
-                          textAlign: TextAlign.center,
-                          style: sans(color: AppColors.oliveSoft, size: 17),
+                          'Rute, lalu lintas, dan tiket transportasi umum '
+                          'Medan dalam satu aplikasi.',
+                          style: sans(
+                            color: AppColors.oliveSoft,
+                            size: 17,
+                            height: 1.4,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 28),
-                      for (final (i, f) in splashFeatures.indexed) ...[
-                        if (i > 0) const SizedBox(height: 12),
-                        _rise(3 + i, _FeatureChip(f)),
-                      ],
+                      _rise(3, const _FeaturePanel()),
                     ],
                   ),
                 ),
@@ -150,18 +160,15 @@ class _LogoLockup extends StatelessWidget {
       label: 'SmartMove Medan',
       child: ExcludeSemantics(
         child: Row(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset(AppTextures.logoAsset, width: 84),
-            const SizedBox(width: 10),
+            Image.asset(AppTextures.logoAsset, width: 72),
+            const SizedBox(width: 12),
             Text(
-              'Smart\nMove.\nMedan',
-              style: sans(
+              'SmartMove\nMedan',
+              style: titleSerif(
+                size: 20,
                 color: AppColors.oliveSoft,
-                size: 17,
-                weight: FontWeight.w600,
-                height: 1.1,
-              ),
+              ).copyWith(height: 1.05),
             ),
           ],
         ),
@@ -170,38 +177,67 @@ class _LogoLockup extends StatelessWidget {
   }
 }
 
-class _FeatureChip extends StatelessWidget {
-  const _FeatureChip(this.text);
-
-  final String text;
+/// Satu panel olive (bukan 4 kapsul seragam) dengan pembatas tipis.
+class _FeaturePanel extends StatelessWidget {
+  const _FeaturePanel();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: const BoxConstraints(minHeight: 56),
-      padding: const EdgeInsets.fromLTRB(12, 10, 16, 10),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
       decoration: BoxDecoration(
         color: AppColors.olive,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x664A4428),
+            blurRadius: 40,
+            spreadRadius: -20,
+            offset: Offset(0, 18),
+          ),
+        ],
       ),
-      child: Row(
+      child: Column(
         children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: const BoxDecoration(
-              color: AppColors.white,
-              shape: BoxShape.circle,
+          for (final (i, f) in splashFeatures.indexed)
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              decoration: i == splashFeatures.length - 1
+                  ? null
+                  : const BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: Color(0x26FFFFFF)),
+                      ),
+                    ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: const BoxDecoration(
+                      color: AppColors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      _featureIcons[i],
+                      color: AppColors.olive,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      f,
+                      style: sans(
+                        color: AppColors.white,
+                        size: 15,
+                        height: 1.35,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            child: const Icon(Icons.check, color: AppColors.olive, size: 24),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              text,
-              style: sans(color: AppColors.white, size: 15, height: 1.35),
-            ),
-          ),
         ],
       ),
     );

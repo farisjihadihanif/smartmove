@@ -15,14 +15,16 @@ const _userAgentPackage = 'id.smartmove.smartmove';
 
 /// Peta OSM + atribusi "© OpenStreetMap contributors" yang selalu terlihat.
 /// [children] = lapisan flutter_map (PolylineLayer, MarkerLayer, …).
-/// [capped] menambah tutup atas ungu melengkung seperti mockup hal. 4 & 6.
+/// [tucked]: peta diselipkan di bawah header & bar bawah yang bersudut bulat
+/// (pengganti "tutup atas ungu" mockup hal. 4 & 6). Penempatan di bawahnya
+/// diatur layar (Stack); atribusi OSM dinaikkan 28 dp agar tetap terlihat.
 class MapView extends StatelessWidget {
   const MapView({
     super.key,
     this.center = medanCenter,
     this.zoom = 14,
     this.controller,
-    this.capped = false,
+    this.tucked = false,
     this.children = const [],
     this.onTap,
     this.tileProvider,
@@ -31,7 +33,7 @@ class MapView extends StatelessWidget {
   final LatLng center;
   final double zoom;
   final MapController? controller;
-  final bool capped;
+  final bool tucked;
   final List<Widget> children;
   final void Function(TapPosition, LatLng)? onTap;
 
@@ -55,25 +57,14 @@ class MapView extends StatelessWidget {
           tileProvider: tileProvider,
         ),
         ...children,
-        const OsmAttribution(),
+        Padding(
+          padding: EdgeInsets.only(bottom: tucked ? 28 : 0),
+          child: const OsmAttribution(),
+        ),
       ],
     );
 
-    if (!capped) return map;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Container(
-          height: 16,
-          margin: const EdgeInsets.symmetric(horizontal: AppSizes.s1),
-          decoration: const BoxDecoration(
-            color: AppColors.inkViolet,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-          ),
-        ),
-        Expanded(child: map),
-      ],
-    );
+    return map;
   }
 }
 

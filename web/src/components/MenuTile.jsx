@@ -22,12 +22,12 @@ export default function MenuTile({
     return (
       <Tag
         {...linkProps}
-        className={`group flex flex-col items-center gap-3 rounded-3xl p-2 ${className}`}
+        className={`group flex flex-col items-center gap-3 rounded-3xl p-3 transition hover:bg-lilac-wash/15 ${className}`}
       >
-        <span className="grid size-24 place-items-center transition-transform group-active:scale-95" aria-hidden="true">
+        <span className="grid size-24 place-items-center rounded-full bg-lilac-wash/25 transition-transform group-active:scale-95" aria-hidden="true">
           {icon}
         </span>
-        <span className="bg-pill flex min-h-touch min-w-[8.5rem] items-center justify-center whitespace-nowrap rounded-full px-4 text-[15px] font-semibold tracking-[0.02em] text-white shadow-[0_2px_4px_rgb(59_11_100/0.25)]">
+        <span className="bg-pill flex min-h-touch min-w-[8.5rem] items-center justify-center whitespace-nowrap rounded-full px-4 text-[0.875rem] font-semibold text-white shadow-[0_6px_14px_-6px_rgb(114_13_129/0.8)]">
           {label}
         </span>
       </Tag>
@@ -37,15 +37,15 @@ export default function MenuTile({
   return (
     <Tag
       {...linkProps}
-      className={`group flex flex-col items-center gap-2 rounded-2xl px-2 py-3 text-center hover:bg-black/[0.03] ${className}`}
+      className={`group flex flex-col items-center gap-2.5 rounded-3xl px-2 py-3 text-center transition hover:bg-lilac-wash/15 ${className}`}
     >
       <span
-        className={`grid size-16 place-items-center rounded-full transition-transform group-active:scale-95 ${iconClass}`}
+        className={`grid size-16 place-items-center rounded-full shadow-[0_6px_14px_-8px_rgb(30_99_195/0.7)] transition-transform group-active:scale-95 ${iconClass}`}
         aria-hidden="true"
       >
         {icon}
       </span>
-      <span className="text-[15px] leading-snug text-ink">{label}</span>
+      <span className="text-[0.875rem] font-medium leading-snug text-ink">{label}</span>
     </Tag>
   )
 }

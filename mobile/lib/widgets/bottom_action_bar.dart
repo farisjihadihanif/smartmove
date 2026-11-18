@@ -20,7 +20,7 @@ class BarAction {
   final bool filled;
 }
 
-/// Bar aksi bawah bertekstur ungu tua (mockup hal. 4–7).
+/// Bar aksi bawah bertekstur ungu tua (mockup hal. 4–7), sudut atas membulat.
 /// [top] tampil di atas tombol (mis. pita "Simulasi").
 class BottomActionBar extends StatelessWidget {
   const BottomActionBar({super.key, this.actions = const [], this.top});
@@ -31,15 +31,17 @@ class BottomActionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: AppTextures.barDark,
+      decoration: AppTextures.barDark.copyWith(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      ),
       child: SafeArea(
         top: false,
         minimum: const EdgeInsets.only(bottom: AppSizes.s4),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(
-            AppSizes.s3,
             AppSizes.s4,
-            AppSizes.s3,
+            AppSizes.s4,
+            AppSizes.s4,
             0,
           ),
           child: Column(
@@ -48,13 +50,13 @@ class BottomActionBar extends StatelessWidget {
               ?top,
               if (actions.isNotEmpty)
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     for (final (i, a) in actions.indexed) ...[
-                      if (i > 0) const SizedBox(width: AppSizes.s2),
+                      if (i > 0) const SizedBox(width: AppSizes.s3),
                       Flexible(
                         child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 136),
+                          constraints: const BoxConstraints(maxWidth: 160),
                           child: _ActionPill(action: a),
                         ),
                       ),
@@ -91,8 +93,8 @@ class _ActionPill extends StatelessWidget {
             shadows: const [
               BoxShadow(
                 color: Color(0x40000000),
-                blurRadius: 6,
-                offset: Offset(0, 2),
+                blurRadius: 12,
+                offset: Offset(0, 4),
               ),
             ],
           ),
@@ -109,18 +111,12 @@ class _ActionPill extends StatelessWidget {
                       action.label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: sans(
-                        size: 17,
-                        color: fg,
-                        weight: action.filled
-                            ? FontWeight.w600
-                            : FontWeight.w400,
-                      ),
+                      style: sans(size: 15, color: fg, weight: FontWeight.w600),
                     ),
                   ),
                   if (action.icon != null) ...[
-                    const SizedBox(width: 6),
-                    Icon(action.icon, size: 22, color: fg),
+                    const SizedBox(width: AppSizes.s2),
+                    Icon(action.icon, size: 20, color: fg),
                   ],
                 ],
               ),

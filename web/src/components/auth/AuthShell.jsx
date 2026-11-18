@@ -1,70 +1,140 @@
 import { useId, useState } from 'react'
-import { Eye, EyeOff } from 'lucide-react'
+import { ArrowLeft, Eye, EyeOff, Megaphone, Route, Ticket, TrafficCone } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import logo from '../../assets/brand/logo.webp'
+
+// Fitur unggulan dari poster (mockup hal. 1) – tampil di panel kiri versi desktop.
+const FITUR = [
+  [Route, 'Navigasi rute alternatif'],
+  [TrafficCone, 'Pemantau lalu lintas real time'],
+  [Ticket, 'Pembayaran terintegrasi transportasi umum'],
+  [Megaphone, 'Kampanye kesadaran transportasi umum'],
+]
 
 /**
- * Kerangka layar akun (mockup hal. 2): gradasi indigo → magenta, avatar bulat, judul kapital.
- * Di layar lebar kolomnya tetap sempit seperti layar ponsel.
+ * Kerangka layar akun (identitas mockup hal. 2, dimodernkan):
+ * - Ponsel: pita gradasi indigo → magenta bertekstur lilac di atas, lembar putih membulat
+ *   yang menutupinya, dan medali avatar yang menumpang di sambungan keduanya.
+ * - Desktop: dua kolom – panel gradasi (logo + fitur) di kiri, form di kanan.
+ * `back`: tujuan tombol kembali di pita (opsional).
  */
-export function AuthShell({ title, children, avatar = true }) {
+export function AuthShell({ title, subtitle, back, children }) {
   return (
-    <div className="min-h-dvh bg-login text-white">
-      <main className="mx-auto flex min-h-dvh w-full max-w-[400px] flex-col px-6 pb-10 pt-[max(3rem,8vh)]">
-        {avatar && (
+    <div className="min-h-dvh bg-surface lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
+      <aside className="bg-login-wash relative px-6 pb-[5.5rem] pt-4 text-white lg:flex lg:min-h-dvh lg:flex-col lg:px-14 lg:pb-12 lg:pt-12 xl:px-20">
+        <div className="flex min-h-touch items-center gap-3">
+          {back && (
+            <Link
+              to={back}
+              aria-label="Kembali"
+              className="-ml-3 grid size-touch shrink-0 place-items-center rounded-full hover:bg-white/15"
+            >
+              <ArrowLeft size={22} aria-hidden="true" />
+            </Link>
+          )}
+          <Brand />
+        </div>
+
+        <div className="hidden lg:mt-auto lg:block">
+          <p className="max-w-[14ch] font-serif text-[clamp(2.5rem,3.6vw,3.5rem)] leading-[1.05]">
+            Permudah kegiatanmu di Medan
+          </p>
+          <ul className="mt-10 max-w-md divide-y divide-white/20 border-y border-white/20">
+            {FITUR.map(([Icon, text]) => (
+              <li key={text} className="flex items-center gap-4 py-3.5 text-[0.975rem]">
+                <Icon size={22} strokeWidth={1.75} className="shrink-0 text-white/90" aria-hidden="true" />
+                {text}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </aside>
+
+      <main className="relative -mt-9 flex min-h-[calc(100dvh-5.5rem)] flex-col rounded-t-[2rem] bg-surface px-6 pb-8 lg:mt-0 lg:min-h-dvh lg:justify-center lg:rounded-none lg:px-12 lg:py-12">
+        <div className="mx-auto flex w-full max-w-[25rem] flex-1 flex-col lg:flex-none">
           <div
             aria-hidden="true"
-            className="mx-auto grid size-32 place-items-center rounded-full bg-login-avatar/90 sm:size-36"
+            className="mx-auto -mt-10 grid size-20 place-items-center rounded-full bg-login-avatar text-indigo ring-[6px] ring-surface lg:mx-0 lg:mt-0 lg:size-16 lg:ring-0"
           >
-            <PersonSolid size={72} className="text-indigo" />
+            <PersonSolid size={44} className="lg:size-9" />
           </div>
-        )}
-        <h1 className="mt-7 text-center text-[1.625rem] font-bold leading-tight tracking-[0.01em]">{title}</h1>
-        {children}
+          <h1 className="mt-4 text-center font-serif text-[1.875rem] leading-tight text-ink lg:mt-6 lg:text-left lg:text-[2.25rem]">
+            {title}
+          </h1>
+          {subtitle && (
+            <p className="mx-auto mt-2 max-w-[34ch] text-center text-[0.95rem] leading-relaxed text-ink/65 lg:mx-0 lg:text-left">
+              {subtitle}
+            </p>
+          )}
+          {children}
+        </div>
       </main>
     </div>
   )
 }
 
+function Brand() {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="grid size-11 place-items-center rounded-2xl bg-white shadow-[0_4px_14px_rgb(20_10_60/0.25)]">
+        <img src={logo} alt="" width="34" height="26" className="h-auto w-[34px]" />
+      </span>
+      <span className="font-serif text-xl leading-none">SmartMove Medan</span>
+    </div>
+  )
+}
+
 /**
- * Kolom berikon (mockup hal. 2): sel ikon + celah tipis + sel isian, latar `login-field`,
- * teks indigo rata tengah. Label tetap ada untuk pembaca layar.
+ * Kolom isian: label di atas, lalu sel ikon + celah tipis + sel isian (motif mockup hal. 2)
+ * berlatar `login-field`. Teks rata kiri agar isian panjang (email) tetap terbaca.
  */
-export function AuthField({ icon: Icon, label, type = 'text', reveal = false, ...props }) {
+export function AuthField({ icon: Icon, label, hint, type = 'text', reveal = false, ...props }) {
   const id = useId()
+  const hintId = useId()
   const [shown, setShown] = useState(false)
   const inputType = reveal ? (shown ? 'text' : 'password') : type
 
   return (
-    <div className="group flex h-14 rounded-2xl outline-offset-2 outline-white focus-within:outline-2">
-      <label
-        htmlFor={id}
-        className="grid w-14 shrink-0 place-items-center rounded-l-2xl bg-login-field text-indigo"
-      >
-        <Icon size={26} aria-hidden="true" />
-        <span className="sr-only">{label}</span>
+    <div>
+      <label htmlFor={id} className="mb-1.5 block text-sm font-semibold text-ink/80">
+        {label}
       </label>
-      <div className="ml-1.5 flex min-w-0 flex-1 items-center rounded-r-2xl bg-login-field">
-        <input
-          id={id}
-          type={inputType}
-          placeholder={label}
-          className="h-full min-w-0 flex-1 bg-transparent px-3 text-center text-lg font-semibold text-indigo outline-none placeholder:font-semibold placeholder:text-indigo/60"
-          {...props}
-        />
-        {reveal && (
-          <button
-            type="button"
-            onClick={() => setShown((v) => !v)}
-            aria-label={shown ? 'Sembunyikan password' : 'Tampilkan password'}
-            aria-pressed={shown}
-            className="grid size-touch shrink-0 place-items-center rounded-full text-indigo/70 hover:text-indigo"
-          >
-            {shown ? <EyeOff size={20} aria-hidden="true" /> : <Eye size={20} aria-hidden="true" />}
-          </button>
-        )}
+      <div className="flex h-[3.25rem] gap-1 rounded-2xl outline-offset-2 outline-login-button focus-within:outline-2">
+        <span aria-hidden="true" className="grid w-12 shrink-0 place-items-center rounded-l-2xl bg-login-field text-indigo">
+          <Icon size={22} />
+        </span>
+        <div className="flex min-w-0 flex-1 items-center rounded-r-2xl bg-login-field">
+          <input
+            id={id}
+            type={inputType}
+            aria-describedby={hint ? hintId : undefined}
+            className="h-full min-w-0 flex-1 bg-transparent px-3.5 text-base font-medium text-indigo outline-none placeholder:font-normal placeholder:text-indigo/45 disabled:opacity-60"
+            {...props}
+          />
+          {reveal && (
+            <button
+              type="button"
+              onClick={() => setShown((v) => !v)}
+              aria-label={shown ? 'Sembunyikan password' : 'Tampilkan password'}
+              aria-pressed={shown}
+              className="grid size-touch shrink-0 place-items-center rounded-full text-indigo/60 hover:text-indigo"
+            >
+              {shown ? <EyeOff size={20} aria-hidden="true" /> : <Eye size={20} aria-hidden="true" />}
+            </button>
+          )}
+        </div>
       </div>
+      {hint && (
+        <p id={hintId} className="mt-1.5 text-[0.8125rem] leading-snug text-ink/55">
+          {hint}
+        </p>
+      )}
     </div>
   )
 }
+
+const buttonBase =
+  'flex min-h-[3.25rem] w-full items-center justify-center rounded-full px-6 text-base font-semibold transition'
 
 /** Tombol utama ungu (mockup: "Login"). */
 export function AuthButton({ busy, children, className = '', ...props }) {
@@ -73,7 +143,7 @@ export function AuthButton({ busy, children, className = '', ...props }) {
       type="submit"
       disabled={busy}
       aria-busy={busy || undefined}
-      className={`mx-auto flex min-h-touch min-w-44 items-center justify-center rounded-full bg-login-button px-8 text-lg font-semibold text-white shadow-[0_2px_8px_rgb(51_51_153/0.35)] transition hover:brightness-110 disabled:opacity-70 ${className}`}
+      className={`${buttonBase} bg-login-button text-white shadow-[0_6px_18px_-6px_rgb(115_36_169/0.7)] hover:brightness-110 active:scale-[0.99] disabled:opacity-70 ${className}`}
       {...props}
     >
       {busy ? 'Tunggu sebentar…' : children}
@@ -81,16 +151,37 @@ export function AuthButton({ busy, children, className = '', ...props }) {
   )
 }
 
-/** Pesan sukses di atas gradasi (mis. email reset terkirim). */
-export function AuthNotice({ children }) {
+/** Tombol kedua bergaris ungu (mockup: "Create account"), berupa tautan. */
+export function AuthSecondary({ className = '', ...props }) {
   return (
-    <p role="status" className="rounded-2xl bg-login-field px-4 py-3 text-sm leading-relaxed text-indigo">
-      {children}
-    </p>
+    <Link
+      className={`${buttonBase} border-2 border-login-button text-login-button hover:bg-login-button/5 ${className}`}
+      {...props}
+    />
   )
 }
 
-export const linkClass = 'font-semibold text-white underline underline-offset-2 hover:decoration-2'
+/** Pesan sukses (mis. email reset terkirim). `detail` ditebalkan dan boleh patah di mana saja (alamat email panjang). */
+export function AuthNotice({ title, children, detail, icon: Icon }) {
+  return (
+    <div role="status" className="flex gap-3 rounded-2xl bg-login-field px-4 py-3.5 text-indigo">
+      {Icon && <Icon size={22} className="mt-0.5 shrink-0" aria-hidden="true" />}
+      <div className="min-w-0 text-sm leading-relaxed">
+        {title && <p className="font-semibold">{title}</p>}
+        <p className="text-indigo/85">{children}</p>
+        {detail && <p className="mt-1 font-semibold [overflow-wrap:anywhere]">{detail}</p>}
+      </div>
+    </div>
+  )
+}
+
+/** Baris "Sudah punya akun? Masuk" di dasar lembar. */
+export function AuthFooter({ children }) {
+  return <p className="mt-auto pt-10 text-center text-[0.95rem] text-ink/70 lg:mt-10 lg:pt-0 lg:text-left">{children}</p>
+}
+
+export const linkClass =
+  'font-semibold text-login-button underline decoration-login-button/35 underline-offset-4 hover:decoration-login-button'
 
 // Ikon padat seperti di mockup (lucide hanya garis).
 export function PersonSolid({ size = 24, ...props }) {

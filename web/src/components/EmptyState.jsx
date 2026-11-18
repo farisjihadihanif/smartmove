@@ -16,7 +16,7 @@ export default function EmptyState({ icon: Icon, title, message, action, classNa
         <button
           type="button"
           onClick={action.onClick}
-          className="bg-pill mt-6 min-h-touch rounded-full px-6 text-base font-semibold text-white shadow-[0_2px_4px_rgb(59_11_100/0.25)]"
+          className="mt-6 min-h-touch rounded-full bg-login-button px-6 text-base font-semibold text-white shadow-[0_6px_18px_-6px_rgb(115_36_169/0.7)] transition hover:brightness-110"
         >
           {action.label}
         </button>

@@ -3,7 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../theme.dart';
 
 /// Kolom "Telusuri di sini" (mockup hal. 3–7): kapsul abu muda, pin kiri,
-/// kaca pembesar kanan. Beranda: `leading: Icon(Icons.search)` + `showSubmit: false`.
+/// tombol cari bulat ungu di kanan. Beranda: `leading: Icon(Icons.search)` + `showSubmit: false`.
 class SearchField extends StatelessWidget {
   const SearchField({
     super.key,
@@ -29,10 +29,10 @@ class SearchField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textStyle = Theme.of(context).textTheme.titleMedium
-        ?.copyWith(fontSize: 18, color: AppColors.ink);
+        ?.copyWith(fontSize: 16, color: AppColors.ink);
 
     return Container(
-      height: AppSizes.touch,
+      height: 52,
       padding: const EdgeInsets.only(left: AppSizes.s2, right: AppSizes.s1),
       decoration: ShapeDecoration(
         color: AppColors.search,
@@ -40,13 +40,14 @@ class SearchField extends StatelessWidget {
         shape: const StadiumBorder(),
         shadows: [
           BoxShadow(
-            color: AppColors.ink.withValues(alpha: 0.05),
+            color: AppColors.white.withValues(alpha: 0.7),
             spreadRadius: 1,
           ),
           BoxShadow(
-            color: AppColors.inkViolet.withValues(alpha: 0.18),
-            blurRadius: 3,
-            offset: const Offset(0, 1),
+            color: AppColors.inkViolet.withValues(alpha: 0.45),
+            blurRadius: 18,
+            spreadRadius: -8,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -65,7 +66,9 @@ class SearchField extends StatelessWidget {
               style: textStyle,
               decoration: InputDecoration(
                 hintText: hint,
-                hintStyle: textStyle,
+                hintStyle: textStyle?.copyWith(
+                  color: AppColors.ink.withValues(alpha: 0.6),
+                ),
                 semanticCounterText: label,
                 filled: false,
                 isCollapsed: true,
@@ -76,10 +79,16 @@ class SearchField extends StatelessWidget {
             ),
           ),
           if (showSubmit)
-            IconButton(
+            IconButton.filled(
               tooltip: 'Cari',
               onPressed: () => onSubmitted?.call(controller?.text ?? ''),
-              icon: const Icon(Icons.search, size: 28, color: AppColors.ink),
+              style: IconButton.styleFrom(
+                backgroundColor: AppColors.inkViolet,
+                foregroundColor: AppColors.white,
+                minimumSize: const Size(44, 44),
+                fixedSize: const Size(44, 44),
+              ),
+              icon: const Icon(Icons.search, size: 22),
             ),
         ],
       ),
@@ -92,18 +101,10 @@ class _DefaultPin extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return const SizedBox(
       width: 36,
       height: 36,
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: const Icon(
-        Icons.location_on,
-        size: 24,
-        color: AppColors.trafficMacet,
-      ),
+      child: Icon(Icons.location_on, size: 24, color: AppColors.trafficMacet),
     );
   }
 }

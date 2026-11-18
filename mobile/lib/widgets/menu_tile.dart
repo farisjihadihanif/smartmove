@@ -42,7 +42,16 @@ class MenuTile extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SizedBox(width: 96, height: 96, child: Center(child: icon)),
+                Container(
+                  width: 96,
+                  height: 96,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.lilacWash.withValues(alpha: 0.25),
+                  ),
+                  child: icon,
+                ),
                 const SizedBox(height: AppSizes.s3),
                 GradientPill(
                   label: label,
@@ -81,6 +90,14 @@ class MenuTile extends StatelessWidget {
                   border: iconBorder == null
                       ? null
                       : Border.all(color: iconBorder!, width: 3),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.iconBlueDeep.withValues(alpha: 0.35),
+                      blurRadius: 14,
+                      spreadRadius: -8,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
                 ),
                 child: IconTheme.merge(
                   data: const IconThemeData(color: AppColors.white, size: 30),
@@ -91,9 +108,10 @@ class MenuTile extends StatelessWidget {
               Text(
                 label,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 15,
+                style: sans(
+                  size: 14,
                   height: 1.3,
+                  weight: FontWeight.w500,
                   color: AppColors.ink,
                 ),
               ),

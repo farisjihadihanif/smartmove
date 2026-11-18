@@ -58,27 +58,31 @@ class ErrorBanner extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.loginField,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x1F000000),
-              blurRadius: 3,
-              offset: Offset(0, 1),
-            ),
-          ],
+          border: Border.all(
+            color: AppColors.trafficMacet.withValues(alpha: 0.2),
+          ),
         ),
         child: IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const ColoredBox(
-                color: AppColors.trafficMacet,
-                child: SizedBox(width: 4),
-              ),
-              const SizedBox(width: AppSizes.s3),
-              Icon(
-                isOfflineError(error) ? Icons.wifi_off : Icons.error_outline,
-                size: 22,
-                color: AppColors.trafficMacet,
+              const SizedBox(width: AppSizes.s2),
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.trafficMacet.withValues(alpha: 0.12),
+                  ),
+                  child: Icon(
+                    isOfflineError(error)
+                        ? Icons.wifi_off
+                        : Icons.error_outline,
+                    size: 20,
+                    color: const Color(0xFFC62828),
+                  ),
+                ),
               ),
               const SizedBox(width: AppSizes.s3),
               Expanded(

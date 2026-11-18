@@ -1,7 +1,15 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import ErrorBanner from '../../components/ErrorBanner.jsx'
-import { AuthButton, AuthField, AuthNotice, AuthShell, LockSolid, linkClass } from '../../components/auth/AuthShell.jsx'
+import { CircleCheck } from 'lucide-react'
+import {
+  AuthButton,
+  AuthField,
+  AuthNotice,
+  AuthShell,
+  LockSolid,
+  linkClass,
+} from '../../components/auth/AuthShell.jsx'
 import { api } from '../../lib/api.js'
 import { checkPassword } from '../../lib/authRules.js'
 
@@ -34,20 +42,22 @@ export default function ResetPassword() {
   }
 
   return (
-    <AuthShell title="PASSWORD BARU">
+    <AuthShell title="Password baru" subtitle="Buat password baru untuk akunmu, minimal 8 karakter.">
       {done ? (
-        <div className="mt-8 flex flex-col gap-6">
-          <AuthNotice>{done}</AuthNotice>
+        <div className="mt-7 flex flex-col gap-6">
+          <AuthNotice icon={CircleCheck} title="Password diganti">
+            {done}
+          </AuthNotice>
           <Link
             to="/masuk"
             replace
-            className="mx-auto flex min-h-touch min-w-44 items-center justify-center rounded-full bg-login-button px-8 text-lg font-semibold"
+            className="flex min-h-[3.25rem] w-full items-center justify-center rounded-full bg-login-button px-6 font-semibold text-white"
           >
             Masuk
           </Link>
         </div>
       ) : (
-        <form onSubmit={onSubmit} noValidate className="mt-8 flex flex-col">
+        <form onSubmit={onSubmit} noValidate className="mt-7 flex flex-col">
           <div className="flex flex-col gap-4">
             <AuthField
               icon={LockSolid}

@@ -1,7 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../theme.dart';
-import 'pill_toggle.dart';
 
 /// Keadaan kosong: ikon di medali lilac, judul Bree Serif, satu kalimat arahan,
 /// aksi opsional. Kalimat menjelaskan apa yang bisa dilakukan.
@@ -69,12 +68,13 @@ class EmptyState extends StatelessWidget {
           ],
           if (actionLabel != null && onAction != null) ...[
             const SizedBox(height: AppSizes.s6),
-            GradientPill(
-              label: actionLabel!,
-              onTap: onAction,
-              bold: true,
-              fontSize: 16,
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.s6),
+            FilledButton(
+              onPressed: onAction,
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: AppSizes.s6),
+                textStyle: sans(size: 16, weight: FontWeight.w600),
+              ),
+              child: Text(actionLabel!),
             ),
           ],
         ],

@@ -8,3 +8,4 @@ dist/
 *.jks
 api/uploads/
 uploads/
+.playwright-mcp/

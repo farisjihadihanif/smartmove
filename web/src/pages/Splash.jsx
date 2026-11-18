@@ -1,13 +1,13 @@
-import { Check } from 'lucide-react'
+import { Megaphone, Route, Ticket, TrafficCone } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import logo from '../assets/brand/logo.webp'
 
-// Fitur unggulan, teks persis dari poster (mockup hal. 1).
+// Fitur unggulan, teks dari poster (mockup hal. 1); ikon garis menggantikan centang clip-art.
 const FITUR = [
-  'Navigasi rute alternatif',
-  'Pemantau lalu lintas real time',
-  'Sistem pembayaran terintegrasi transportasi umum',
-  'Kampanye kesadaran penggunaan transportasi umum',
+  [Route, 'Navigasi rute alternatif'],
+  [TrafficCone, 'Pemantau lalu lintas real time'],
+  [Ticket, 'Sistem pembayaran terintegrasi transportasi umum'],
+  [Megaphone, 'Kampanye kesadaran penggunaan transportasi umum'],
 ]
 
 /** Garis daun dekoratif dari poster: tepi daun + tulang daun + urat yang menyebar dari pangkal. */
@@ -30,56 +30,56 @@ function Leaf({ className }) {
   )
 }
 
-// Splash web = halaman sambutan untuk tamu (mockup hal. 1).
+// Splash web = halaman sambutan untuk tamu (identitas mockup hal. 1, dimodernkan).
+// Ponsel: satu kolom; desktop: judul + tombol di kiri, panel fitur olive di kanan.
 export default function Splash() {
   return (
     <div className="relative min-h-dvh overflow-hidden bg-splash-bg text-olive">
-      <Leaf className="pointer-events-none absolute -left-10 top-16 w-36 -rotate-12 text-leaf sm:left-[8%] sm:w-48" />
-      <Leaf className="pointer-events-none absolute -right-12 -top-4 w-44 rotate-[18deg] text-leaf sm:right-[8%] sm:w-60" />
+      <Leaf className="pointer-events-none absolute -left-12 top-24 w-36 -rotate-12 text-leaf lg:-bottom-10 lg:left-[1%] lg:top-auto lg:w-48" />
+      <Leaf className="pointer-events-none absolute -right-14 -top-6 w-44 rotate-[18deg] text-leaf lg:right-[4%] lg:w-64" />
 
-      <main className="splash-in relative mx-auto flex min-h-dvh w-full max-w-[680px] flex-col items-center px-4 pb-8 pt-12 text-center sm:pt-16">
-        <div className="flex items-center gap-2.5">
-          <img src={logo} alt="" width="84" height="65" className="h-auto w-[84px]" />
-          <p className="text-left text-[1.0625rem] font-semibold leading-[1.1] text-olive-soft">
-            Smart
-            <br />
-            Move.
+      <main className="splash-in relative mx-auto grid min-h-dvh w-full max-w-6xl content-start gap-x-16 px-5 pb-6 pt-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:content-center lg:px-10 lg:py-16">
+        <div className="flex items-center gap-3 lg:col-start-1">
+          <img src={logo} alt="" width="72" height="56" className="h-auto w-[72px]" />
+          <p className="font-serif text-xl leading-[1.05] text-olive-soft">
+            SmartMove
             <br />
             Medan
           </p>
         </div>
 
-        <h1 className="mt-8 text-[clamp(2.6rem,12.5vw,4.75rem)] font-extrabold uppercase leading-[0.92] tracking-[-0.02em]">
-          Permudah
-          <br />
-          Kegiatanmu
-        </h1>
-        <p className="mt-4 text-[clamp(1.05rem,4.4vw,1.5rem)] text-olive-soft">Dengan aplikasi rencana SmartMove</p>
+        <div className="mt-10 lg:col-start-1 lg:mt-12">
+          <h1 className="text-[clamp(2.6rem,13vw,4rem)] font-extrabold lg:text-[clamp(3rem,5vw,4.5rem)] uppercase leading-[0.9] tracking-[-0.025em]">
+            Permudah
+            <br />
+            Kegiatanmu
+          </h1>
+          <p className="mt-4 max-w-[30ch] text-[clamp(1.05rem,4.2vw,1.35rem)] leading-snug text-olive-soft">
+            Rute, lalu lintas, dan tiket transportasi umum Medan dalam satu aplikasi.
+          </p>
+        </div>
 
-        <ul className="mt-8 grid w-full gap-3 sm:grid-cols-2 sm:gap-4">
-          {FITUR.map((f) => (
-            <li
-              key={f}
-              className="flex min-h-14 items-center gap-3 rounded-2xl bg-olive py-2.5 pl-3 pr-4 text-left text-[0.95rem] leading-snug text-white"
-            >
-              <span className="grid size-8 shrink-0 place-items-center rounded-full bg-white text-olive">
-                <Check size={22} strokeWidth={3.5} aria-hidden="true" />
+        <ul className="mt-8 rounded-[1.75rem] bg-olive px-5 py-2 text-white shadow-[0_18px_40px_-20px_rgb(74_68_40/0.7)] lg:col-start-2 lg:row-span-4 lg:row-start-1 lg:mt-0 lg:self-center lg:px-8 lg:py-4">
+          {FITUR.map(([Icon, text]) => (
+            <li key={text} className="flex items-center gap-4 border-b border-white/15 py-4 last:border-0 lg:py-6">
+              <span className="grid size-11 shrink-0 place-items-center rounded-full bg-white text-olive lg:size-12">
+                <Icon size={22} strokeWidth={2} aria-hidden="true" />
               </span>
-              {f}
+              <span className="text-[0.975rem] leading-snug lg:text-lg">{text}</span>
             </li>
           ))}
         </ul>
 
-        <div className="mt-auto flex w-full max-w-sm flex-col gap-3 pt-12">
+        <div className="mt-8 flex flex-col gap-3 lg:col-start-1 lg:mt-12 lg:flex-row">
           <Link
             to="/masuk"
-            className="flex min-h-14 items-center justify-center rounded-full bg-olive text-lg font-semibold text-white transition hover:brightness-110"
+            className="flex min-h-[3.25rem] flex-1 items-center justify-center rounded-full bg-olive px-8 text-base font-semibold text-white transition hover:brightness-110 lg:flex-none"
           >
             Masuk
           </Link>
           <Link
             to="/daftar"
-            className="flex min-h-14 items-center justify-center rounded-full border-2 border-olive text-lg font-semibold transition hover:bg-olive/10"
+            className="flex min-h-[3.25rem] flex-1 items-center justify-center rounded-full border-2 border-olive px-8 text-base font-semibold transition hover:bg-olive/10 lg:flex-none"
           >
             Buat akun
           </Link>

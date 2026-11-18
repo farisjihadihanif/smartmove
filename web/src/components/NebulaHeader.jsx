@@ -1,7 +1,7 @@
 import { Mail } from 'lucide-react'
 
 /**
- * Header bertekstur cat air lilac (mockup hal. 3–7).
+ * Header bertekstur cat air lilac (mockup hal. 3–7), sudut bawah membulat agar isi di bawahnya terasa naik.
  * - `leading`: ikon fitur / avatar di lingkaran kiri.
  * - `title`: judul layar (Open Sans tebal) atau sapaan (`serif`, Bree Serif – Beranda).
  * - `unread` + `onNotifications`: tombol amplop kanan dengan lencana jumlah.
@@ -17,18 +17,20 @@ export default function NebulaHeader({
   className = '',
 }) {
   return (
-    <header className={`bg-lilac-wash px-4 pb-5 pt-4 text-ink ${className}`}>
+    <header
+      className={`bg-lilac-wash relative z-10 rounded-b-[1.75rem] px-4 pb-5 pt-4 text-ink shadow-[0_8px_20px_-8px_rgb(65_57_111/0.5)] ${className}`}
+    >
       <div className="flex min-h-touch items-center gap-3">
         {leading && (
-          <div className="grid size-12 shrink-0 place-items-center overflow-hidden rounded-full bg-white ring-2 ring-ink-violet/80">
+          <div className="grid size-12 shrink-0 place-items-center overflow-hidden rounded-full bg-white text-ink-violet shadow-[0_2px_8px_rgb(65_57_111/0.25)] ring-2 ring-white">
             {leading}
           </div>
         )}
         <h1
           className={
             serif
-              ? 'flex-1 text-center font-serif text-xl leading-snug'
-              : 'flex-1 text-xl font-semibold leading-tight tracking-[0.01em]'
+              ? 'flex-1 font-serif text-[1.375rem] leading-snug'
+              : 'flex-1 text-xl font-bold leading-tight'
           }
         >
           {title}
@@ -49,13 +51,13 @@ function NotificationButton({ unread, onClick }) {
       aria-label={label}
       className="relative grid size-touch shrink-0 place-items-center rounded-full"
     >
-      <span className="grid size-9 place-items-center rounded-full border-[1.5px] border-ink bg-white/30">
+      <span className="grid size-10 place-items-center rounded-full bg-white/75 shadow-[0_2px_8px_rgb(65_57_111/0.18)] backdrop-blur-sm">
         <Mail size={20} strokeWidth={2} aria-hidden="true" />
       </span>
       {unread > 0 && (
         <span
           aria-hidden="true"
-          className="absolute right-0.5 top-0.5 grid h-[18px] min-w-[18px] place-items-center rounded-full border border-white bg-ink px-1 text-[11px] font-semibold leading-none text-white"
+          className="absolute right-0 top-0 grid h-[18px] min-w-[18px] place-items-center rounded-full border-2 border-white bg-traffic-macet px-1 text-[10px] font-bold leading-none text-white"
         >
           {unread > 9 ? '9+' : unread}
         </span>

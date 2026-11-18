@@ -63,7 +63,7 @@ class _NavPreviewState extends State<NavPreview> {
             ),
           ],
         ),
-        Expanded(child: MapView(capped: true, tileProvider: FakeTiles())),
+        Expanded(child: MapView(tucked: true, tileProvider: FakeTiles())),
         BottomActionBar(
           actions: [
             BarAction(

@@ -1,7 +1,16 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import ErrorBanner from '../../components/ErrorBanner.jsx'
-import { AuthButton, AuthField, AuthNotice, AuthShell, MailSolid, linkClass } from '../../components/auth/AuthShell.jsx'
+import { MailCheck } from 'lucide-react'
+import {
+  AuthButton,
+  AuthField,
+  AuthFooter,
+  AuthNotice,
+  AuthShell,
+  MailSolid,
+  linkClass,
+} from '../../components/auth/AuthShell.jsx'
 import { api } from '../../lib/api.js'
 import { EMAIL_RE } from '../../lib/authRules.js'
 
@@ -10,7 +19,7 @@ export default function LupaPassword() {
   const [email, setEmail] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
-  const [sent, setSent] = useState('')
+  const [sent, setSent] = useState(null)
 
   async function onSubmit(e) {
     e.preventDefault()
@@ -23,7 +32,7 @@ export default function LupaPassword() {
     setError(null)
     try {
       const res = await api.post('/auth/forgot', { email: value })
-      setSent(res?.message || 'Tautan reset password sudah dikirim. Cek kotak masuk email kamu.')
+      setSent({ to: value, message: res?.message || 'Tautan reset password sudah dikirim. Cek kotak masuk email kamu.' })
     } catch (err) {
       setError(err)
     } finally {
@@ -32,14 +41,16 @@ export default function LupaPassword() {
   }
 
   return (
-    <AuthShell title="LUPA PASSWORD">
-      <p className="mt-3 text-center leading-relaxed text-white/90">
-        Masukkan email akunmu. Kami kirim tautan untuk membuat password baru.
-      </p>
-      <form onSubmit={onSubmit} noValidate className="mt-8 flex flex-col">
+    <AuthShell
+      title="Lupa password"
+      subtitle="Masukkan email akunmu. Kami kirim tautan untuk membuat password baru."
+      back="/masuk"
+    >
+      <form onSubmit={onSubmit} noValidate className="mt-7 flex flex-col">
         <AuthField
           icon={MailSolid}
           label="Email"
+          placeholder="nama@email.com"
           type="email"
           inputMode="email"
           autoComplete="email"
@@ -49,7 +60,9 @@ export default function LupaPassword() {
         {error && <ErrorBanner error={error} className="mt-3" />}
         {sent && (
           <div className="mt-4">
-            <AuthNotice>{sent}</AuthNotice>
+            <AuthNotice icon={MailCheck} title="Cek kotak masuk" detail={sent.to}>
+              {sent.message}
+            </AuthNotice>
           </div>
         )}
         <AuthButton busy={busy} className="mt-6">
@@ -57,12 +70,12 @@ export default function LupaPassword() {
         </AuthButton>
       </form>
 
-      <p className="mt-auto pt-10 text-center text-[0.95rem] font-semibold">
+      <AuthFooter>
         Sudah ingat?{' '}
         <Link to="/masuk" className={`${linkClass} inline-flex min-h-touch items-center px-1`}>
           Kembali ke Masuk
         </Link>
-      </p>
+      </AuthFooter>
     </AuthShell>
   )
 }

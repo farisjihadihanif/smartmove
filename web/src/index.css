@@ -83,6 +83,18 @@
   background-image: linear-gradient(to bottom, var(--color-login-from), var(--color-login-to));
 }
 
+/* Gradasi login dikalikan (multiply) dengan tekstur lilac: warna mockup tetap, ada guratan cat air.
+   Sama dengan LoginWash di mobile (ShaderMask multiply). */
+@utility bg-login-wash {
+  background-color: var(--color-login-from);
+  background-image:
+    linear-gradient(to bottom, var(--color-login-from), var(--color-login-to)),
+    url("./assets/textures/lilac-wash.webp");
+  background-size: cover, cover;
+  background-position: center, top center;
+  background-blend-mode: multiply, normal;
+}
+
 @utility bg-pill {
   background-image: linear-gradient(
     to right,
@@ -143,6 +155,9 @@
   font-size: 11px;
   padding: 1px 6px;
   border-top-left-radius: 6px;
+}
+.map-tucked .leaflet-container .leaflet-bottom {
+  bottom: 1.75rem;
 }
 .leaflet-container .leaflet-control-attribution a {
   color: var(--color-ink-violet);

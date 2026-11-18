@@ -1,3 +1,5 @@
+import { Check } from 'lucide-react'
+
 const TONE = {
   pill: 'bg-pill',
   deep: 'bg-pill-deep',
@@ -5,10 +7,11 @@ const TONE = {
 }
 
 /**
- * Deretan kapsul gradasi ungu → magenta (mockup hal. 4, 6).
+ * Deretan kapsul (mockup hal. 4, 6). Yang aktif bergradasi ungu → magenta (warna mockup),
+ * yang tidak aktif putih tembus pandang – gradasi hanya untuk pilihan yang sedang dipakai.
  * - Tunggal (tab, mis. Estimasi Waktu · Peta Interaktif): `value` string.
  * - `multiple` (lapisan, mis. Traffic · Transportasi umum · Street view): `value` array.
- * Yang aktif diberi cincin putih tebal + teks tebal (penanda bentuk, bukan warna saja) dan aria-pressed.
+ * Yang aktif juga diberi ikon centang + teks tebal (penanda bentuk, bukan warna saja) dan aria-pressed.
  */
 export default function PillToggle({
   options,
@@ -28,7 +31,7 @@ export default function PillToggle({
   }
 
   return (
-    <div role="group" aria-label={label} className={`flex justify-between gap-3 ${className}`}>
+    <div role="group" aria-label={label} className={`flex justify-between gap-2 ${className}`}>
       {options.map((opt) => {
         const on = isOn(opt.value)
         return (
@@ -37,10 +40,13 @@ export default function PillToggle({
             type="button"
             aria-pressed={on}
             onClick={() => toggle(opt.value)}
-            className={`${TONE[tone]} flex min-h-touch max-w-[9.5rem] flex-1 items-center justify-center gap-1 rounded-full px-3 py-1 text-center text-[15px] leading-tight text-white shadow-[0_2px_4px_rgb(59_11_100/0.25)] transition-shadow ${
-              on ? 'font-semibold ring-[3px] ring-white ring-inset' : ''
+            className={`flex min-h-touch min-w-0 max-w-[10rem] flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-1 text-center text-[0.875rem] leading-tight transition ${
+              on
+                ? `${TONE[tone]} font-semibold text-white shadow-[0_6px_14px_-6px_rgb(114_13_129/0.8)]`
+                : 'bg-white/80 text-ink-violet ring-1 ring-ink-violet/15 hover:bg-white'
             }`}
           >
+            {on && <Check size={16} strokeWidth={3} className="shrink-0" aria-hidden="true" />}
             {opt.label}
           </button>
         )

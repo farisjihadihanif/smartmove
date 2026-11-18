@@ -58,7 +58,7 @@ export default function Komponen() {
           <SearchField value={q} onChange={setQ} onSubmit={noop} />
           <PillToggle options={LAYERS} value={layers} onChange={setLayers} multiple label="Lapisan peta" />
         </NebulaHeader>
-        <MapView capped className="-mt-3 flex-1">
+        <MapView tucked className="flex-1">
           <Polyline positions={SAMPLE_ROUTE} pathOptions={{ color: '#0A11D8', weight: 9 }} />
           <Polyline positions={SAMPLE_ROUTE} pathOptions={{ color: '#0F53FF', weight: 6 }} />
         </MapView>

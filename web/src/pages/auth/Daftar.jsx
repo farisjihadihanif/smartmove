@@ -4,6 +4,7 @@ import ErrorBanner from '../../components/ErrorBanner.jsx'
 import {
   AuthButton,
   AuthField,
+  AuthFooter,
   AuthShell,
   BadgeSolid,
   LockSolid,
@@ -52,12 +53,17 @@ export default function Daftar() {
   }
 
   return (
-    <AuthShell title="BUAT AKUN">
-      <form onSubmit={onSubmit} noValidate className="mt-8 flex flex-col">
+    <AuthShell
+      title="Buat akun"
+      subtitle="Simpan rencana perjalanan, kumpulkan poin, dan pesan tiket simulasi."
+      back="/masuk"
+    >
+      <form onSubmit={onSubmit} noValidate className="mt-7 flex flex-col">
         <div className="flex flex-col gap-4">
           <AuthField
             icon={BadgeSolid}
             label="Nama lengkap"
+            placeholder="mis. Budi Siregar"
             autoComplete="name"
             value={form.namaLengkap}
             onChange={set('namaLengkap')}
@@ -65,6 +71,8 @@ export default function Daftar() {
           <AuthField
             icon={PersonSolid}
             label="Username"
+            placeholder="mis. budi_medan"
+            hint="Huruf kecil, angka, titik, atau garis bawah."
             autoComplete="username"
             autoCapitalize="none"
             spellCheck={false}
@@ -74,6 +82,7 @@ export default function Daftar() {
           <AuthField
             icon={MailSolid}
             label="Email"
+            placeholder="nama@email.com"
             type="email"
             inputMode="email"
             autoComplete="email"
@@ -83,15 +92,13 @@ export default function Daftar() {
           <AuthField
             icon={LockSolid}
             label="Password"
+            hint="Minimal 8 karakter."
             reveal
             autoComplete="new-password"
             value={form.password}
             onChange={set('password')}
           />
         </div>
-        <p className="mt-3 text-center text-sm leading-relaxed text-white/90">
-          Username pakai huruf kecil, angka, titik, atau garis bawah. Password minimal 8 karakter.
-        </p>
 
         {error && <ErrorBanner error={error} className="mt-3" />}
 
@@ -100,12 +107,12 @@ export default function Daftar() {
         </AuthButton>
       </form>
 
-      <p className="mt-auto pt-10 text-center text-[0.95rem] font-semibold">
+      <AuthFooter>
         Sudah punya akun?{' '}
         <Link to="/masuk" state={location.state} className={`${linkClass} inline-flex min-h-touch items-center px-1`}>
           Masuk
         </Link>
-      </p>
+      </AuthFooter>
     </AuthShell>
   )
 }

@@ -1,24 +1,38 @@
 import nodemailer from 'nodemailer';
 
 // Pengirim email via Gmail SMTP. Tes menyuntikkan mailer palsu lewat createApp({ mailer }).
-export function createMailer(cfg, { logger = console } = {}) {
+//
+// Di luar produksi email TIDAK dikirim ke sembarang alamat (alamat uji sering palsu):
+// - MAIL_MODE=console (bawaan dev): isi email hanya ditulis ke konsol.
+// - MAIL_MODE=smtp: dikirim lewat SMTP, tapi hanya ke ADMIN_EMAIL; alamat lain ke konsol.
+// Produksi selalu SMTP ke alamat tujuan.
+export function createMailer(cfg, { logger = console, transport } = {}) {
   const { user, pass, from } = cfg.smtp || {};
-  if (!user || !pass) {
+  const production = cfg.nodeEnv === 'production';
+  const mode = production ? 'smtp' : cfg.mailMode === 'smtp' ? 'smtp' : 'console';
+  const adminEmail = (cfg.admin?.email || '').trim().toLowerCase();
+
+  const toConsole = ({ to, subject, text }, reason) =>
+    logger.log(`[email ${reason}] ke ${to}: ${subject}\n${text}`);
+
+  if (mode === 'console' || !user || !pass) {
     return {
-      async send({ to, subject, text }) {
-        if (cfg.nodeEnv === 'production') {
-          logger.warn('SMTP belum diatur; email tidak dikirim.');
-        } else {
-          // Hanya di development: tampilkan isi email agar alur reset bisa dicoba.
-          logger.log(`[email dev] ke ${to}: ${subject}\n${text}`);
-        }
+      async send(msg) {
+        if (production) logger.warn('SMTP belum diatur; email tidak dikirim.');
+        else toConsole(msg, 'konsol');
       },
     };
   }
 
-  const transport = nodemailer.createTransport({ service: 'gmail', auth: { user, pass } });
+  const smtp = transport || nodemailer.createTransport({ service: 'gmail', auth: { user, pass } });
   return {
-    send: ({ to, subject, text, html }) =>
-      transport.sendMail({ from: `SmartMove Medan <${from}>`, to, subject, text, html }),
+    async send(msg) {
+      const to = String(msg.to || '').trim().toLowerCase();
+      if (!production && (!adminEmail || to !== adminEmail)) {
+        toConsole(msg, 'konsol, bukan ADMIN_EMAIL');
+        return;
+      }
+      await smtp.sendMail({ from: `SmartMove Medan <${from}>`, ...msg });
+    },
   };
 }

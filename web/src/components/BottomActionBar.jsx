@@ -9,23 +9,23 @@ export default function BottomActionBar({ actions = [], children, className = ''
   return (
     <nav
       aria-label="Aksi"
-      className={`bg-bar-dark px-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-5 ${className}`}
+      className={`bg-bar-dark relative z-10 rounded-t-[1.75rem] px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 ${className}`}
     >
       {children}
       {actions.length > 0 && (
-        <div className="flex items-center justify-around gap-2">
+        <div className="flex items-center justify-center gap-3">
           {actions.map(({ label, icon: Icon, onClick, variant = 'light', disabled }) => (
             <button
               key={label}
               type="button"
               onClick={onClick}
               disabled={disabled}
-              className={`flex h-12 min-w-0 max-w-[8.5rem] flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-[17px] shadow-[0_2px_6px_rgb(0_0_0/0.25)] transition-transform active:scale-[0.97] disabled:opacity-50 ${
-                variant === 'pill' ? 'bg-pill font-semibold text-white' : 'bg-action-pill text-ink-violet'
+              className={`flex h-12 min-w-0 max-w-[10rem] flex-1 items-center justify-center gap-2 rounded-full px-3 text-[0.9375rem] font-semibold shadow-[0_4px_12px_rgb(0_0_0/0.25)] transition-transform active:scale-[0.97] disabled:opacity-50 ${
+                variant === 'pill' ? 'bg-pill text-white' : 'bg-action-pill text-ink-violet'
               }`}
             >
               <span className="truncate">{label}</span>
-              {Icon && <Icon size={22} strokeWidth={2} className="shrink-0" aria-hidden="true" />}
+              {Icon && <Icon size={20} strokeWidth={2} className="shrink-0" aria-hidden="true" />}
             </button>
           ))}
         </div>

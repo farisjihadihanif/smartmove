@@ -19,7 +19,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _email = TextEditingController();
   bool _busy = false;
   Object? _error;
-  String? _sent;
+  ({String to, String message})? _sent;
 
   @override
   void dispose() {
@@ -44,7 +44,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       final msg = res is Map ? res['message'] : null;
       if (mounted) {
         setState(
-          () => _sent = msg is String ? msg : 'Tautan reset password sudah dikirim. Cek kotak masuk email kamu.',
+          () => _sent = (
+            to: email,
+            message: msg is String ? msg : 'Tautan reset password sudah dikirim. Cek kotak masuk email kamu.',
+          ),
         );
       }
     } on ApiException catch (e) {
@@ -57,41 +60,22 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return AuthShell(
-      title: 'LUPA PASSWORD',
+      title: 'Lupa password',
+      subtitle: 'Masukkan email akunmu. Kami kirim tautan untuk membuat password baru.',
       showBack: true,
-      footer: Wrap(
-        alignment: WrapAlignment.center,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          Text(
-            'Sudah ingat?',
-            style: sans(
-              color: AppColors.white,
-              size: 15,
-              weight: FontWeight.w600,
-            ),
-          ),
-          AuthLink(
-            label: 'Kembali ke Masuk',
-            onTap: () => Navigator.pop(context),
-          ),
-        ],
+      footer: AuthFooter(
+        text: 'Sudah ingat?',
+        link: AuthLink(
+          label: 'Kembali ke Masuk',
+          onTap: () => Navigator.pop(context),
+        ),
       ),
       children: [
-        const SizedBox(height: AppSizes.s3),
-        Text(
-          'Masukkan email akunmu. Kami kirim tautan untuk membuat password baru.',
-          textAlign: TextAlign.center,
-          style: sans(
-            color: AppColors.white.withValues(alpha: 0.92),
-            size: 15,
-            height: 1.45,
-          ),
-        ),
-        const SizedBox(height: AppSizes.s8),
+        const SizedBox(height: 28),
         AuthField(
           icon: Icons.email,
           label: 'Email',
+          placeholder: 'nama@email.com',
           controller: _email,
           keyboardType: TextInputType.emailAddress,
           autofillHints: const [AutofillHints.email],
@@ -101,7 +85,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         AuthError(_error),
         if (_sent != null) ...[
           const SizedBox(height: AppSizes.s4),
-          AuthNotice(_sent!),
+          AuthNotice(
+            _sent!.message,
+            icon: Icons.mark_email_read_outlined,
+            title: 'Cek kotak masuk',
+            detail: _sent!.to,
+          ),
         ],
         const SizedBox(height: AppSizes.s6),
         AuthButton(

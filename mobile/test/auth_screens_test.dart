@@ -80,7 +80,7 @@ void main() {
     expect(tester.takeException(), isNull);
 
     await passSplash(tester);
-    expect(find.text('MEMBER LOGIN'), findsOneWidget);
+    expect(find.text('Member Login'), findsOneWidget);
     expect(find.text('Ingat saya'), findsOneWidget);
     expect(find.text('Lupa password?'), findsOneWidget);
     expect(find.text('Buat akun'), findsOneWidget);
@@ -121,7 +121,7 @@ void main() {
     await tester.tap(find.text('Masuk'));
     await settleApi(tester);
     expect(find.text('Username/email atau password salah'), findsOneWidget);
-    expect(find.text('MEMBER LOGIN'), findsOneWidget);
+    expect(find.text('Member Login'), findsOneWidget);
   });
 
   testWidgets('Masuk berhasil → token disimpan, pindah ke Beranda', (
@@ -182,7 +182,7 @@ void main() {
     await passSplash(tester);
     await tester.tap(find.text('Buat akun'));
     await tester.pumpAndSettle();
-    expect(find.text('BUAT AKUN'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Buat akun'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     final fields = find.byType(TextField);
@@ -208,7 +208,7 @@ void main() {
     expect(sent['username'], 'budi_medan');
     expect(sent.containsKey('role'), isFalse);
     expect(find.text('Hallo, Budi Medan!'), findsOneWidget);
-    expect(find.text('BUAT AKUN'), findsNothing);
+    expect(find.widgetWithText(FilledButton, 'Buat akun'), findsNothing);
   });
 
   testWidgets('Lupa password: pesan dari API tampil', (tester) async {
@@ -225,7 +225,7 @@ void main() {
     await passSplash(tester);
     await tester.tap(find.text('Lupa password?'));
     await tester.pumpAndSettle();
-    expect(find.text('LUPA PASSWORD'), findsOneWidget);
+    expect(find.text('Lupa password'), findsOneWidget);
 
     await tester.enterText(find.byType(TextField), 'bukan-email');
     await tester.tap(find.text('Kirim tautan'));

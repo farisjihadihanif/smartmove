@@ -1,7 +1,15 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import ErrorBanner from '../../components/ErrorBanner.jsx'
-import { AuthButton, AuthField, AuthShell, LockSolid, PersonSolid, linkClass } from '../../components/auth/AuthShell.jsx'
+import {
+  AuthButton,
+  AuthField,
+  AuthSecondary,
+  AuthShell,
+  LockSolid,
+  PersonSolid,
+  linkClass,
+} from '../../components/auth/AuthShell.jsx'
 import { api } from '../../lib/api.js'
 import { useAuth } from '../../lib/useAuth.js'
 
@@ -35,12 +43,13 @@ export default function Masuk() {
   }
 
   return (
-    <AuthShell title="MEMBER LOGIN">
-      <form onSubmit={onSubmit} noValidate className="mt-10 flex flex-col">
-        <div className="flex flex-col gap-5">
+    <AuthShell title="Member Login" subtitle="Masuk untuk melanjutkan rencana perjalananmu di Medan.">
+      <form onSubmit={onSubmit} noValidate className="mt-7 flex flex-col">
+        <div className="flex flex-col gap-4">
           <AuthField
             icon={PersonSolid}
             label="Username atau email"
+            placeholder="mis. budi_medan"
             autoComplete="username"
             autoCapitalize="none"
             spellCheck={false}
@@ -57,8 +66,8 @@ export default function Masuk() {
           />
         </div>
 
-        <div className="mt-2 flex items-center justify-between gap-3 text-[0.95rem]">
-          <label className="-ml-2 flex min-h-touch cursor-pointer items-center gap-2.5 px-2 font-semibold">
+        <div className="mt-1.5 flex items-center justify-between gap-3 text-[0.9rem]">
+          <label className="-ml-2 flex min-h-touch cursor-pointer items-center gap-2.5 px-2 text-ink/80">
             <input
               type="checkbox"
               checked={form.ingat}
@@ -74,20 +83,18 @@ export default function Masuk() {
 
         {error && <ErrorBanner error={error} className="mt-3" />}
 
-        <AuthButton busy={busy} className="mt-6">
+        <AuthButton busy={busy} className="mt-4">
           Masuk
         </AuthButton>
       </form>
 
-      <div className="mt-auto flex flex-col items-center pt-12">
-        <p className="text-[0.95rem] font-semibold">Belum punya akun?</p>
-        <Link
-          to="/daftar"
-          state={location.state}
-          className="mt-2 flex min-h-14 w-full max-w-72 items-center justify-center rounded-full border-2 border-login-button text-xl font-semibold transition hover:bg-white/10"
-        >
+      <div className="mt-auto pt-10 lg:mt-8 lg:pt-0">
+        <p className="mb-3 flex items-center gap-3 text-sm text-ink/55 before:h-px before:flex-1 before:bg-ink/10 after:h-px after:flex-1 after:bg-ink/10">
+          Belum punya akun?
+        </p>
+        <AuthSecondary to="/daftar" state={location.state}>
           Buat akun
-        </Link>
+        </AuthSecondary>
       </div>
     </AuthShell>
   )

@@ -36,6 +36,8 @@ const config = {
     windowMs: 15 * 60 * 1000,
     limit: Number(env.AUTH_RATE_LIMIT) || 20,
   },
+  // console | smtp (lihat services/mail.js). Diabaikan di produksi.
+  mailMode: env.MAIL_MODE || 'console',
   smtp: {
     user: env.SMTP_USER,
     pass: env.SMTP_PASS,

@@ -8,20 +8,20 @@ const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">Op
 
 /**
  * Peta OSM + atribusi wajib. `children` = lapisan react-leaflet (Polyline, Marker, …).
- * `capped` menambah tutup atas ungu melengkung seperti mockup hal. 4 & 6.
+ * `tucked`: peta diselipkan 28 px di bawah header & bar bawah yang bersudut bulat (pengganti
+ * "tutup atas ungu" mockup hal. 4 & 6); atribusi OSM ikut naik agar tetap terlihat.
  */
 export default function MapView({
   center = MEDAN_CENTER,
   zoom = 14,
-  capped = false,
+  tucked = false,
   label = 'Peta',
   className = '',
   children,
   ...rest
 }) {
   return (
-    <div className={`relative flex min-h-0 flex-col ${className}`}>
-      {capped && <div aria-hidden="true" className="relative z-[1] mx-1 -mb-3 h-7 shrink-0 rounded-t-[1.75rem] bg-ink-violet" />}
+    <div className={`relative flex min-h-0 flex-col ${tucked ? 'map-tucked -my-7' : ''} ${className}`}>
       <div className="relative min-h-0 flex-1 overflow-hidden" role="region" aria-label={label}>
         <MapContainer
           center={center}
