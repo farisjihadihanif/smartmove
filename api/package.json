@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
+    "impor:osm": "node scripts/impor-osm.js",
     "test": "node --test --test-concurrency=1 \"test/**/*.test.js\"",
     "lint": "eslint ."
   },

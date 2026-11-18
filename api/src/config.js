@@ -46,6 +46,8 @@ const config = {
   osrmUrlFoot: env.OSRM_URL_FOOT,
   nominatimUrl: env.NOMINATIM_URL || 'https://nominatim.openstreetmap.org',
   nominatimEmail: env.NOMINATIM_EMAIL,
+  // Impor koridor & halte (npm run impor:osm). Kosong = overpass-api.de.
+  overpassUrl: env.OVERPASS_URL,
   // Foto jalan (Street view). Token hanya di server.
   mapillaryToken: env.MAPILLARY_TOKEN,
   mapillaryUrl: env.MAPILLARY_URL,
