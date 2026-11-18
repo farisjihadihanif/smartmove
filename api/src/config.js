@@ -41,6 +41,7 @@ const config = {
     windowMs: 60 * 1000,
     limit: Number(env.MAP_RATE_LIMIT) || 60,
   },
+  osrmUrl: env.OSRM_URL || 'https://router.project-osrm.org',
   nominatimUrl: env.NOMINATIM_URL || 'https://nominatim.openstreetmap.org',
   nominatimEmail: env.NOMINATIM_EMAIL,
   // Kebijakan OSM: User-Agent yang mengenali aplikasi + alamat kontak.

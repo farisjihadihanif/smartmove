@@ -12,6 +12,7 @@ import { authRouter } from './routes/auth.js';
 import { usersRouter } from './routes/users.js';
 import { homeRouter } from './routes/home.js';
 import { placesRouter } from './routes/places.js';
+import { routesRouter } from './routes/routes.js';
 
 export function createApp(opts = {}) {
   const cfg = { ...config, ...opts };
@@ -54,8 +55,16 @@ export function createApp(opts = {}) {
   api.use('/auth', authRouter(cfg, { mailer }));
   api.use('/users', usersRouter(cfg));
   api.use('/home', homeRouter(cfg));
-  api.use('/places', placesRouter(cfg));
-  // Router fitur lain (routes, ...) dipasang di tugas berikutnya.
+  // Satu kuota bersama untuk semua endpoint yang memanggil layanan peta.
+  const mapLimit = rateLimit({
+    windowMs: cfg.mapRateLimit.windowMs,
+    limit: cfg.mapRateLimit.limit,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    message: { message: 'Terlalu banyak permintaan, coba lagi nanti' },
+  });
+  api.use('/places', mapLimit, placesRouter(cfg));
+  api.use('/routes', mapLimit, routesRouter(cfg));
 
   app.use('/api', api);
   app.use(notFound);

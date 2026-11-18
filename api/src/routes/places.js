@@ -1,5 +1,4 @@
 import express from 'express';
-import { rateLimit } from 'express-rate-limit';
 import { httpError } from '../lib/httpError.js';
 import { str } from '../lib/validate.js';
 import { dalamWilayah, jarakMeter, parseLatLng, wajibDalamWilayah } from '../lib/wilayah.js';
@@ -11,16 +10,6 @@ const MAKS_HASIL = 10;
 export function placesRouter(cfg) {
   const r = express.Router();
   const nominatim = cfg.nominatim || createNominatim(cfg, { fetch: cfg.fetch });
-
-  r.use(
-    rateLimit({
-      windowMs: cfg.mapRateLimit.windowMs,
-      limit: cfg.mapRateLimit.limit,
-      standardHeaders: 'draft-8',
-      legacyHeaders: false,
-      message: { message: 'Terlalu banyak permintaan, coba lagi nanti' },
-    }),
-  );
 
   // GET /places/search?q=&near=lat,lng → { items }
   // Hasil dibatasi Mebidang. `near` (opsional) hanya mengurutkan dari yang terdekat;
