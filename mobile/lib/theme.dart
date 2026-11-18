@@ -12,6 +12,12 @@ abstract final class AppColors {
   static const loginField = Color(0xFFFCEDED);
   static const loginAvatar = Color(0xFFB79FD1);
 
+  // Splash (hal. 1)
+  static const splashBg = Color(0xFFF6FFF4);
+  static const olive = Color(0xFF7B7147);
+  static const oliveSoft = Color(0xFF918555);
+  static const leaf = Color(0xFFE1E6D3);
+
   // Warna dasar tekstur (fallback saat gambar belum termuat)
   static const lilacWash = Color(0xFFDAB8F6);
   static const barDark = Color(0xFF3B0B64);
@@ -92,6 +98,9 @@ abstract final class AppTextures {
   static const lilacWashAsset = 'assets/textures/lilac-wash.webp';
   static const barDarkAsset = 'assets/textures/bar-dark.webp';
 
+  /// Logo dari mockup hal. 1 (sementara sampai logo final, DESIGN §9).
+  static const logoAsset = 'assets/brand/logo.webp';
+
   /// Latar header lilac: gambar menutupi area, rata atas.
   static const lilacWash = BoxDecoration(
     color: AppColors.lilacWash,
@@ -120,6 +129,29 @@ abstract final class AppSizes {
   static const s8 = 32.0;
 }
 
+/// Gaya Open Sans dengan bobot yang benar. google_fonts mendaftarkan family
+/// per bobot (mis. `OpenSans_600`), jadi `copyWith(fontWeight: ...)` atau
+/// `TextStyle(fontWeight: ...)` yang mewarisi family lain TIDAK mengganti
+/// file font. Selalu pakai helper ini (atau [titleSerif]) bila mengubah bobot.
+/// Bobot yang dibundel: 400, 500, 600, 700, 800.
+TextStyle sans({
+  double? size,
+  FontWeight weight = FontWeight.w400,
+  Color? color,
+  double? height,
+  double? letterSpacing,
+  TextDecoration? decoration,
+  Color? decorationColor,
+}) => GoogleFonts.openSans(
+  fontSize: size,
+  fontWeight: weight,
+  color: color,
+  height: height,
+  letterSpacing: letterSpacing,
+  decoration: decoration,
+  decorationColor: decorationColor,
+);
+
 /// Gaya judul Bree Serif (judul kartu besar, sapaan).
 TextStyle titleSerif({double size = 22, Color color = AppColors.ink}) =>
     GoogleFonts.breeSerif(fontSize: size, color: color, height: 1.2);
@@ -142,8 +174,12 @@ ThemeData buildTheme() {
   );
 
   final base = ThemeData(useMaterial3: true, colorScheme: scheme);
-  final text = GoogleFonts.openSansTextTheme(base.textTheme)
-      .apply(bodyColor: AppColors.ink, displayColor: AppColors.ink);
+  // Gabungkan geometri tipografi (ukuran + bobot M3, mis. titleMedium w500)
+  // SEBELUM diberi Open Sans, agar tiap gaya mendapat family sesuai bobotnya.
+  // Tanpa ini bobot baru ditambahkan Theme.of() dan family tetap regular.
+  final text = GoogleFonts.openSansTextTheme(
+    base.typography.englishLike.merge(base.textTheme),
+  ).apply(bodyColor: AppColors.ink, displayColor: AppColors.ink);
   const pill = StadiumBorder();
   const minTouch = Size(AppSizes.touch, AppSizes.touch);
 
@@ -155,9 +191,10 @@ ThemeData buildTheme() {
       backgroundColor: AppColors.lilacWash,
       foregroundColor: AppColors.ink,
       elevation: 0,
-      titleTextStyle: text.titleLarge?.copyWith(
+      titleTextStyle: sans(
+        size: text.titleLarge?.fontSize,
+        weight: FontWeight.w600,
         color: AppColors.ink,
-        fontWeight: FontWeight.w600,
       ),
     ),
     filledButtonTheme: FilledButtonThemeData(
@@ -166,7 +203,10 @@ ThemeData buildTheme() {
         foregroundColor: AppColors.white,
         minimumSize: minTouch,
         shape: pill,
-        textStyle: text.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+        textStyle: sans(
+          size: text.labelLarge?.fontSize,
+          weight: FontWeight.w600,
+        ),
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(

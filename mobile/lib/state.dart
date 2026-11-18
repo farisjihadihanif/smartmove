@@ -49,13 +49,23 @@ class AppState extends ChangeNotifier {
   }
 
   /// Simpan sesi dari respons `/auth/login` atau `/auth/register` → `{user, token}`.
-  Future<void> setSession(Map<String, dynamic> response) async {
+  /// [remember] false ("Ingat saya" tidak dicentang): token hanya di memori.
+  Future<void> setSession(
+    Map<String, dynamic> response, {
+    bool remember = true,
+  }) async {
     final token = response['token'];
     final user = _extractUser(response);
     if (token is! String || token.isEmpty || user == null) {
       throw ApiException(500, 'Respons masuk tidak valid');
     }
-    await api.tokens.write(token);
+    if (remember) {
+      api.sessionToken = null;
+      await api.tokens.write(token);
+    } else {
+      api.sessionToken = token;
+      await api.tokens.clear();
+    }
     _set(AuthStatus.signedIn, user);
   }
 
@@ -70,12 +80,14 @@ class AppState extends ChangeNotifier {
     } on ApiException {
       // Abaikan: sesi lokal tetap dihapus.
     }
+    api.sessionToken = null;
     await api.tokens.clear();
     _set(AuthStatus.signedOut, null);
   }
 
   Future<void> _handleUnauthorized() async {
     if (_status == AuthStatus.signedOut) return;
+    api.sessionToken = null;
     await api.tokens.clear();
     _set(AuthStatus.signedOut, null);
   }

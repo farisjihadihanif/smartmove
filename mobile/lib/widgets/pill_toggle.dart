@@ -145,13 +145,11 @@ class GradientPill extends StatelessWidget {
                     label,
                     textAlign: TextAlign.center,
                     maxLines: 2,
-                    style: TextStyle(
+                    style: sans(
                       color: AppColors.white,
-                      fontSize: fontSize,
+                      size: fontSize,
                       height: 1.15,
-                      fontWeight: on || bold
-                          ? FontWeight.w600
-                          : FontWeight.w400,
+                      weight: on || bold ? FontWeight.w600 : FontWeight.w400,
                     ),
                   ),
                 ),

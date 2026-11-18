@@ -109,10 +109,10 @@ class _ActionPill extends StatelessWidget {
                       action.label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 17,
+                      style: sans(
+                        size: 17,
                         color: fg,
-                        fontWeight: action.filled
+                        weight: action.filled
                             ? FontWeight.w600
                             : FontWeight.w400,
                       ),

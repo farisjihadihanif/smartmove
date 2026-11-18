@@ -1,11 +1,11 @@
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:smartmove/api.dart';
-import 'package:smartmove/fonts.dart';
 import 'package:smartmove/theme.dart';
 import 'package:smartmove/widgets/widgets.dart';
+
+import 'font_preload.dart';
 
 /// Tile palsu dari aset lokal agar tes tidak memanggil jaringan.
 class FakeTiles extends TileProvider {
@@ -90,15 +90,7 @@ class _NavPreviewState extends State<NavPreview> {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  setUpAll(() async {
-    setupFonts();
-    // Muat semua font lebih dulu agar tidak memicu relayout setelah tes selesai.
-    for (final w in [FontWeight.w400, FontWeight.w600, FontWeight.w700]) {
-      GoogleFonts.openSans(fontWeight: w);
-    }
-    GoogleFonts.breeSerif();
-    await GoogleFonts.pendingFonts();
-  });
+  setUpAll(preloadFonts);
 
   testWidgets('layar navigasi 360 px tanpa overflow + atribusi OSM tampil', (
     tester,

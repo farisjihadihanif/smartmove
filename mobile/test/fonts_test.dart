@@ -5,13 +5,9 @@ import 'package:material_ui/material_ui.dart';
 import 'package:smartmove/fonts.dart';
 import 'package:smartmove/theme.dart';
 
-/// Ketebalan Open Sans yang dibundel di assets/google_fonts/.
-final bundledOpenSans = {
-  FontWeight.w400,
-  FontWeight.w500,
-  FontWeight.w600,
-  FontWeight.w700,
-};
+import 'font_preload.dart';
+
+final bundledOpenSans = bundledOpenSansWeights.toSet();
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

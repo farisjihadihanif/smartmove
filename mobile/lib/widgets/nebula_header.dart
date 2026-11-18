@@ -1,4 +1,3 @@
-import 'package:google_fonts/google_fonts.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../theme.dart';
@@ -35,9 +34,9 @@ class NebulaHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final titleStyle = serif
         ? titleSerif(size: 20)
-        : GoogleFonts.openSans(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
+        : sans(
+            size: 20,
+            weight: FontWeight.w600,
             color: AppColors.ink,
             height: 1.2,
           );
@@ -164,10 +163,10 @@ class _NotificationButton extends StatelessWidget {
                     ),
                     child: Text(
                       unread > 9 ? '9+' : '$unread',
-                      style: const TextStyle(
+                      style: sans(
                         color: AppColors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
+                        size: 11,
+                        weight: FontWeight.w600,
                         height: 1,
                       ),
                     ),

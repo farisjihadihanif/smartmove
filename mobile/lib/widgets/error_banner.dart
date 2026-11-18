@@ -102,8 +102,7 @@ class ErrorBanner extends StatelessWidget {
                   onPressed: onRetry,
                   style: TextButton.styleFrom(
                     foregroundColor: AppColors.inkViolet,
-                    textStyle: Theme.of(context).textTheme.labelLarge
-                        ?.copyWith(fontSize: 14, fontWeight: FontWeight.w600),
+                    textStyle: sans(size: 14, weight: FontWeight.w600),
                   ),
                   child: Text(retryLabel),
                 ),

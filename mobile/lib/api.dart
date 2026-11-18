@@ -89,6 +89,10 @@ class ApiClient {
   final String _base;
   final Duration timeout;
 
+  /// Token sesi tanpa "Ingat saya": hanya di memori, hilang saat aplikasi ditutup.
+  /// Bila diisi, dipakai menggantikan token di [tokens].
+  String? sessionToken;
+
   /// Dipanggil saat API membalas 401 (mis. kosongkan sesi di [AppState]).
   void Function()? onUnauthorized;
 
@@ -113,7 +117,7 @@ class ApiClient {
     final req = http.Request(method, uri(path, query));
     req.headers['Accept'] = 'application/json';
     if (auth) {
-      final token = await tokens.read();
+      final token = sessionToken ?? await tokens.read();
       if (token != null && token.isNotEmpty) {
         req.headers['Authorization'] = 'Bearer $token';
       }
