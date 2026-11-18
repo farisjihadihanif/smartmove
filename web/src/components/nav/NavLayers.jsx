@@ -14,18 +14,18 @@ const PIN_TUJUAN = L.divIcon({
 
 const keLatLng = ([lng, lat]) => [lat, lng]
 
-/** Padding fitBounds: ruang untuk lembar bawah (ponsel) atau panel kiri (desktop). */
+/** Padding fitBounds: ruang untuk lembar bawah (ponsel); di desktop panel rute ada di samping peta. */
 function paddingRute() {
   const lebar = window.matchMedia('(min-width: 64rem)').matches
   return lebar
-    ? { paddingTopLeft: [460, 96], paddingBottomRight: [64, 72] }
+    ? { paddingTopLeft: [64, 92], paddingBottomRight: [64, 64] }
     : { paddingTopLeft: [28, 96], paddingBottomRight: [28, Math.round(window.innerHeight * 0.42)] }
 }
 
-/** Pusat peta agar `titik` tampil di area yang tidak tertutup lembar bawah / panel kiri. */
+/** Pusat peta agar `titik` tampil di area yang tidak tertutup lembar bawah (ponsel). Desktop: tepat di tengah. */
 function pusatTerlihat(map, titik, zoom) {
   const lebar = window.matchMedia('(min-width: 64rem)').matches
-  const geser = lebar ? L.point(-220, 0) : L.point(0, Math.round(map.getSize().y * 0.22))
+  const geser = lebar ? L.point(0, -14) : L.point(0, Math.round(map.getSize().y * 0.22))
   return map.unproject(map.project(titik, zoom).add(geser), zoom)
 }
 

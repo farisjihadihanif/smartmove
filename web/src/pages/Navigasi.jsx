@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowLeft, Loader2, MapPin, Play, Route, Share2 } from 'lucide-react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Loader2, MapPin, Play, Route, Share2 } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
 import BottomActionBar from '../components/BottomActionBar.jsx'
 import ErrorBanner from '../components/ErrorBanner.jsx'
 import MapView from '../components/MapView.jsx'
-import NebulaHeader from '../components/NebulaHeader.jsx'
+import PageShell from '../components/PageShell.jsx'
 import PillToggle from '../components/PillToggle.jsx'
 import SearchField from '../components/SearchField.jsx'
 import NavLayers from '../components/nav/NavLayers.jsx'
@@ -14,7 +14,7 @@ import { MEDAN_CENTER } from '../lib/geo.js'
 import { MODA, formatJarak, teksBagikan, titikFoto } from '../lib/navigasi.js'
 
 // Smart Navigation (mockup hal. 4, PRD §6.1): cari tujuan, pilih moda, rute di peta,
-// ringkasan & langkah di lembar bawah, Play (panduan langkah), Share, Street view (Mapillary).
+// ringkasan & langkah di lembar bawah (desktop: panel samping kiri), Play (panduan langkah), Share, Street view (Mapillary).
 // Lokasi pengguna hanya dipakai selama layar terbuka, tidak disimpan (aturan bisnis #5).
 // URL: ?q= (dari Beranda), ?dari=lat,lng&ke=lat,lng&mode= (dari Trip Planner nanti).
 
@@ -219,103 +219,104 @@ export default function Navigasi() {
   }
 
   const adaRute = Boolean(rute)
+  const aksi = [
+    {
+      label: 'Rute',
+      icon: Route,
+      disabled: !adaRute,
+      onClick: () => {
+        setPlay(null)
+        setBuka(true)
+        setFitKey((n) => n + 1)
+      },
+    },
+    { label: 'Play', icon: Play, disabled: !adaRute, onClick: () => setPlay(0) },
+    { label: 'Share', icon: Share2, disabled: !adaRute, onClick: bagikan },
+  ]
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-surface">
-      <NebulaHeader
-        row
-        leading={
-          <Link to="/" aria-label="Kembali ke Beranda" className="grid size-full place-items-center">
-            <ArrowLeft size={22} aria-hidden="true" />
-          </Link>
-        }
-        title="Smart Navigation"
-      >
-        <div className="relative lg:max-w-xl lg:flex-1">
-          <SearchField
-            value={query}
-            onChange={(v) => {
-              setQuery(v)
-              if (!v) setHasil(null)
-            }}
-            onSubmit={cari}
-            placeholder={target === 'dari' ? 'Cari titik asal' : 'Telusuri di sini'}
-            label={target === 'dari' ? 'Cari titik asal' : 'Cari tujuan'}
-          />
-          {hasil && <HasilCari hasil={hasil} onPilih={pilih} onTutup={() => setHasil(null)} />}
+    <PageShell
+      map
+      title="Smart Navigation"
+      toolbar={
+        <>
+          <div className="relative lg:max-w-md lg:flex-1">
+            <SearchField
+              value={query}
+              onChange={(v) => {
+                setQuery(v)
+                if (!v) setHasil(null)
+              }}
+              onSubmit={cari}
+              placeholder={target === 'dari' ? 'Cari titik asal' : 'Telusuri di sini'}
+              label={target === 'dari' ? 'Cari titik asal' : 'Cari tujuan'}
+            />
+            {hasil && <HasilCari hasil={hasil} onPilih={pilih} onTutup={() => setHasil(null)} />}
+          </div>
+          <PillToggle options={LAPISAN} value={lapisan} onChange={ubahLapisan} multiple label="Lapisan peta" fitDesktop className="lg:shrink-0" />
+        </>
+      }
+    >
+      {/* Ponsel: peta + lembar bawah + bar aksi. Desktop: panel rute di kiri, peta memenuhi sisanya. */}
+      <div className="relative z-0 flex min-h-0 flex-1 flex-col lg:flex-row">
+        <div className="relative flex min-h-0 flex-1 flex-col">
+          <MapView tucked attribution="topright" className="flex-1 lg:mb-0" label="Peta rute">
+            <NavLayers
+              dari={dari}
+              ke={ke}
+              rute={rute}
+              langkahAktif={langkahAktif}
+              fitKey={fitKey}
+              onPick={ketukPeta}
+              onMove={setTengah}
+            />
+          </MapView>
+
+          {pesan && (
+            <p
+              role="status"
+              className="sheet-fade absolute left-1/2 top-12 z-20 w-max max-w-[calc(100%-2rem)] -translate-x-1/2 rounded-full bg-ink-violet px-4 py-2.5 text-center text-sm font-semibold text-white shadow-[0_8px_20px_-8px_rgb(65_57_111/0.8)]"
+            >
+              {pesan}
+            </p>
+          )}
         </div>
-        <PillToggle options={LAPISAN} value={lapisan} onChange={ubahLapisan} multiple label="Lapisan peta" className="lg:w-[27rem]" />
-      </NebulaHeader>
-
-      <div className="relative z-0 flex min-h-0 flex-1 flex-col">
-        <MapView tucked attribution="topright" className="flex-1" label="Peta rute">
-          <NavLayers
-            dari={dari}
-            ke={ke}
-            rute={rute}
-            langkahAktif={langkahAktif}
-            fitKey={fitKey}
-            onPick={ketukPeta}
-            onMove={setTengah}
-          />
-        </MapView>
-
-        {pesan && (
-          <p
-            role="status"
-            className="sheet-fade absolute left-1/2 top-12 z-20 w-max max-w-[calc(100%-2rem)] -translate-x-1/2 rounded-full bg-ink-violet px-4 py-2.5 text-center text-sm font-semibold text-white shadow-[0_8px_20px_-8px_rgb(65_57_111/0.8)]"
-          >
-            {pesan}
-          </p>
-        )}
 
         <section
           aria-label="Rute"
-          className="sheet-rise absolute inset-x-0 -bottom-7 z-10 max-h-[58%] overflow-y-auto rounded-t-[1.75rem] bg-surface px-5 pb-[calc(1.75rem+1rem)] pt-2 shadow-[0_-12px_32px_-14px_rgb(65_57_111/0.55)] lg:bottom-auto lg:left-6 lg:right-auto lg:top-10 lg:max-h-[calc(100%-3.5rem)] lg:w-[25rem] lg:rounded-[1.75rem] lg:px-6 lg:pb-6 lg:pt-5"
+          className="sheet-rise absolute inset-x-0 -bottom-7 z-10 max-h-[58%] overflow-y-auto rounded-t-[1.75rem] bg-surface px-5 pb-[calc(1.75rem+1rem)] pt-2 shadow-[0_-12px_32px_-14px_rgb(65_57_111/0.55)] lg:static lg:order-first lg:-mt-7 lg:flex lg:max-h-none lg:w-[26rem] lg:shrink-0 lg:flex-col lg:overflow-hidden lg:rounded-none lg:p-0 lg:shadow-[10px_0_28px_-18px_rgb(65_57_111/0.55)] xl:w-[28rem]"
         >
           <span aria-hidden="true" className="mx-auto mb-3 block h-1 w-10 rounded-full bg-ink/15 lg:hidden" />
-          <RouteSheet
-            dari={dari}
-            ke={ke}
-            lokasiStatus={lokasiStatus}
-            target={target}
-            onTarget={(t) => {
-              setTarget(t)
-              setHasil(null)
-              setQuery(t === 'ke' ? (ke?.nama ?? '') : '')
-            }}
-            mode={mode}
-            onMode={setMode}
-            rute={rute}
-            memuat={memuatRute}
-            galat={galatRute}
-            onRetry={() => setCoba((n) => n + 1)}
-            buka={buka}
-            onBuka={setBuka}
-            play={play}
-            onPlay={setPlay}
-            foto={foto}
-            onTutupFoto={() => setLapisan((l) => l.filter((v) => v !== 'street'))}
-          />
+          <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:px-6 lg:pb-6 lg:pt-12">
+            <RouteSheet
+              dari={dari}
+              ke={ke}
+              lokasiStatus={lokasiStatus}
+              target={target}
+              onTarget={(t) => {
+                setTarget(t)
+                setHasil(null)
+                setQuery(t === 'ke' ? (ke?.nama ?? '') : '')
+              }}
+              mode={mode}
+              onMode={setMode}
+              rute={rute}
+              memuat={memuatRute}
+              galat={galatRute}
+              onRetry={() => setCoba((n) => n + 1)}
+              buka={buka}
+              onBuka={setBuka}
+              play={play}
+              onPlay={setPlay}
+              foto={foto}
+              onTutupFoto={() => setLapisan((l) => l.filter((v) => v !== 'street'))}
+            />
+          </div>
+          <BottomActionBar actions={aksi} className="hidden lg:block lg:rounded-t-[1.75rem]" />
         </section>
       </div>
 
-      <BottomActionBar
-        actions={[
-          {
-            label: 'Rute',
-            icon: Route,
-            disabled: !adaRute,
-            onClick: () => {
-              setPlay(null)
-              setBuka(true)
-              setFitKey((n) => n + 1)
-            },
-          },
-          { label: 'Play', icon: Play, disabled: !adaRute, onClick: () => setPlay(0) },
-          { label: 'Share', icon: Share2, disabled: !adaRute, onClick: bagikan },
-        ]}
-      />
-    </div>
+      <BottomActionBar actions={aksi} className="lg:hidden" />
+    </PageShell>
   )
 }
 

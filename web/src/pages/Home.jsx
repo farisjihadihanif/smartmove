@@ -8,7 +8,6 @@ import {
   Info,
   Map as MapIcon,
   Megaphone,
-  LogIn,
   Search,
   Signpost,
   TrafficCone,
@@ -16,15 +15,16 @@ import {
 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import logo from '../assets/brand/logo.webp'
-import { BottomNav, TopNav } from '../components/AppNav.jsx'
+import { BottomNav } from '../components/AppNav.jsx'
 import ErrorBanner from '../components/ErrorBanner.jsx'
 import MenuTile from '../components/MenuTile.jsx'
 import { NotificationButton } from '../components/NebulaHeader.jsx'
 import SearchField from '../components/SearchField.jsx'
+import SiteBar, { SignInButton } from '../components/SiteBar.jsx'
 import NotificationSheet from '../components/home/NotificationSheet.jsx'
 import { api, fileUrl } from '../lib/api.js'
-import { countUnread, readLastSeen, writeLastSeen } from '../lib/notifications.js'
 import { useAuth } from '../lib/useAuth.js'
+import { useNotifications } from '../lib/useNotifications.js'
 import { jamAtauTanggal, jamWib, salamWib } from '../lib/wib.js'
 
 // Beranda (mockup hal. 3): sapaan + jam Medan, lonceng, cari, 4 menu utama, Trip Planner,
@@ -63,8 +63,6 @@ export default function Home() {
   const [offset, setOffset] = useState(0)
   const [error, setError] = useState(null)
   const [query, setQuery] = useState('')
-  const [lastSeen, setLastSeen] = useState(() => readLastSeen(user?.id))
-  const [sheet, setSheet] = useState(null) // { lastSeen } saat panel terbuka
 
   // Permintaan dibuat di sini; state diisi di callback (bukan langsung di dalam effect).
   const load = useCallback(
@@ -100,17 +98,8 @@ export default function Home() {
   const now = useServerNow(offset)
   const tamu = !user
   const nama = user?.namaLengkap || user?.username || ''
-  const notifikasi = data?.notifikasi ?? []
-  const unread = countUnread(notifikasi, lastSeen)
-
-  const openNotifications = useCallback(() => {
-    setSheet({ lastSeen })
-    if (data && user) {
-      writeLastSeen(user.id, data.sapaan.waktuServer)
-      setLastSeen(new Date(data.sapaan.waktuServer).getTime())
-    }
-  }, [data, user, lastSeen])
-  const closeNotifications = useCallback(() => setSheet(null), [])
+  const notif = useNotifications(user, data)
+  const openNotifications = notif.open
 
   function search(q) {
     const s = q.trim()
@@ -121,18 +110,7 @@ export default function Home() {
     <div className="min-h-dvh bg-surface pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-16">
       <header className="bg-lilac-wash rounded-b-[2rem] shadow-[0_10px_28px_-14px_rgb(65_57_111/0.6)] lg:rounded-b-[3rem]">
         <div className="mx-auto max-w-6xl px-4 pb-6 pt-5 lg:px-10 lg:pb-14 lg:pt-6">
-          <div className="hidden items-center justify-between lg:flex">
-            <Link to="/" className="flex items-center gap-3 rounded-full pr-2">
-              <span className="grid size-11 place-items-center rounded-full bg-white/85">
-                <img src={logo} alt="" width="34" height="26" className="w-[34px]" />
-              </span>
-              <span className="font-serif text-lg leading-none">SmartMove Medan</span>
-            </Link>
-            <div className="flex items-center gap-3">
-              <TopNav />
-              {tamu ? <SignInButton /> : <NotificationButton unread={unread} onClick={openNotifications} />}
-            </div>
-          </div>
+          <SiteBar signedIn={!tamu} unread={notif.unread} onNotifications={openNotifications} />
 
           <div className="flex items-start gap-3 lg:mt-14 lg:items-end lg:gap-6">
             <Avatar user={user} />
@@ -153,7 +131,7 @@ export default function Home() {
             {tamu ? (
               <SignInButton className="lg:hidden" />
             ) : (
-              <NotificationButton unread={unread} onClick={openNotifications} className="lg:hidden" />
+              <NotificationButton unread={notif.unread} onClick={openNotifications} className="lg:hidden" />
             )}
           </div>
 
@@ -198,25 +176,13 @@ export default function Home() {
       <BottomNav className="lg:hidden" />
 
       <NotificationSheet
-        open={!!sheet}
-        onClose={closeNotifications}
-        items={notifikasi}
-        lastSeen={sheet?.lastSeen ?? null}
+        open={notif.isOpen}
+        onClose={notif.close}
+        items={notif.items}
+        lastSeen={notif.lastSeen}
         now={now}
       />
     </div>
-  )
-}
-
-function SignInButton({ className = '' }) {
-  return (
-    <Link
-      to="/masuk"
-      className={`flex min-h-touch shrink-0 items-center gap-2 rounded-full bg-login-button px-5 text-[15px] font-semibold text-white shadow-[0_6px_16px_-6px_rgb(115_36_169/0.8)] transition hover:brightness-110 ${className}`}
-    >
-      <LogIn size={18} aria-hidden="true" />
-      Masuk
-    </Link>
   )
 }
 
