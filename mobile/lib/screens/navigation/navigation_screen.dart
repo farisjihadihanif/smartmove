@@ -75,6 +75,8 @@ class NavigationScreen extends StatefulWidget {
     this.initialQuery,
     this.dari,
     this.ke,
+    this.dariNama,
+    this.keNama,
     this.mode = Moda.driving,
     this.locate = lokasiPerangkat,
     this.share = bagikanSistem,
@@ -84,9 +86,13 @@ class NavigationScreen extends StatefulWidget {
   /// Kata kunci dari kolom cari Beranda.
   final String? initialQuery;
 
-  /// Titik awal dari Trip Planner (nanti, T-109). Tanpa [dari] = lokasi perangkat.
+  /// Titik dari Trip Planner (T-109). Tanpa [dari] = lokasi perangkat.
   final LatLng? dari;
   final LatLng? ke;
+
+  /// Nama titik dari rencana; bila ada, tidak perlu reverse geocoding.
+  final String? dariNama;
+  final String? keNama;
   final Moda mode;
   final Future<LokasiHasil> Function() locate;
 
@@ -154,8 +160,11 @@ class NavigationScreenState extends State<NavigationScreen> {
     final pKe = widget.ke;
     if (pKe != null && dalamWilayah(pKe)) {
       unawaited(
-        _namaTitik(pKe).then((t) {
-          _set(() => ke = t);
+        _namaTitik(pKe, widget.keNama).then((t) {
+          _set(() {
+            ke = t;
+            if (_query.text.isEmpty) _query.text = t.nama;
+          });
           _hitungRute();
         }),
       );
@@ -165,7 +174,7 @@ class NavigationScreenState extends State<NavigationScreen> {
 
     final pDari = widget.dari;
     if (pDari != null && dalamWilayah(pDari)) {
-      final t = await _namaTitik(pDari);
+      final t = await _namaTitik(pDari, widget.dariNama);
       _set(() {
         dari = t;
         lokasiStatus = 'tidak';
@@ -204,7 +213,10 @@ class NavigationScreenState extends State<NavigationScreen> {
   }
 
   /// Nama titik dari API (reverse); bila gagal cukup "Titik di peta".
-  Future<Tempat> _namaTitik(LatLng p) async {
+  Future<Tempat> _namaTitik(LatLng p, [String? nama]) async {
+    if (nama != null && nama.trim().isNotEmpty) {
+      return Tempat(nama: nama.trim(), lokasi: p);
+    }
     try {
       final r = await _api.get(
         '/places/reverse',

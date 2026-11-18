@@ -16,7 +16,7 @@ import { MODA, formatJarak, teksBagikan, titikFoto } from '../lib/navigasi.js'
 // Smart Navigation (mockup hal. 4, PRD §6.1): cari tujuan, pilih moda, rute di peta,
 // ringkasan & langkah di lembar bawah (desktop: panel samping kiri), Play (panduan langkah), Share, Street view (Mapillary).
 // Lokasi pengguna hanya dipakai selama layar terbuka, tidak disimpan (aturan bisnis #5).
-// URL: ?q= (dari Beranda), ?dari=lat,lng&ke=lat,lng&mode= (dari Trip Planner nanti).
+// URL: ?q= (dari Beranda), ?dari=lat,lng&ke=lat,lng&mode=&dariNama=&keNama= (dari Trip Planner).
 
 const LAPISAN = [
   { value: 'traffic', label: 'Traffic' },
@@ -36,8 +36,9 @@ function parseTitik(v) {
   return m ? { lat: Number(m[1]), lng: Number(m[2]) } : null
 }
 
-/** Nama titik dari API (reverse); bila gagal cukup "Titik di peta". */
-async function namaTitik(lokasi) {
+/** Nama titik dari API (reverse); bila gagal cukup "Titik di peta". `nama` dari URL dipakai langsung. */
+async function namaTitik(lokasi, nama) {
+  if (nama?.trim()) return { nama: nama.trim().slice(0, 200), alamat: '', lokasi }
   try {
     const { tempat } = await api.get('/places/reverse', { query: { at: latLng(lokasi) } })
     return { nama: tempat.nama, alamat: tempat.alamat, lokasi }
@@ -78,9 +79,15 @@ export default function Navigasi() {
     let batal = false
     const pDari = parseTitik(params.get('dari'))
     const pKe = parseTitik(params.get('ke'))
-    if (pKe && dalamWilayah(pKe)) namaTitik(pKe).then((t) => !batal && setKe(t))
+    if (pKe && dalamWilayah(pKe)) {
+      namaTitik(pKe, params.get('keNama')).then((t) => {
+        if (batal) return
+        setKe(t)
+        setQuery((q) => q || t.nama)
+      })
+    }
     if (pDari && dalamWilayah(pDari)) {
-      namaTitik(pDari).then((t) => {
+      namaTitik(pDari, params.get('dariNama')).then((t) => {
         if (batal) return
         setDari(t)
         setLokasiStatus('tidak')

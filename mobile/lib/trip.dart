@@ -1,0 +1,162 @@
+import 'package:material_ui/material_ui.dart';
+
+import 'navigasi.dart';
+import 'wib.dart';
+
+// Helper Trip Planner (T-109). Sama dengan web/src/lib/trip.js – ubah bersamaan.
+
+/// Moda rencana (API: driving | motorcycle | walking | transit). Transit baru di T-203.
+enum ModaTrip {
+  driving('Mobil', Icons.directions_car_rounded),
+  motorcycle('Motor', Icons.two_wheeler_rounded),
+  walking('Jalan kaki', Icons.directions_walk_rounded),
+  transit('Transportasi umum', Icons.directions_bus_rounded, segera: true);
+
+  const ModaTrip(this.label, this.icon, {this.segera = false});
+  final String label;
+  final IconData icon;
+  final bool segera;
+
+  static ModaTrip dari(Object? v) =>
+      ModaTrip.values.firstWhere((m) => m.name == v, orElse: () => driving);
+
+  /// Moda Smart Navigation; null untuk transit (belum ada).
+  Moda? get navigasi => switch (this) {
+    driving => Moda.driving,
+    motorcycle => Moda.motorcycle,
+    walking => Moda.walking,
+    transit => null,
+  };
+}
+
+/// Satu rencana perjalanan dari API (`publicTrip`).
+class Trip {
+  const Trip({
+    required this.id,
+    required this.asal,
+    required this.tujuan,
+    required this.moda,
+    this.judul,
+    this.berangkatPada,
+    this.ringkasan,
+  });
+
+  factory Trip.fromJson(Map j) {
+    final r = j['ringkasan'];
+    return Trip(
+      id: '${j['id']}',
+      judul: (j['judul'] as String?)?.trim().isEmpty ?? true
+          ? null
+          : j['judul'] as String,
+      asal: Tempat.fromJson(j['asal'] as Map),
+      tujuan: Tempat.fromJson(j['tujuan'] as Map),
+      moda: ModaTrip.dari(j['moda']),
+      berangkatPada: j['berangkatPada'] == null
+          ? null
+          : DateTime.tryParse('${j['berangkatPada']}'),
+      ringkasan: r is Map ? Map<String, dynamic>.from(r) : null,
+    );
+  }
+
+  final String id;
+  final String? judul;
+  final Tempat asal;
+  final Tempat tujuan;
+  final ModaTrip moda;
+  final DateTime? berangkatPada;
+  final Map<String, dynamic>? ringkasan;
+}
+
+Map<String, Object?> tempatJson(Tempat t) => {
+  'nama': t.nama,
+  'lokasi': {'lat': t.lokasi.latitude, 'lng': t.lokasi.longitude},
+};
+
+/// "12 mnt · 4,9 km" dari ringkasan tersimpan, atau null.
+String? teksRingkasan(Map? r) {
+  if (r == null) return null;
+  final bagian = [
+    if (r['durasiS'] is num) formatDurasi(r['durasiS'] as num),
+    if (r['jarakM'] is num) formatJarak(r['jarakM'] as num),
+  ];
+  return bagian.isEmpty ? null : bagian.join(' · ');
+}
+
+/// "Berangkat dalam 1 j 5 mnt" / "Waktunya berangkat".
+String hitungMundur(DateTime t, DateTime now) {
+  final s = t.difference(now).inSeconds;
+  return s < 60 ? 'Waktunya berangkat' : 'Berangkat dalam ${formatDurasi(s)}';
+}
+
+/// Lewat lebih dari 30 menit dari jam berangkat.
+bool sudahLewat(Trip t, DateTime now) =>
+    t.berangkatPada != null &&
+    t.berangkatPada!.isBefore(now.subtract(const Duration(minutes: 30)));
+
+class GrupTrip {
+  GrupTrip(this.judul, this.items);
+  final String judul;
+  final List<Trip> items;
+}
+
+/// Per hari (akan datang, jam naik), "Kapan saja" (tanpa jadwal), dan "Sudah lewat".
+({Trip? berikutnya, List<GrupTrip> grup, List<Trip> lewat}) kelompokkan(
+  List<Trip> trips,
+  DateTime now,
+) {
+  final akan =
+      trips
+          .where((t) => t.berangkatPada != null && !sudahLewat(t, now))
+          .toList()
+        ..sort((a, b) => a.berangkatPada!.compareTo(b.berangkatPada!));
+  final bebas = trips.where((t) => t.berangkatPada == null).toList();
+  final lewat = trips.where((t) => sudahLewat(t, now)).toList()
+    ..sort((a, b) => b.berangkatPada!.compareTo(a.berangkatPada!));
+
+  final grup = <GrupTrip>[];
+  for (final t in akan) {
+    final judul = hariWib(t.berangkatPada!, now);
+    if (grup.isNotEmpty && grup.last.judul == judul) {
+      grup.last.items.add(t);
+    } else {
+      grup.add(GrupTrip(judul, [t]));
+    }
+  }
+  if (bebas.isNotEmpty) grup.add(GrupTrip('Kapan saja', bebas));
+  return (
+    berikutnya: akan.isEmpty ? null : akan.first,
+    grup: grup,
+    lewat: lewat,
+  );
+}
+
+/// Tanggal + jam WIB (dari pemilih) → waktu UTC.
+DateTime waktuWib(DateTime tanggal, TimeOfDay jam) => DateTime.utc(
+  tanggal.year,
+  tanggal.month,
+  tanggal.day,
+  jam.hour,
+  jam.minute,
+).subtract(const Duration(hours: 7));
+
+/// Waktu → tanggal & jam WIB untuk pemilih.
+({DateTime tanggal, TimeOfDay jam}) keWib(DateTime t) {
+  final w = t.toUtc().add(const Duration(hours: 7));
+  return (
+    tanggal: DateTime(w.year, w.month, w.day),
+    jam: TimeOfDay(hour: w.hour, minute: w.minute),
+  );
+}
+
+/// "Kam, 19 Nov" untuk tombol tanggal.
+String labelTanggal(DateTime tanggal) {
+  const hari = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+  const bulan = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', //
+    'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
+  ];
+  return '${hari[tanggal.weekday - 1]}, ${tanggal.day} ${bulan[tanggal.month - 1]}';
+}
+
+String labelJam(TimeOfDay j) =>
+    '${j.hour.toString().padLeft(2, '0')}.${j.minute.toString().padLeft(2, '0')}';

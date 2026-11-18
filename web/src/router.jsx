@@ -6,6 +6,7 @@ import Navigasi from './pages/Navigasi.jsx'
 import NotFound from './pages/NotFound.jsx'
 import Segera from './pages/Segera.jsx'
 import Splash from './pages/Splash.jsx'
+import TripPlanner from './pages/TripPlanner.jsx'
 import Daftar from './pages/auth/Daftar.jsx'
 import LupaPassword from './pages/auth/LupaPassword.jsx'
 import Masuk from './pages/auth/Masuk.jsx'
@@ -24,7 +25,7 @@ export const router = createBrowserRouter([
   { path: 'reset-password', element: <ResetPassword /> },
   // Splash sambutan, otomatis sekali untuk tamu baru (lihat Index.jsx).
   { path: 'selamat-datang', element: <Splash /> },
-  // Tujuan menu Beranda; yang belum jadi memakai Segera (T-109, dst.).
+  // Tujuan menu Beranda; yang belum jadi memakai Segera.
   // Terbuka untuk tamu (ARCHITECTURE §4) …
   { path: 'navigasi', element: <Navigasi />, errorElement: <NotFound /> },
   { path: 'lalu-lintas', element: <Segera title="Live Traffic Information" /> },
@@ -35,7 +36,7 @@ export const router = createBrowserRouter([
     element: <RequireAuth />,
     errorElement: <NotFound />,
     children: [
-      { path: 'trip-planner', element: <Segera title="Trip Planner" /> },
+      { path: 'trip-planner', element: <TripPlanner /> },
       { path: 'rewards', element: <Segera title="Rewards" /> },
       { path: 'akun', element: <Segera title="Akun" account /> },
     ],

@@ -235,7 +235,9 @@ void main() {
 
   testWidgets('Play: panduan langkah maju-mundur lalu selesai', (tester) async {
     final (state, _) = await _pump(tester, ke: const LatLng(3.5855, 98.6747));
-    expect(find.text('Travellers Suites'), findsOneWidget);
+    // Nama tujuan di lembar rute + di kolom cari.
+    expect(find.text('Travellers Suites'), findsNWidgets(2));
+    expect(find.widgetWithText(TextField, 'Travellers Suites'), findsOneWidget);
 
     await _tap(tester, find.text('Play'));
     expect(find.text('Langkah 1 dari 3'), findsOneWidget);

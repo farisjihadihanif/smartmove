@@ -13,6 +13,7 @@ import '../auth/login_screen.dart';
 import '../auth/register_screen.dart';
 import '../coming_soon_screen.dart';
 import '../navigation/navigation_screen.dart';
+import '../trip/trip_planner_screen.dart';
 import 'notification_sheet.dart';
 
 /// Beranda (mockup hal. 3): sapaan + jam Medan, lonceng, cari, 4 menu utama,
@@ -149,9 +150,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void _open(String title, {String? query}) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => title == 'Smart Navigation'
-            ? NavigationScreen(initialQuery: query)
-            : ComingSoonScreen(title: title),
+        builder: (_) => switch (title) {
+          'Smart Navigation' => NavigationScreen(initialQuery: query),
+          'Trip Planner' => const TripPlannerScreen(),
+          _ => ComingSoonScreen(title: title),
+        },
       ),
     );
   }
