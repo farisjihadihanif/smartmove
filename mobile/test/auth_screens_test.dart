@@ -59,6 +59,14 @@ Future<void> passSplash(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
+/// Lewati Splash ke Beranda tamu, lalu buka Member Login lewat tombol Masuk.
+Future<void> openLogin(WidgetTester tester) async {
+  await passSplash(tester);
+  await settleApi(tester);
+  await tester.tap(find.widgetWithText(FilledButton, 'Masuk').first);
+  await tester.pumpAndSettle();
+}
+
 /// Tunggu request API palsu selesai lalu gambar ulang.
 Future<void> settleApi(WidgetTester tester) async {
   await tester.runAsync(() => Future<void>.delayed(Duration.zero));
@@ -70,7 +78,7 @@ void main() {
   setUpAll(preloadFonts);
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
-  testWidgets('Splash menampilkan logo & 4 fitur, lalu ke Member Login', (
+  testWidgets('Splash menampilkan logo & 4 fitur, lalu Beranda tamu', (
     tester,
   ) async {
     await pumpApp(tester, (_) async => _json({'user': null}));
@@ -82,6 +90,14 @@ void main() {
     expect(tester.takeException(), isNull);
 
     await passSplash(tester);
+    await settleApi(tester);
+    // Tamu: tanpa lonceng, ada ajakan masuk.
+    expect(find.bySemanticsLabel(RegExp('^Notifikasi')), findsNothing);
+    expect(find.text('Simpan perjalanan & kumpulkan poin'), findsOneWidget);
+    expect(find.text('Member Login'), findsNothing);
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Masuk').first);
+    await tester.pumpAndSettle();
     expect(find.text('Member Login'), findsOneWidget);
     expect(find.text('Ingat saya'), findsOneWidget);
     expect(find.text('Lupa password?'), findsOneWidget);
@@ -99,11 +115,11 @@ void main() {
     tester,
   ) async {
     var calls = 0;
-    await pumpApp(tester, (_) async {
-      calls++;
+    await pumpApp(tester, (req) async {
+      if (req.url.path.startsWith('/api/auth/login')) calls++;
       return _json({});
     });
-    await passSplash(tester);
+    await openLogin(tester);
     await tester.tap(find.text('Masuk'));
     await tester.pump();
     expect(find.text('Isi username/email dan password dulu.'), findsOneWidget);
@@ -117,7 +133,7 @@ void main() {
       }
       return _json({'user': null});
     });
-    await passSplash(tester);
+    await openLogin(tester);
     await tester.enterText(find.byType(TextField).at(0), 'budi');
     await tester.enterText(find.byType(TextField).at(1), 'salahsalah');
     await tester.tap(find.text('Masuk'));
@@ -137,7 +153,7 @@ void main() {
       }
       return _json({'user': null});
     });
-    await passSplash(tester);
+    await openLogin(tester);
     await tester.enterText(find.byType(TextField).at(0), ' budi ');
     await tester.enterText(find.byType(TextField).at(1), 'rahasia123');
     await tester.tap(find.text('Masuk'));
@@ -159,7 +175,7 @@ void main() {
       }
       return _json({'user': null});
     });
-    await passSplash(tester);
+    await openLogin(tester);
     await tester.tap(find.text('Ingat saya'));
     await tester.enterText(find.byType(TextField).at(0), 'budi');
     await tester.enterText(find.byType(TextField).at(1), 'rahasia123');
@@ -181,7 +197,7 @@ void main() {
       }
       return _json({'user': null});
     });
-    await passSplash(tester);
+    await openLogin(tester);
     await tester.tap(find.text('Buat akun'));
     await tester.pumpAndSettle();
     expect(find.widgetWithText(FilledButton, 'Buat akun'), findsOneWidget);
@@ -224,7 +240,7 @@ void main() {
       }
       return _json({'user': null});
     });
-    await passSplash(tester);
+    await openLogin(tester);
     await tester.tap(find.text('Lupa password?'));
     await tester.pumpAndSettle();
     expect(find.text('Lupa password'), findsOneWidget);

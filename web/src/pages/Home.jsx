@@ -8,9 +8,11 @@ import {
   Info,
   Map as MapIcon,
   Megaphone,
+  LogIn,
   Search,
   Signpost,
   TrafficCone,
+  UserRound,
 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import logo from '../assets/brand/logo.webp'
@@ -27,6 +29,7 @@ import { jamAtauTanggal, jamWib, salamWib } from '../lib/wib.js'
 
 // Beranda (mockup hal. 3): sapaan + jam Medan, lonceng, cari, 4 menu utama, Trip Planner,
 // lalu ringkasan poin & event yang sedang berlangsung (data GET /home, API_SPECS §5).
+// Terbuka untuk tamu (ARCHITECTURE §4): sapaan tanpa nama, tanpa lonceng & poin, ada tombol Masuk.
 
 const MENU = [
   { to: '/navigasi', label: 'Smart Navigation', icon: MapIcon },
@@ -95,6 +98,7 @@ export default function Home() {
   }, [load])
 
   const now = useServerNow(offset)
+  const tamu = !user
   const nama = user?.namaLengkap || user?.username || ''
   const notifikasi = data?.notifikasi ?? []
   const unread = countUnread(notifikasi, lastSeen)
@@ -126,7 +130,7 @@ export default function Home() {
             </Link>
             <div className="flex items-center gap-3">
               <TopNav />
-              <NotificationButton unread={unread} onClick={openNotifications} />
+              {tamu ? <SignInButton /> : <NotificationButton unread={unread} onClick={openNotifications} />}
             </div>
           </div>
 
@@ -146,7 +150,11 @@ export default function Home() {
                 )}
               </h1>
             </div>
-            <NotificationButton unread={unread} onClick={openNotifications} className="lg:hidden" />
+            {tamu ? (
+              <SignInButton className="lg:hidden" />
+            ) : (
+              <NotificationButton unread={unread} onClick={openNotifications} className="lg:hidden" />
+            )}
           </div>
 
           <SearchField
@@ -181,7 +189,7 @@ export default function Home() {
           </div>
 
           <aside className="mt-6 flex flex-col gap-6 lg:mt-0" aria-label="Ringkasan hari ini">
-            <PointsLink poin={data?.poin} loading={!data && !error} />
+            {tamu ? <GuestCard /> : <PointsLink poin={data?.poin} loading={!data && !error} />}
             {data?.events?.length > 0 && <OngoingEvents events={data.events} now={now} />}
           </aside>
         </div>
@@ -200,7 +208,56 @@ export default function Home() {
   )
 }
 
+function SignInButton({ className = '' }) {
+  return (
+    <Link
+      to="/masuk"
+      className={`flex min-h-touch shrink-0 items-center gap-2 rounded-full bg-login-button px-5 text-[15px] font-semibold text-white shadow-[0_6px_16px_-6px_rgb(115_36_169/0.8)] transition hover:brightness-110 ${className}`}
+    >
+      <LogIn size={18} aria-hidden="true" />
+      Masuk
+    </Link>
+  )
+}
+
+/** Pengganti ringkasan poin untuk tamu: ajakan masuk/daftar. */
+function GuestCard() {
+  return (
+    <section className="rounded-[1.5rem] bg-white px-5 py-5 ring-1 ring-ink/[0.08] lg:px-6 lg:py-6">
+      <h2 className="font-serif text-xl leading-snug">Simpan perjalanan & kumpulkan poin</h2>
+      <p className="mt-1.5 text-[15px] leading-relaxed text-ink/70">
+        Masuk untuk memakai Trip Planner, Rewards, dan pembayaran tiket.
+      </p>
+      <div className="mt-4 flex gap-2">
+        <Link
+          to="/masuk"
+          className="flex min-h-touch flex-1 items-center justify-center rounded-full bg-login-button px-5 text-[15px] font-semibold text-white transition hover:brightness-110"
+        >
+          Masuk
+        </Link>
+        <Link
+          to="/daftar"
+          className="flex min-h-touch flex-1 items-center justify-center rounded-full px-5 text-[15px] font-semibold text-login-button ring-2 ring-inset ring-login-button transition hover:bg-login-button/5"
+        >
+          Buat akun
+        </Link>
+      </div>
+    </section>
+  )
+}
+
 function Avatar({ user }) {
+  if (!user) {
+    return (
+      <Link
+        to="/masuk"
+        aria-label="Masuk"
+        className="grid size-14 shrink-0 place-items-center rounded-full bg-login-avatar text-white shadow-[0_4px_12px_rgb(65_57_111/0.3)] ring-[3px] ring-white lg:size-24"
+      >
+        <UserRound className="size-7 lg:size-11" aria-hidden="true" />
+      </Link>
+    )
+  }
   const foto = fileUrl(user?.foto)
   const inisial = (user?.namaLengkap || user?.username || '?').trim().charAt(0).toUpperCase()
   return (

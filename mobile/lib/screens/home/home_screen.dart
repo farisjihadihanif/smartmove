@@ -9,12 +9,16 @@ import '../../state.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
 import '../../wib.dart';
+import '../auth/login_screen.dart';
+import '../auth/register_screen.dart';
 import '../coming_soon_screen.dart';
 import 'notification_sheet.dart';
 
 /// Beranda (mockup hal. 3): sapaan + jam Medan, lonceng, cari, 4 menu utama,
 /// Trip Planner, lalu ringkasan poin & event yang sedang berlangsung.
 /// Data dari `GET /home` (API_SPECS §5). Sama dengan web/src/pages/Home.jsx.
+/// Terbuka untuk tamu (ARCHITECTURE §4): sapaan tanpa nama, tanpa lonceng &
+/// poin, ada tombol Masuk; Trip Planner, Rewards, Akun meminta login.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, this.seenStore = const NotifSeenStore()});
 
@@ -150,6 +154,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final user = AppScope.of(context).user;
+    final tamu = user == null;
     final nama = (user?['namaLengkap'] ?? user?['username'] ?? '').toString();
     final now = _now;
     final salam =
@@ -173,7 +178,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             jam: jamWib(now),
             unread: unread,
             onNotifications: _openNotifications,
-            onAvatar: () => _open('Akun'),
+            tamu: tamu,
+            onSignIn: () => pushLogin(context),
+            onAvatar: tamu ? () => pushLogin(context) : () => _open('Akun'),
             onSearch: (_) => _open('Smart Navigation'),
           ),
           Padding(
@@ -192,13 +199,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ],
                 _MenuPanel(onOpen: _open),
                 const SizedBox(height: AppSizes.s6),
-                _TripPlannerCard(onTap: () => _open('Trip Planner')),
-                const SizedBox(height: AppSizes.s6),
-                _PointsTile(
-                  poin: poin,
-                  loading: _data == null && _error == null,
-                  onTap: () => _open('Rewards'),
+                _TripPlannerCard(
+                  onTap: tamu
+                      ? () => pushLogin(context)
+                      : () => _open('Trip Planner'),
                 ),
+                const SizedBox(height: AppSizes.s6),
+                if (tamu)
+                  const _GuestCard()
+                else
+                  _PointsTile(
+                    poin: poin,
+                    loading: _data == null && _error == null,
+                    onTap: () => _open('Rewards'),
+                  ),
                 if (events.isNotEmpty) ...[
                   const SizedBox(height: AppSizes.s6),
                   _OngoingEvents(events: events, now: now),
@@ -220,6 +234,8 @@ class _Header extends StatelessWidget {
     required this.jam,
     required this.unread,
     required this.onNotifications,
+    required this.tamu,
+    required this.onSignIn,
     required this.onAvatar,
     required this.onSearch,
   });
@@ -228,6 +244,8 @@ class _Header extends StatelessWidget {
   final String nama;
   final String salam;
   final String jam;
+  final bool tamu;
+  final VoidCallback onSignIn;
   final int unread;
   final VoidCallback onNotifications;
   final VoidCallback onAvatar;
@@ -293,10 +311,23 @@ class _Header extends StatelessWidget {
                       ],
                     ),
                   ),
-                  NotificationButton(
-                    unread: unread,
-                    onPressed: onNotifications,
-                  ),
+                  if (tamu)
+                    FilledButton.icon(
+                      onPressed: onSignIn,
+                      icon: const Icon(Icons.login_rounded, size: 18),
+                      label: const Text('Masuk'),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSizes.s4 + AppSizes.s1,
+                        ),
+                        textStyle: sans(size: 15, weight: FontWeight.w600),
+                      ),
+                    )
+                  else
+                    NotificationButton(
+                      unread: unread,
+                      onPressed: onNotifications,
+                    ),
                 ],
               ),
               const SizedBox(height: AppSizes.s4 + AppSizes.s1),
@@ -335,7 +366,7 @@ class _Avatar extends StatelessWidget {
 
     return Semantics(
       button: true,
-      label: 'Akun',
+      label: user == null ? 'Masuk' : 'Akun',
       excludeSemantics: true,
       child: GestureDetector(
         onTap: onTap,
@@ -356,7 +387,13 @@ class _Avatar extends StatelessWidget {
               ),
             ],
           ),
-          child: url != null
+          child: user == null
+              ? const Icon(
+                  Icons.person_outline_rounded,
+                  size: 30,
+                  color: AppColors.white,
+                )
+              : url != null
               ? Image.network(
                   url,
                   width: 56,
@@ -521,6 +558,73 @@ class _TripPlannerCard extends StatelessWidget {
 }
 
 const _amber = Color(0xFF9A5B00);
+
+/// Pengganti ringkasan poin untuk tamu: ajakan masuk/daftar.
+class _GuestCard extends StatelessWidget {
+  const _GuestCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSizes.s4 + AppSizes.s1),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.ink.withValues(alpha: 0.08)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Semantics(
+            header: true,
+            child: Text(
+              'Simpan perjalanan & kumpulkan poin',
+              style: titleSerif(size: 20),
+            ),
+          ),
+          const SizedBox(height: AppSizes.s1 + 2),
+          Text(
+            'Masuk untuk memakai Trip Planner, Rewards, dan pembayaran tiket.',
+            style: sans(
+              size: 15,
+              height: 1.5,
+              color: AppColors.ink.withValues(alpha: 0.7),
+            ),
+          ),
+          const SizedBox(height: AppSizes.s4),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton(
+                  onPressed: () => pushLogin(context),
+                  child: const Text('Masuk'),
+                ),
+              ),
+              const SizedBox(width: AppSizes.s2),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const RegisterScreen(),
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.loginButton,
+                    side: const BorderSide(
+                      color: AppColors.loginButton,
+                      width: 2,
+                    ),
+                  ),
+                  child: const Text('Buat akun'),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class _PointsTile extends StatelessWidget {
   const _PointsTile({

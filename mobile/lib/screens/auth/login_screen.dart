@@ -7,6 +7,12 @@ import 'auth_shell.dart';
 import 'forgot_password_screen.dart';
 import 'register_screen.dart';
 
+/// Buka Member Login di atas layar sekarang (tamu menekan Masuk atau fitur
+/// yang wajib login). Setelah berhasil, tumpukan kembali ke Beranda.
+Future<void> pushLogin(BuildContext context) =>
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (_) => const LoginScreen()));
+
 /// Member Login (mockup hal. 2).
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -41,6 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _error = null;
     });
     final state = AppScope.read(context);
+    final nav = Navigator.of(context);
     try {
       final res = await state.api.post('/auth/login', {
         'username': id,
@@ -51,6 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Map<String, dynamic>.from(res as Map),
         remember: _remember,
       );
+      nav.popUntil((r) => r.isFirst);
     } on ApiException catch (e) {
       if (mounted) {
         setState(() {
@@ -65,6 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return AuthShell(
       title: 'Member Login',
+      showBack: ModalRoute.of(context)?.canPop ?? false,
       subtitle: 'Masuk untuk melanjutkan rencana perjalananmu di Medan.',
       footer: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

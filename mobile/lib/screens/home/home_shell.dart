@@ -1,6 +1,8 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../state.dart';
 import '../../theme.dart';
+import '../auth/login_screen.dart';
 import '../coming_soon_screen.dart';
 import 'home_screen.dart';
 
@@ -29,7 +31,14 @@ class _HomeShellState extends State<HomeShell> {
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
-        onDestinationSelected: (i) => setState(() => _index = i),
+        onDestinationSelected: (i) {
+          // Rewards & Akun wajib login: tamu diarahkan ke Member Login.
+          if (i > 0 && !AppScope.read(context).isSignedIn) {
+            pushLogin(context);
+            return;
+          }
+          setState(() => _index = i);
+        },
         height: 72,
         labelTextStyle: WidgetStateProperty.resolveWith(
           (s) => s.contains(WidgetState.selected)

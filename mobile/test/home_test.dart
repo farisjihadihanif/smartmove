@@ -73,16 +73,25 @@ Map<String, dynamic> _home() => {
   ],
 };
 
-Future<void> pumpHome(WidgetTester tester) async {
+/// Respons tamu (API_SPECS §5): tanpa nama, poin null, tanpa notifikasi pribadi.
+Map<String, dynamic> _homeTamu() => {
+  ..._home(),
+  'sapaan': {..._home()['sapaan'] as Map, 'teks': 'Hallo! Selamat pagi'},
+  'poin': null,
+  'notifikasi': <Object>[],
+};
+
+Future<void> pumpHome(WidgetTester tester, {bool tamu = false}) async {
   tester.view.physicalSize = const Size(360, 760);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   final api = ApiClient(
     client: MockClient(
-      (req) async =>
-          req.url.path == '/api/home' ? _json(_home()) : _json({'user': _user}),
+      (req) async => req.url.path == '/api/home'
+          ? _json(tamu ? _homeTamu() : _home())
+          : _json({'user': _user}),
     ),
-    tokens: MemoryTokenStore('jwt'),
+    tokens: MemoryTokenStore(tamu ? null : 'jwt'),
     baseUrl: 'http://api.test/api',
   );
   final state = AppState(api);
@@ -184,6 +193,39 @@ void main() {
     await tester.tap(find.byTooltip('Tutup'));
     await tester.pumpAndSettle();
     expect(find.bySemanticsLabel('Notifikasi'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('tamu: Beranda terbuka tanpa nama, poin, & lonceng; '
+      'Rewards/Akun/Trip Planner minta login', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    await pumpHome(tester, tamu: true);
+    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(find.text('Hallo! Selamat pagi'), findsOneWidget);
+    expect(find.text('Sarah Lubis'), findsNothing);
+    expect(find.bySemanticsLabel(RegExp('^Notifikasi')), findsNothing);
+    expect(find.widgetWithText(FilledButton, 'Masuk'), findsWidgets);
+    expect(find.text('70 poin'), findsNothing);
+    expect(find.text('Smart Navigation'), findsOneWidget);
+
+    // Menu umum tetap terbuka untuk tamu.
+    await tester.tap(find.text('Smart Navigation'));
+    await tester.pumpAndSettle();
+    expect(find.text('Segera hadir'), findsOneWidget);
+    await tester.tap(find.byTooltip('Kembali'));
+    await tester.pumpAndSettle();
+
+    for (final target in [find.text('Rewards'), find.text('Akun')]) {
+      await tester.tap(target);
+      await tester.pumpAndSettle();
+      expect(find.text('Member Login'), findsOneWidget);
+      await tester.tap(find.byTooltip('Kembali'));
+      await tester.pumpAndSettle();
+    }
+
+    await tester.tap(find.bySemanticsLabel(RegExp('^Trip Planner')));
+    await tester.pumpAndSettle();
+    expect(find.text('Member Login'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

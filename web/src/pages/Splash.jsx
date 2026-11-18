@@ -1,6 +1,8 @@
+import { useEffect } from 'react'
 import { Megaphone, Route, Ticket, TrafficCone } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import logo from '../assets/brand/logo.webp'
+import { markWelcomeSeen } from '../lib/welcome.js'
 
 // Fitur unggulan, teks dari poster (mockup hal. 1); ikon garis menggantikan centang clip-art.
 const FITUR = [
@@ -33,6 +35,7 @@ function Leaf({ className }) {
 // Splash web = halaman sambutan untuk tamu (identitas mockup hal. 1, dimodernkan).
 // Ponsel: satu kolom; desktop: judul + tombol di kiri, panel fitur olive di kanan.
 export default function Splash() {
+  useEffect(markWelcomeSeen, [])
   return (
     <div className="relative min-h-dvh overflow-hidden bg-splash-bg text-olive">
       <Leaf className="pointer-events-none absolute -left-12 top-24 w-36 -rotate-12 text-leaf lg:-bottom-10 lg:left-[1%] lg:top-auto lg:w-48" />
@@ -82,6 +85,12 @@ export default function Splash() {
             className="flex min-h-[3.25rem] flex-1 items-center justify-center rounded-full border-2 border-olive px-8 text-base font-semibold transition hover:bg-olive/10 lg:flex-none"
           >
             Buat akun
+          </Link>
+          <Link
+            to="/"
+            className="flex min-h-[3.25rem] items-center justify-center rounded-full px-6 text-base font-semibold underline decoration-olive/40 underline-offset-4 transition hover:decoration-olive lg:flex-none"
+          >
+            Lihat Beranda dulu
           </Link>
         </div>
       </main>

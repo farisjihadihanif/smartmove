@@ -4,7 +4,6 @@ import 'package:material_ui/material_ui.dart';
 
 import 'api.dart';
 import 'fonts.dart';
-import 'screens/auth/login_screen.dart';
 import 'screens/home/home_shell.dart';
 import 'screens/splash_screen.dart';
 import 'state.dart';
@@ -44,8 +43,8 @@ class SmartMoveApp extends StatelessWidget {
 }
 
 /// Splash tampil sampai durasi minimal lewat dan sesi selesai dipulihkan,
-/// lalu: belum masuk → Member Login, sudah masuk → Beranda.
-/// Saat keluar / sesi berakhir (401) otomatis kembali ke Member Login.
+/// lalu Beranda (tamu atau pengguna). Member Login dibuka dari tombol Masuk
+/// ([pushLogin]); saat keluar / sesi berakhir (401) kembali ke Beranda tamu.
 class RootGate extends StatefulWidget {
   const RootGate({super.key, required this.splashDuration});
 
@@ -79,10 +78,10 @@ class _RootGateState extends State<RootGate> {
     final Widget child;
     if (!_splashDone || status == AuthStatus.unknown) {
       child = const SplashScreen(key: ValueKey('splash'));
-    } else if (status == AuthStatus.signedIn) {
-      child = const HomeShell(key: ValueKey('home'));
     } else {
-      child = const LoginScreen(key: ValueKey('login'));
+      // Beranda terbuka untuk tamu (ARCHITECTURE §4); key berganti saat
+      // masuk/keluar agar data & lonceng dimuat ulang.
+      child = HomeShell(key: ValueKey('home-${status.name}'));
     }
     return AnimatedSwitcher(
       duration: MediaQuery.disableAnimationsOf(context)
