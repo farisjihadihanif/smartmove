@@ -31,7 +31,7 @@ abstract class TokenStore {
 
 class SecureTokenStore implements TokenStore {
   SecureTokenStore([FlutterSecureStorage? storage])
-      : _storage = storage ?? const FlutterSecureStorage();
+    : _storage = storage ?? const FlutterSecureStorage();
 
   static const _key = 'auth_token';
   final FlutterSecureStorage _storage;
@@ -80,9 +80,9 @@ class ApiClient {
     TokenStore? tokens,
     String? baseUrl,
     this.timeout = const Duration(seconds: 20),
-  })  : _http = client ?? http.Client(),
-        tokens = tokens ?? SecureTokenStore(),
-        _base = baseUrl ?? apiBase;
+  }) : _http = client ?? http.Client(),
+       tokens = tokens ?? SecureTokenStore(),
+       _base = baseUrl ?? apiBase;
 
   final http.Client _http;
   final TokenStore tokens;
