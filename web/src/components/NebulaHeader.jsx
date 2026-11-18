@@ -6,6 +6,7 @@ import { Bell } from 'lucide-react'
  * - `title`: judul layar (Open Sans tebal) atau sapaan (`serif`, Bree Serif – Beranda).
  * - `unread` + `onNotifications`: tombol lonceng kanan dengan lencana jumlah.
  * - `children`: isi di bawah judul (SearchField, PillToggle, …).
+ * - `row`: di desktop (lg) judul dan isi berjajar satu baris (layar peta: Smart Navigation, Live Traffic).
  */
 export default function NebulaHeader({
   leading,
@@ -14,13 +15,15 @@ export default function NebulaHeader({
   unread = 0,
   onNotifications,
   children,
+  row = false,
   className = '',
 }) {
   return (
     <header
       className={`bg-lilac-wash relative z-10 rounded-b-[1.75rem] px-4 pb-5 pt-4 text-ink shadow-[0_8px_20px_-8px_rgb(65_57_111/0.5)] ${className}`}
     >
-      <div className="flex min-h-touch items-center gap-3">
+      <div className={row ? 'lg:mx-auto lg:flex lg:max-w-7xl lg:items-center lg:gap-8 lg:px-6' : undefined}>
+      <div className={`flex min-h-touch items-center gap-3 ${row ? 'lg:shrink-0' : ''}`}>
         {leading && (
           <div className="grid size-12 shrink-0 place-items-center overflow-hidden rounded-full bg-white text-ink-violet shadow-[0_2px_8px_rgb(65_57_111/0.25)] ring-2 ring-white">
             {leading}
@@ -37,7 +40,12 @@ export default function NebulaHeader({
         </h1>
         {onNotifications && <NotificationButton unread={unread} onClick={onNotifications} />}
       </div>
-      {children && <div className="mt-4 flex flex-col gap-4">{children}</div>}
+      {children && (
+        <div className={`mt-4 flex flex-col gap-4 ${row ? 'lg:mt-0 lg:flex-1 lg:flex-row lg:items-center lg:gap-6' : ''}`}>
+          {children}
+        </div>
+      )}
+      </div>
     </header>
   )
 }

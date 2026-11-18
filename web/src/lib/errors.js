@@ -4,6 +4,8 @@ const BY_CODE = {
   DI_LUAR_WILAYAH: 'SmartMove baru melayani Medan dan sekitarnya.',
   LAYANAN_PETA_GAGAL: 'Rute belum bisa dihitung. Coba lagi atau buka di OpenStreetMap.',
   POIN_KURANG: 'Poinmu belum cukup untuk voucher ini.',
+  RUTE_TIDAK_ADA: 'Tidak ada jalan untuk moda ini di antara kedua titik. Coba moda lain atau geser titiknya.',
+  FOTO_JALAN_NONAKTIF: 'Foto jalan belum tersedia saat ini.',
 }
 
 /** Ambil pesan untuk galat API (ApiError) atau galat apa pun. */

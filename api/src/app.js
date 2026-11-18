@@ -13,6 +13,7 @@ import { usersRouter } from './routes/users.js';
 import { homeRouter } from './routes/home.js';
 import { placesRouter } from './routes/places.js';
 import { routesRouter } from './routes/routes.js';
+import { streetviewRouter } from './routes/streetview.js';
 
 export function createApp(opts = {}) {
   const cfg = { ...config, ...opts };
@@ -65,6 +66,7 @@ export function createApp(opts = {}) {
   });
   api.use('/places', mapLimit, placesRouter(cfg));
   api.use('/routes', mapLimit, routesRouter(cfg));
+  api.use('/streetview', mapLimit, streetviewRouter(cfg));
 
   app.use('/api', api);
   app.use(notFound);

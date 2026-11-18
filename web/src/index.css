@@ -159,6 +159,16 @@
 .map-tucked .leaflet-container .leaflet-bottom {
   bottom: 1.75rem;
 }
+.map-tucked .leaflet-container .leaflet-top {
+  top: 1.75rem;
+}
+.map-tucked .leaflet-container .leaflet-top .leaflet-control-attribution {
+  border-radius: 0 0 0 6px;
+}
+.leaflet-container .nav-pin {
+  background: none;
+  border: 0;
+}
 .leaflet-container .leaflet-control-attribution a {
   color: var(--color-ink-violet);
 }

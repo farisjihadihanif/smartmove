@@ -46,6 +46,9 @@ const config = {
   osrmUrlFoot: env.OSRM_URL_FOOT,
   nominatimUrl: env.NOMINATIM_URL || 'https://nominatim.openstreetmap.org',
   nominatimEmail: env.NOMINATIM_EMAIL,
+  // Foto jalan (Street view). Token hanya di server.
+  mapillaryToken: env.MAPILLARY_TOKEN,
+  mapillaryUrl: env.MAPILLARY_URL,
   // Kebijakan OSM: User-Agent yang mengenali aplikasi + alamat kontak.
   mapUserAgent: `SmartMoveMedan/1.0 (+${env.APP_URL || 'http://localhost:4200'})`,
   // console | smtp (lihat services/mail.js). Diabaikan di produksi.

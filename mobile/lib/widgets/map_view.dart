@@ -27,6 +27,7 @@ class MapView extends StatelessWidget {
     this.tucked = false,
     this.children = const [],
     this.onTap,
+    this.onMapReady,
     this.tileProvider,
   });
 
@@ -36,6 +37,9 @@ class MapView extends StatelessWidget {
   final bool tucked;
   final List<Widget> children;
   final void Function(TapPosition, LatLng)? onTap;
+
+  /// Dipanggil sekali saat peta siap; [controller] baru boleh dipakai sesudahnya.
+  final VoidCallback? onMapReady;
 
   /// Untuk tes: ganti penyedia tile agar tidak memanggil jaringan.
   final TileProvider? tileProvider;
@@ -49,6 +53,7 @@ class MapView extends StatelessWidget {
         initialZoom: zoom,
         maxZoom: 19,
         onTap: onTap,
+        onMapReady: onMapReady,
       ),
       children: [
         TileLayer(

@@ -12,6 +12,7 @@ import '../../wib.dart';
 import '../auth/login_screen.dart';
 import '../auth/register_screen.dart';
 import '../coming_soon_screen.dart';
+import '../navigation/navigation_screen.dart';
 import 'notification_sheet.dart';
 
 /// Beranda (mockup hal. 3): sapaan + jam Medan, lonceng, cari, 4 menu utama,
@@ -145,9 +146,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _ => 'Live Traffic Information',
   };
 
-  void _open(String title) {
+  void _open(String title, {String? query}) {
     Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => ComingSoonScreen(title: title)),
+      MaterialPageRoute<void>(
+        builder: (_) => title == 'Smart Navigation'
+            ? NavigationScreen(initialQuery: query)
+            : ComingSoonScreen(title: title),
+      ),
     );
   }
 
@@ -181,7 +186,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             tamu: tamu,
             onSignIn: () => pushLogin(context),
             onAvatar: tamu ? () => pushLogin(context) : () => _open('Akun'),
-            onSearch: (_) => _open('Smart Navigation'),
+            onSearch: (q) => _open('Smart Navigation', query: q),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(

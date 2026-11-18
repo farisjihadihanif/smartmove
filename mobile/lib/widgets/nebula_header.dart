@@ -64,6 +64,7 @@ class NebulaHeader extends StatelessWidget {
             bottomPadding,
           ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               ConstrainedBox(

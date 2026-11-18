@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom'
 import AppLayout from './components/AppLayout.jsx'
 import { GuestOnly, RequireAuth } from './lib/auth.jsx'
 import Index from './pages/Index.jsx'
+import Navigasi from './pages/Navigasi.jsx'
 import NotFound from './pages/NotFound.jsx'
 import Segera from './pages/Segera.jsx'
 import Splash from './pages/Splash.jsx'
@@ -23,9 +24,9 @@ export const router = createBrowserRouter([
   { path: 'reset-password', element: <ResetPassword /> },
   // Splash sambutan, otomatis sekali untuk tamu baru (lihat Index.jsx).
   { path: 'selamat-datang', element: <Splash /> },
-  // Tujuan menu Beranda; diganti layar sungguhan di T-107, T-109, dst.
+  // Tujuan menu Beranda; yang belum jadi memakai Segera (T-109, dst.).
   // Terbuka untuk tamu (ARCHITECTURE §4) …
-  { path: 'navigasi', element: <Segera title="Smart Navigation" /> },
+  { path: 'navigasi', element: <Navigasi />, errorElement: <NotFound /> },
   { path: 'lalu-lintas', element: <Segera title="Live Traffic Information" /> },
   { path: 'pembayaran', element: <Segera title="Digital Payment" /> },
   { path: 'kampanye', element: <Segera title="Traffic Mitigation Campaign" /> },

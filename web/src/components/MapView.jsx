@@ -9,13 +9,15 @@ const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">Op
 /**
  * Peta OSM + atribusi wajib. `children` = lapisan react-leaflet (Polyline, Marker, …).
  * `tucked`: peta diselipkan 28 px di bawah header & bar bawah yang bersudut bulat (pengganti
- * "tutup atas ungu" mockup hal. 4 & 6); atribusi OSM ikut naik agar tetap terlihat.
+ * "tutup atas ungu" mockup hal. 4 & 6); atribusi OSM ikut naik/turun agar tetap terlihat.
+ * `attribution`: posisi atribusi (`bottomright` bawaan; `topright` bila bawah tertutup lembar bawah).
  */
 export default function MapView({
   center = MEDAN_CENTER,
   zoom = 14,
   tucked = false,
   label = 'Peta',
+  attribution = 'bottomright',
   className = '',
   children,
   ...rest
@@ -32,7 +34,7 @@ export default function MapView({
           {...rest}
         >
           {/* Tanpa prefiks "Leaflet" agar teks atribusi OSM muat utuh di layar 360 px. */}
-          <AttributionControl position="bottomright" prefix={false} />
+          <AttributionControl position={attribution} prefix={false} />
           <TileLayer url={TILE_URL} attribution={ATTRIBUTION} maxZoom={19} />
           {children}
         </MapContainer>

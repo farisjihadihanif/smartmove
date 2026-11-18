@@ -9,6 +9,7 @@ import 'package:smartmove/api.dart';
 import 'package:smartmove/main.dart';
 import 'package:smartmove/notifications.dart';
 import 'package:smartmove/screens/home/home_screen.dart';
+import 'package:smartmove/screens/navigation/navigation_screen.dart';
 import 'package:smartmove/state.dart';
 import 'package:smartmove/wib.dart';
 
@@ -211,7 +212,8 @@ void main() {
     // Menu umum tetap terbuka untuk tamu.
     await tester.tap(find.text('Smart Navigation'));
     await tester.pumpAndSettle();
-    expect(find.text('Segera hadir'), findsOneWidget);
+    expect(find.byType(NavigationScreen), findsOneWidget);
+    expect(find.text('Mau ke mana?'), findsOneWidget);
     await tester.tap(find.byTooltip('Kembali'));
     await tester.pumpAndSettle();
 
