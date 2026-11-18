@@ -1,6 +1,10 @@
 // Klien API web. Autentikasi lewat cookie httpOnly (credentials: 'include').
 // Alamat dasar: VITE_API_URL (bila API beda domain) atau '' (dev via proxy Vite / satu domain).
-const BASE = `${(import.meta.env.VITE_API_URL || '').replace(/\/+$/, '')}/api`
+const ORIGIN = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '')
+const BASE = `${ORIGIN}/api`
+
+/** Alamat penuh berkas dari API (mis. foto profil `/uploads/avatars/…`). */
+export const fileUrl = (path) => (!path ? null : /^https?:/.test(path) ? path : `${ORIGIN}${path}`)
 
 export class ApiError extends Error {
   constructor(status, message, code) {

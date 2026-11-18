@@ -176,3 +176,30 @@
 @keyframes splash-rise {
   from { opacity: 0; transform: translateY(12px); }
 }
+
+/* Butiran halus seperti kilau kartu Trip Planner di mockup hal. 3 (noise SVG, bukan gambar tambahan). */
+@utility grain {
+  isolation: isolate;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.32;
+    mix-blend-mode: soft-light;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+/* Lembar notifikasi: naik dari bawah (ponsel) / turun sedikit (desktop) sebagai jawaban ketukan lonceng. */
+@media (prefers-reduced-motion: no-preference) {
+  .sheet-fade { animation: sheet-fade 200ms ease-out both; }
+  .sheet-rise { animation: sheet-rise 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  @media (min-width: 64rem) {
+    .sheet-rise { animation-name: sheet-drop; }
+  }
+}
+@keyframes sheet-fade { from { opacity: 0; } }
+@keyframes sheet-rise { from { transform: translateY(100%); } }
+@keyframes sheet-drop { from { opacity: 0; transform: translateY(-8px) scale(0.98); } }

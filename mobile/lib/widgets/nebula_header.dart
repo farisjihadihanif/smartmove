@@ -7,7 +7,7 @@ import '../theme.dart';
 ///
 /// - [leading]: ikon fitur / avatar dalam lingkaran putih.
 /// - [title]: judul layar (Open Sans tebal); [serif] = sapaan Bree Serif (Beranda).
-/// - [unread] + [onNotifications]: tombol amplop dengan lencana jumlah.
+/// - [unread] + [onNotifications]: tombol lonceng dengan lencana jumlah.
 /// - [children]: isi di bawah judul (SearchField, PillToggle, …).
 class NebulaHeader extends StatelessWidget {
   const NebulaHeader({
@@ -101,7 +101,7 @@ class NebulaHeader extends StatelessWidget {
                       ),
                     ),
                     if (onNotifications != null)
-                      _NotificationButton(
+                      NotificationButton(
                         unread: unread,
                         onPressed: onNotifications!,
                       ),
@@ -120,8 +120,13 @@ class NebulaHeader extends StatelessWidget {
   }
 }
 
-class _NotificationButton extends StatelessWidget {
-  const _NotificationButton({required this.unread, required this.onPressed});
+/// Tombol lonceng notifikasi dengan lencana jumlah belum dibaca.
+class NotificationButton extends StatelessWidget {
+  const NotificationButton({
+    super.key,
+    required this.unread,
+    required this.onPressed,
+  });
 
   final int unread;
   final VoidCallback onPressed;
@@ -159,7 +164,7 @@ class _NotificationButton extends StatelessWidget {
                   ],
                 ),
                 child: const Icon(
-                  Icons.mail_outline,
+                  Icons.notifications_none_rounded,
                   size: 20,
                   color: AppColors.ink,
                 ),

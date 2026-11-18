@@ -57,3 +57,12 @@ export function GuestOnly() {
   if (status === 'masuk') return <Navigate to={location.state?.from || '/'} replace />
   return <Outlet />
 }
+
+/** Layar khusus pengguna masuk: tamu diarahkan ke /masuk lalu kembali ke sini. */
+export function RequireAuth() {
+  const { status } = useAuth()
+  const location = useLocation()
+  if (status === 'memuat') return <div className="min-h-dvh bg-surface" aria-busy="true" />
+  if (status === 'tamu') return <Navigate to="/masuk" replace state={{ from: location.pathname + location.search }} />
+  return <Outlet />
+}

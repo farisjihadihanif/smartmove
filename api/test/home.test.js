@@ -106,6 +106,8 @@ describe('GET /api/home', () => {
       ['-10 poin', '+30 poin'],
     );
     assert.equal(poin[1].isi, 'Poin dari perjalanan');
+    // Riwayat poin: muncul = saat dicatat.
+    assert.equal(poin[1].muncul, '2026-11-18T23:00:00.000Z');
   });
 
   test('pengguna tanpa namaLengkap memakai username', async () => {
@@ -129,6 +131,20 @@ describe('GET /api/home', () => {
     assert.equal(res.body.notifikasi[0].jenis, 'event');
     assert.equal(res.body.notifikasi[0].judul, 'Rekayasa arus Gatsu');
     assert.equal(res.body.notifikasi[0].isi, 'Dimulai 10.30 WIB');
+  });
+
+  test('muncul pengingat = 24 jam sebelum mulai, atau saat dibuat bila lebih lambat', async () => {
+    const mulai = new Date(+waktu + 3 * JAM);
+    const lama = new Date(+waktu - 10 * 24 * JAM); // dibuat jauh hari
+    const baru = new Date(waktu - JAM); // dibuat 1 jam lalu, < 24 jam sebelum mulai
+    await Event.collection.insertMany([
+      { judul: 'Lama', isi: 'x', jenis: 'acara', mulai, selesai: new Date(+mulai + JAM), createdAt: lama, updatedAt: lama },
+      { judul: 'Baru', isi: 'x', jenis: 'acara', mulai, selesai: new Date(+mulai + JAM), createdAt: baru, updatedAt: baru },
+    ]);
+    const res = await request(app()).get('/api/home');
+    const byJudul = Object.fromEntries(res.body.notifikasi.map((n) => [n.judul, n.muncul]));
+    assert.equal(byJudul.Lama, new Date(+mulai - 24 * JAM).toISOString());
+    assert.equal(byJudul.Baru, baru.toISOString());
   });
 
   test('rencana perjalanan 24 jam ke depan jadi pengingat, hanya milik sendiri', async () => {

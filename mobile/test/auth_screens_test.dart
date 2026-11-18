@@ -9,6 +9,7 @@ import 'package:smartmove/auth_rules.dart';
 import 'package:smartmove/main.dart';
 import 'package:smartmove/screens/splash_screen.dart';
 import 'package:smartmove/state.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'font_preload.dart';
 
@@ -67,6 +68,7 @@ Future<void> settleApi(WidgetTester tester) async {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(preloadFonts);
+  setUp(() => SharedPreferences.setMockInitialValues({}));
 
   testWidgets('Splash menampilkan logo & 4 fitur, lalu ke Member Login', (
     tester,
@@ -90,7 +92,7 @@ void main() {
   testWidgets('token tersimpan & valid → langsung ke Beranda', (tester) async {
     await pumpApp(tester, (_) async => _json({'user': _user}), token: 'lama');
     await passSplash(tester);
-    expect(find.text('Hallo, Budi Medan!'), findsOneWidget);
+    expect(find.text('Budi Medan'), findsOneWidget);
   });
 
   testWidgets('Masuk: kolom kosong ditolak di klien tanpa memanggil API', (
@@ -143,7 +145,7 @@ void main() {
 
     expect(sent, {'username': 'budi', 'password': 'rahasia123', 'ingat': true});
     expect(await store.read(), 'jwt-1');
-    expect(find.text('Hallo, Budi Medan!'), findsOneWidget);
+    expect(find.text('Budi Medan'), findsOneWidget);
   });
 
   testWidgets('Masuk tanpa "Ingat saya" → token hanya di memori', (
@@ -207,7 +209,7 @@ void main() {
     await settleApi(tester);
     expect(sent['username'], 'budi_medan');
     expect(sent.containsKey('role'), isFalse);
-    expect(find.text('Hallo, Budi Medan!'), findsOneWidget);
+    expect(find.text('Budi Medan'), findsOneWidget);
     expect(find.widgetWithText(FilledButton, 'Buat akun'), findsNothing);
   });
 

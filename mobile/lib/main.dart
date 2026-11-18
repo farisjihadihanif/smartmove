@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import 'api.dart';
 import 'fonts.dart';
 import 'screens/auth/login_screen.dart';
+import 'screens/home/home_shell.dart';
 import 'screens/splash_screen.dart';
 import 'state.dart';
 import 'theme.dart';
@@ -79,7 +80,7 @@ class _RootGateState extends State<RootGate> {
     if (!_splashDone || status == AuthStatus.unknown) {
       child = const SplashScreen(key: ValueKey('splash'));
     } else if (status == AuthStatus.signedIn) {
-      child = const _PlaceholderHome(key: ValueKey('home'));
+      child = const HomeShell(key: ValueKey('home'));
     } else {
       child = const LoginScreen(key: ValueKey('login'));
     }
@@ -88,33 +89,6 @@ class _RootGateState extends State<RootGate> {
           ? Duration.zero
           : const Duration(milliseconds: 350),
       child: child,
-    );
-  }
-}
-
-/// Sementara sampai Beranda dibuat (T-104).
-class _PlaceholderHome extends StatelessWidget {
-  const _PlaceholderHome({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final state = AppScope.of(context);
-    final user = state.user;
-    final name = user?['namaLengkap'] ?? user?['username'] ?? '';
-    return Scaffold(
-      body: Container(
-        decoration: AppTextures.lilacWash,
-        alignment: Alignment.center,
-        padding: const EdgeInsets.all(AppSizes.s6),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Hallo, $name!', style: titleSerif(size: 28)),
-            const SizedBox(height: AppSizes.s4),
-            FilledButton(onPressed: state.signOut, child: const Text('Keluar')),
-          ],
-        ),
-      ),
     );
   }
 }

@@ -1,10 +1,10 @@
-import { Mail } from 'lucide-react'
+import { Bell } from 'lucide-react'
 
 /**
  * Header bertekstur cat air lilac (mockup hal. 3–7), sudut bawah membulat agar isi di bawahnya terasa naik.
  * - `leading`: ikon fitur / avatar di lingkaran kiri.
  * - `title`: judul layar (Open Sans tebal) atau sapaan (`serif`, Bree Serif – Beranda).
- * - `unread` + `onNotifications`: tombol amplop kanan dengan lencana jumlah.
+ * - `unread` + `onNotifications`: tombol lonceng kanan dengan lencana jumlah.
  * - `children`: isi di bawah judul (SearchField, PillToggle, …).
  */
 export default function NebulaHeader({
@@ -42,17 +42,18 @@ export default function NebulaHeader({
   )
 }
 
-function NotificationButton({ unread, onClick }) {
+export function NotificationButton({ unread, onClick, className = '' }) {
   const label = unread > 0 ? `Notifikasi, ${unread} belum dibaca` : 'Notifikasi'
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="relative grid size-touch shrink-0 place-items-center rounded-full"
+      aria-haspopup="dialog"
+      className={`relative grid size-touch shrink-0 place-items-center rounded-full ${className}`}
     >
       <span className="grid size-10 place-items-center rounded-full bg-white/75 shadow-[0_2px_8px_rgb(65_57_111/0.18)] backdrop-blur-sm">
-        <Mail size={20} strokeWidth={2} aria-hidden="true" />
+        <Bell size={20} strokeWidth={2} aria-hidden="true" />
       </span>
       {unread > 0 && (
         <span

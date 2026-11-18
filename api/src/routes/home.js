@@ -11,6 +11,11 @@ const MAKS_NOTIF = 10;
 
 const dua = (n) => String(n).padStart(2, '0');
 
+// Kapan pengingat (event/trip) mulai tampil: 24 jam sebelum waktunya, atau saat dibuat bila lebih lambat.
+// Klien membandingkan `muncul` dengan waktu terakhir notifikasi dibuka untuk menghitung "belum dibaca".
+const munculPengingat = (waktu, dibuat) =>
+  new Date(Math.max(new Date(waktu).getTime() - 24 * JAM_MS, dibuat ? new Date(dibuat).getTime() : 0));
+
 // Pembagian waktu sapaan yang umum di Indonesia.
 export function salamUntukJam(jam) {
   if (jam >= 4 && jam < 11) return 'Selamat pagi';
@@ -76,6 +81,7 @@ export function homeRouter(cfg) {
       judul: e.judul,
       isi: `Dimulai ${dua(jamWib(e.mulai).jam)}.${dua(jamWib(e.mulai).menit)} WIB`,
       waktu: e.mulai,
+      muncul: munculPengingat(e.mulai, e.createdAt),
       ref: e.id,
     }));
 
@@ -103,6 +109,7 @@ export function homeRouter(cfg) {
           judul: t.judul || `Ke ${t.tujuan.nama}`,
           isi: `Berangkat ${dua(w.jam)}.${dua(w.menit)} WIB`,
           waktu: t.berangkatPada,
+          muncul: munculPengingat(t.berangkatPada, t.createdAt),
           ref: t.id,
         });
       }
@@ -114,6 +121,7 @@ export function homeRouter(cfg) {
           judul: tambah ? `+${l.jumlah} poin` : `${l.jumlah} poin`,
           isi: tambah ? `Poin dari ${LABEL_POIN[l.alasan]}` : `Poin dipakai untuk ${LABEL_POIN[l.alasan]}`,
           waktu: l.createdAt,
+          muncul: l.createdAt,
           ref: l.ref,
         });
       }
