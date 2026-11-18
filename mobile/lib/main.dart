@@ -39,12 +39,9 @@ class _PlaceholderHome extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(gradient: nebulaGradient),
+        decoration: AppTextures.lilacWash,
         alignment: Alignment.center,
-        child: Text(
-          'SmartMove Medan',
-          style: titleSerif(size: 28, color: AppColors.white),
-        ),
+        child: Text('SmartMove Medan', style: titleSerif(size: 28)),
       ),
     );
   }

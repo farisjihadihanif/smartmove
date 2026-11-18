@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:material_ui/material_ui.dart' show AssetImage;
 import 'package:smartmove/api.dart';
 import 'package:smartmove/state.dart';
 import 'package:smartmove/theme.dart';
@@ -10,18 +11,17 @@ import 'package:smartmove/theme.dart';
 ApiClient _client(
   Future<http.Response> Function(http.Request) handler, {
   String? token,
-}) =>
-    ApiClient(
-      client: MockClient(handler),
-      tokens: MemoryTokenStore(token),
-      baseUrl: 'http://api.test/api',
-    );
+}) => ApiClient(
+  client: MockClient(handler),
+  tokens: MemoryTokenStore(token),
+  baseUrl: 'http://api.test/api',
+);
 
 http.Response _json(Object body, [int status = 200]) => http.Response(
-      jsonEncode(body),
-      status,
-      headers: {'content-type': 'application/json; charset=utf-8'},
-    );
+  jsonEncode(body),
+  status,
+  headers: {'content-type': 'application/json; charset=utf-8'},
+);
 
 void main() {
   group('ApiClient', () {
@@ -32,12 +32,15 @@ void main() {
         return _json({'ok': true});
       }, token: 'abc');
 
-      final data = await api.get('/places/search', query: {
-        'q': 'Kualanamu',
-        'near': latLngQuery(3.5, 98.6),
-        'kosong': '',
-        'nol': null,
-      });
+      final data = await api.get(
+        '/places/search',
+        query: {
+          'q': 'Kualanamu',
+          'near': latLngQuery(3.5, 98.6),
+          'kosong': '',
+          'nol': null,
+        },
+      );
 
       expect(data, {'ok': true});
       expect(seen.headers['Authorization'], 'Bearer abc');
@@ -57,14 +60,18 @@ void main() {
     });
 
     test('galat memakai message & code dari API', () async {
-      final api = _client((_) async =>
-          _json({'message': 'Poin kamu kurang', 'code': 'POIN_KURANG'}, 409));
+      final api = _client(
+        (_) async =>
+            _json({'message': 'Poin kamu kurang', 'code': 'POIN_KURANG'}, 409),
+      );
       await expectLater(
         api.post('/rewards/redeem'),
-        throwsA(isA<ApiException>()
-            .having((e) => e.status, 'status', 409)
-            .having((e) => e.code, 'code', 'POIN_KURANG')
-            .having((e) => e.message, 'message', 'Poin kamu kurang')),
+        throwsA(
+          isA<ApiException>()
+              .having((e) => e.status, 'status', 409)
+              .having((e) => e.code, 'code', 'POIN_KURANG')
+              .having((e) => e.message, 'message', 'Poin kamu kurang'),
+        ),
       );
     });
 
@@ -72,8 +79,13 @@ void main() {
       final api = _client((_) async => http.Response('', 500));
       await expectLater(
         api.get('/home'),
-        throwsA(isA<ApiException>().having(
-            (e) => e.message, 'message', 'Terjadi kesalahan pada server')),
+        throwsA(
+          isA<ApiException>().having(
+            (e) => e.message,
+            'message',
+            'Terjadi kesalahan pada server',
+          ),
+        ),
       );
     });
 
@@ -81,7 +93,9 @@ void main() {
       final api = _client((_) async => throw http.ClientException('putus'));
       await expectLater(
         api.get('/home'),
-        throwsA(isA<ApiException>().having((e) => e.isNetwork, 'isNetwork', true)),
+        throwsA(
+          isA<ApiException>().having((e) => e.isNetwork, 'isNetwork', true),
+        ),
       );
     });
   });
@@ -94,10 +108,14 @@ void main() {
     });
 
     test('bootstrap dengan token valid → signedIn', () async {
-      final state = AppState(_client(
-        (_) async => _json({'user': {'name': 'Rina', 'role': 'user'}}),
-        token: 't',
-      ));
+      final state = AppState(
+        _client(
+          (_) async => _json({
+            'user': {'name': 'Rina', 'role': 'user'},
+          }),
+          token: 't',
+        ),
+      );
       await state.bootstrap();
       expect(state.status, AuthStatus.signedIn);
       expect(state.user?['name'], 'Rina');
@@ -105,7 +123,10 @@ void main() {
     });
 
     test('bootstrap 401 → token dihapus', () async {
-      final api = _client((_) async => _json({'message': 'x'}, 401), token: 't');
+      final api = _client(
+        (_) async => _json({'message': 'x'}, 401),
+        token: 't',
+      );
       final state = AppState(api);
       await state.bootstrap();
       expect(state.status, AuthStatus.signedOut);
@@ -129,14 +150,28 @@ void main() {
   });
 
   test('warna mockup persis (DESIGN §2.1)', () {
-    expect(AppColors.primaryDeep.toARGB32(), 0xFF361254);
-    expect(AppColors.primary.toARGB32(), 0xFF4B1D6D);
-    expect(AppColors.magenta.toARGB32(), 0xFF8B3AA8);
-    expect(AppColors.violet.toARGB32(), 0xFF6D28D9);
-    expect(AppColors.lavender.toARGB32(), 0xFFF3E8FF);
-    expect(AppColors.accent.toARGB32(), 0xFFD35428);
-    expect(AppColors.route.toARGB32(), 0xFF0D3AA9);
-    expect(nebulaGradient.colors,
-        [AppColors.primaryDeep, AppColors.primary, AppColors.magenta]);
+    expect(AppColors.loginFrom.toARGB32(), 0xFF333399);
+    expect(AppColors.loginTo.toARGB32(), 0xFFFF00CC);
+    expect(AppColors.loginButton.toARGB32(), 0xFF7324A9);
+    expect(AppColors.pillFrom.toARGB32(), 0xFF4B3572);
+    expect(AppColors.pillVia.toARGB32(), 0xFFA2028A);
+    expect(AppColors.pillTo.toARGB32(), 0xFF6B217B);
+    expect(AppColors.pillSoft.toARGB32(), 0xFF9B59B6);
+    expect(AppColors.inkViolet.toARGB32(), 0xFF41396F);
+    expect(AppColors.iconBlue.toARGB32(), 0xFF68B4E7);
+    expect(AppColors.route.toARGB32(), 0xFF0F53FF);
+    expect(AppColors.trafficPadat.toARGB32(), 0xFFFFA000);
+    expect(AppColors.trafficMacet.toARGB32(), 0xFFF44336);
+    expect(AppGradients.pill.stops, [0, 0.66, 1]);
+    expect(AppGradients.login.colors, [AppColors.loginFrom, AppColors.loginTo]);
+  });
+
+  test('header lilac memakai gambar tekstur dari mockup, bukan gradasi', () {
+    final deco = AppTextures.lilacWash;
+    expect(deco.gradient, isNull);
+    expect(
+      (deco.image!.image as AssetImage).assetName,
+      'assets/textures/lilac-wash.webp',
+    );
   });
 }

@@ -3,7 +3,7 @@ import { MapPin } from 'lucide-react'
 import { api } from '../lib/api.js'
 
 const STATUS_CLASS = {
-  memeriksa: 'text-primary',
+  memeriksa: 'text-ink-violet',
   tersambung: 'font-semibold text-traffic-lancar',
   gagal: 'font-semibold text-traffic-macet',
 }
@@ -26,7 +26,7 @@ export default function Home() {
 
   return (
     <>
-      <header className="bg-nebula rounded-b-3xl px-4 pb-8 pt-10 text-white">
+      <header className="bg-lilac-wash px-4 pb-8 pt-10 text-ink">
         <div className="flex items-center gap-2 text-sm opacity-90">
           <MapPin size={18} aria-hidden="true" />
           <span>Medan</span>

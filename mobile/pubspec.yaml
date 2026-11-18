@@ -31,3 +31,4 @@ flutter:
   # Unduhan saat runtime dimatikan di main.dart.
   assets:
     - assets/google_fonts/
+    - assets/textures/

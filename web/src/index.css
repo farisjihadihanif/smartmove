@@ -1,17 +1,54 @@
 @import "tailwindcss";
 
-/* Token warna mockup – DESIGN.md §2. Jangan diubah tanpa memperbarui DESIGN.md. */
+/* Token warna dari piksel mockup – DESIGN.md §2.1. Ubah bersamaan dengan DESIGN.md dan mobile/lib/theme.dart. */
 @theme {
-  --color-primary-deep: #361254;
-  --color-primary: #4B1D6D;
-  --color-magenta: #8B3AA8;
-  --color-violet: #6D28D9;
-  --color-lavender: #F3E8FF;
-  --color-accent: #D35428;
-  --color-route: #0D3AA9;
+  /* Login (hal. 2) */
+  --color-login-from: #333399;
+  --color-login-to: #FF00CC;
+  --color-indigo: #333399;
+  --color-login-button: #7324A9;
+  --color-login-field: #FCEDED;
+  --color-login-avatar: #B79FD1;
+
+  /* Tekstur: warna dasar/fallback */
+  --color-lilac-wash: #DAB8F6;
+  --color-bar-dark: #3B0B64;
+
+  /* Kapsul & bar */
+  --color-pill-from: #4B3572;
+  --color-pill-via: #A2028A;
+  --color-pill-to: #6B217B;
+  --color-pill-deep-from: #43376F;
+  --color-pill-deep-via: #720D81;
+  --color-pill-deep-to: #512A77;
+  --color-pill-soft: #9B59B6;
+  --color-ink-violet: #41396F;
+  --color-action-pill: #F4F0F0;
+  --color-sysnav-from: #4C2F73;
+  --color-sysnav-via: #740C82;
+  --color-sysnav-to: #4D2F76;
+
+  /* Kartu Trip Planner (hal. 3) */
+  --color-trip-1: #F29BB8;
+  --color-trip-2: #D684A7;
+  --color-trip-3: #9C6193;
+  --color-trip-4: #5F3F73;
+
+  /* Ikon, teks, permukaan */
+  --color-icon-blue: #68B4E7;
+  --color-icon-blue-deep: #1E63C3;
+  --color-ink: #000000;
+  --color-surface: #FFFFFF;
+  --color-surface-menu: #FAFDFD;
+  --color-surface-nav: #F4F4F3;
+  --color-search: #F6F6F6;
+
+  /* Peta & lalu lintas (hal. 4, 6) */
+  --color-route: #0F53FF;
+  --color-route-outline: #0A11D8;
   --color-traffic-lancar: #2E9E5B;
-  --color-traffic-padat: #F2A20C;
-  --color-traffic-macet: #D93636;
+  --color-traffic-padat: #FFA000;
+  --color-traffic-macet: #F44336;
 
   --font-sans: "Open Sans", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Bree Serif", ui-serif, Georgia, serif;
@@ -20,13 +57,60 @@
   --spacing-touch: 48px;
 }
 
-/* Gradasi header nebula: #361254 → #4B1D6D → #8B3AA8 */
-@utility bg-nebula {
+/* Header lilac: gambar tekstur dari mockup, bukan gradasi buatan. */
+@utility bg-lilac-wash {
+  background-color: var(--color-lilac-wash);
+  background-image: url("./assets/textures/lilac-wash.webp");
+  background-size: cover;
+  background-position: top center;
+}
+
+/* Bar aksi bawah: tekstur ungu tua dari mockup. */
+@utility bg-bar-dark {
+  background-color: var(--color-bar-dark);
+  background-image: url("./assets/textures/bar-dark.webp");
+  background-size: cover;
+  background-position: center;
+}
+
+@utility bg-login {
+  background-image: linear-gradient(to bottom, var(--color-login-from), var(--color-login-to));
+}
+
+@utility bg-pill {
   background-image: linear-gradient(
-    135deg,
-    var(--color-primary-deep),
-    var(--color-primary) 50%,
-    var(--color-magenta)
+    to right,
+    var(--color-pill-from),
+    var(--color-pill-via) 66%,
+    var(--color-pill-to)
+  );
+}
+
+@utility bg-pill-deep {
+  background-image: linear-gradient(
+    to right,
+    var(--color-pill-deep-from),
+    var(--color-pill-deep-via) 62%,
+    var(--color-pill-deep-to)
+  );
+}
+
+@utility bg-sysnav {
+  background-image: linear-gradient(
+    to right,
+    var(--color-sysnav-from),
+    var(--color-sysnav-via) 45%,
+    var(--color-sysnav-to)
+  );
+}
+
+@utility bg-trip-card {
+  background-image: linear-gradient(
+    to right,
+    var(--color-trip-1),
+    var(--color-trip-2) 50%,
+    var(--color-trip-3) 82%,
+    var(--color-trip-4)
   );
 }
 
@@ -35,10 +119,10 @@
     -webkit-tap-highlight-color: transparent;
   }
   body {
-    @apply bg-white font-sans text-primary-deep antialiased;
+    @apply bg-surface font-sans text-ink antialiased;
     min-width: 360px;
   }
   :focus-visible {
-    @apply outline-2 outline-offset-2 outline-violet;
+    @apply outline-2 outline-offset-2 outline-pill-via;
   }
 }

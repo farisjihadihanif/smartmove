@@ -1,27 +1,113 @@
 import 'package:google_fonts/google_fonts.dart';
 import 'package:material_ui/material_ui.dart';
 
-/// Token warna mockup – DESIGN.md §2.1. Jangan diubah tanpa memperbarui DESIGN.md.
+/// Token warna dari piksel mockup – DESIGN.md §2.1.
+/// Ubah bersamaan dengan DESIGN.md dan web/src/index.css.
 abstract final class AppColors {
-  static const primaryDeep = Color(0xFF361254);
-  static const primary = Color(0xFF4B1D6D);
-  static const magenta = Color(0xFF8B3AA8);
-  static const violet = Color(0xFF6D28D9);
-  static const lavender = Color(0xFFF3E8FF);
-  static const accent = Color(0xFFD35428);
-  static const route = Color(0xFF0D3AA9);
-  static const trafficLancar = Color(0xFF2E9E5B);
-  static const trafficPadat = Color(0xFFF2A20C);
-  static const trafficMacet = Color(0xFFD93636);
+  // Login (hal. 2)
+  static const loginFrom = Color(0xFF333399);
+  static const loginTo = Color(0xFFFF00CC);
+  static const indigo = Color(0xFF333399);
+  static const loginButton = Color(0xFF7324A9);
+  static const loginField = Color(0xFFFCEDED);
+  static const loginAvatar = Color(0xFFB79FD1);
+
+  // Warna dasar tekstur (fallback saat gambar belum termuat)
+  static const lilacWash = Color(0xFFDAB8F6);
+  static const barDark = Color(0xFF3B0B64);
+
+  // Kapsul & bar
+  static const pillFrom = Color(0xFF4B3572);
+  static const pillVia = Color(0xFFA2028A);
+  static const pillTo = Color(0xFF6B217B);
+  static const pillDeepFrom = Color(0xFF43376F);
+  static const pillDeepVia = Color(0xFF720D81);
+  static const pillDeepTo = Color(0xFF512A77);
+  static const pillSoft = Color(0xFF9B59B6);
+  static const inkViolet = Color(0xFF41396F);
+  static const actionPill = Color(0xFFF4F0F0);
+  static const sysnavFrom = Color(0xFF4C2F73);
+  static const sysnavVia = Color(0xFF740C82);
+  static const sysnavTo = Color(0xFF4D2F76);
+
+  // Kartu Trip Planner (hal. 3)
+  static const trip1 = Color(0xFFF29BB8);
+  static const trip2 = Color(0xFFD684A7);
+  static const trip3 = Color(0xFF9C6193);
+  static const trip4 = Color(0xFF5F3F73);
+
+  // Ikon, teks, permukaan
+  static const iconBlue = Color(0xFF68B4E7);
+  static const iconBlueDeep = Color(0xFF1E63C3);
+  static const ink = Color(0xFF000000);
   static const white = Color(0xFFFFFFFF);
+  static const surfaceMenu = Color(0xFFFAFDFD);
+  static const surfaceNav = Color(0xFFF4F4F3);
+  static const search = Color(0xFFF6F6F6);
+
+  // Peta & lalu lintas (hal. 4, 6)
+  static const route = Color(0xFF0F53FF);
+  static const routeOutline = Color(0xFF0A11D8);
+  static const trafficLancar = Color(0xFF2E9E5B);
+  static const trafficPadat = Color(0xFFFFA000);
+  static const trafficMacet = Color(0xFFF44336);
 }
 
-/// Gradasi header nebula: #361254 → #4B1D6D → #8B3AA8.
-const nebulaGradient = LinearGradient(
-  begin: Alignment.topLeft,
-  end: Alignment.bottomRight,
-  colors: [AppColors.primaryDeep, AppColors.primary, AppColors.magenta],
-);
+/// Gradasi dari mockup (titik henti diukur dari gambar).
+abstract final class AppGradients {
+  static const login = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [AppColors.loginFrom, AppColors.loginTo],
+  );
+  static const pill = LinearGradient(
+    colors: [AppColors.pillFrom, AppColors.pillVia, AppColors.pillTo],
+    stops: [0, 0.66, 1],
+  );
+  static const pillDeep = LinearGradient(
+    colors: [
+      AppColors.pillDeepFrom,
+      AppColors.pillDeepVia,
+      AppColors.pillDeepTo,
+    ],
+    stops: [0, 0.62, 1],
+  );
+  static const sysnav = LinearGradient(
+    colors: [AppColors.sysnavFrom, AppColors.sysnavVia, AppColors.sysnavTo],
+    stops: [0, 0.45, 1],
+  );
+  static const tripCard = LinearGradient(
+    colors: [
+      AppColors.trip1,
+      AppColors.trip2,
+      AppColors.trip3,
+      AppColors.trip4,
+    ],
+    stops: [0, 0.5, 0.82, 1],
+  );
+}
+
+/// Tekstur yang dipotong dari mockup (bukan gradasi buatan).
+abstract final class AppTextures {
+  static const lilacWashAsset = 'assets/textures/lilac-wash.webp';
+  static const barDarkAsset = 'assets/textures/bar-dark.webp';
+
+  /// Latar header lilac: gambar menutupi area, rata atas.
+  static const lilacWash = BoxDecoration(
+    color: AppColors.lilacWash,
+    image: DecorationImage(
+      image: AssetImage(lilacWashAsset),
+      fit: BoxFit.cover,
+      alignment: Alignment.topCenter,
+    ),
+  );
+
+  /// Latar bar aksi bawah ungu tua.
+  static const barDark = BoxDecoration(
+    color: AppColors.barDark,
+    image: DecorationImage(image: AssetImage(barDarkAsset), fit: BoxFit.cover),
+  );
+}
 
 /// Ukuran (DESIGN §2.3): spasi kelipatan 4, target sentuh ≥ 48 dp.
 abstract final class AppSizes {
@@ -35,31 +121,29 @@ abstract final class AppSizes {
 }
 
 /// Gaya judul Bree Serif (judul kartu besar, sapaan).
-TextStyle titleSerif({double size = 22, Color color = AppColors.primaryDeep}) =>
+TextStyle titleSerif({double size = 22, Color color = AppColors.ink}) =>
     GoogleFonts.breeSerif(fontSize: size, color: color, height: 1.2);
 
 ThemeData buildTheme() {
   const scheme = ColorScheme(
     brightness: Brightness.light,
-    primary: AppColors.primary,
+    primary: AppColors.loginButton,
     onPrimary: AppColors.white,
-    primaryContainer: AppColors.lavender,
-    onPrimaryContainer: AppColors.primaryDeep,
-    secondary: AppColors.magenta,
+    primaryContainer: AppColors.lilacWash,
+    onPrimaryContainer: AppColors.ink,
+    secondary: AppColors.pillVia,
     onSecondary: AppColors.white,
-    tertiary: AppColors.violet,
+    tertiary: AppColors.inkViolet,
     onTertiary: AppColors.white,
     error: AppColors.trafficMacet,
     onError: AppColors.white,
     surface: AppColors.white,
-    onSurface: AppColors.primaryDeep,
+    onSurface: AppColors.ink,
   );
 
   final base = ThemeData(useMaterial3: true, colorScheme: scheme);
-  final text = GoogleFonts.openSansTextTheme(base.textTheme).apply(
-    bodyColor: AppColors.primaryDeep,
-    displayColor: AppColors.primaryDeep,
-  );
+  final text = GoogleFonts.openSansTextTheme(base.textTheme)
+      .apply(bodyColor: AppColors.ink, displayColor: AppColors.ink);
   const pill = StadiumBorder();
   const minTouch = Size(AppSizes.touch, AppSizes.touch);
 
@@ -68,17 +152,17 @@ ThemeData buildTheme() {
     scaffoldBackgroundColor: AppColors.white,
     materialTapTargetSize: MaterialTapTargetSize.padded,
     appBarTheme: AppBarTheme(
-      backgroundColor: AppColors.primaryDeep,
-      foregroundColor: AppColors.white,
+      backgroundColor: AppColors.lilacWash,
+      foregroundColor: AppColors.ink,
       elevation: 0,
       titleTextStyle: text.titleLarge?.copyWith(
-        color: AppColors.white,
+        color: AppColors.ink,
         fontWeight: FontWeight.w600,
       ),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.loginButton,
         foregroundColor: AppColors.white,
         minimumSize: minTouch,
         shape: pill,
@@ -87,7 +171,7 @@ ThemeData buildTheme() {
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.pillDeepVia,
         foregroundColor: AppColors.white,
         minimumSize: minTouch,
         shape: pill,
@@ -95,15 +179,15 @@ ThemeData buildTheme() {
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.primary,
-        side: const BorderSide(color: AppColors.primary),
+        foregroundColor: AppColors.inkViolet,
+        side: const BorderSide(color: AppColors.inkViolet),
         minimumSize: minTouch,
         shape: pill,
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
-        foregroundColor: AppColors.violet,
+        foregroundColor: AppColors.inkViolet,
         minimumSize: minTouch,
       ),
     ),
@@ -111,14 +195,14 @@ ThemeData buildTheme() {
       style: IconButton.styleFrom(minimumSize: minTouch),
     ),
     chipTheme: base.chipTheme.copyWith(
-      backgroundColor: AppColors.lavender,
-      selectedColor: AppColors.magenta,
+      backgroundColor: AppColors.pillSoft,
+      selectedColor: AppColors.pillVia,
       shape: pill,
       side: BorderSide.none,
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: AppColors.lavender,
+      fillColor: AppColors.search,
       contentPadding: const EdgeInsets.symmetric(
         horizontal: AppSizes.s4,
         vertical: AppSizes.s3,
@@ -129,22 +213,22 @@ ThemeData buildTheme() {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(999),
-        borderSide: const BorderSide(color: AppColors.violet, width: 2),
+        borderSide: const BorderSide(color: AppColors.inkViolet, width: 2),
       ),
     ),
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: AppColors.white,
-      indicatorColor: AppColors.lavender,
+      backgroundColor: AppColors.surfaceNav,
+      indicatorColor: AppColors.lilacWash,
       iconTheme: WidgetStateProperty.resolveWith(
         (s) => IconThemeData(
           color: s.contains(WidgetState.selected)
-              ? AppColors.primary
-              : AppColors.primaryDeep.withValues(alpha: 0.55),
+              ? AppColors.iconBlueDeep
+              : AppColors.ink.withValues(alpha: 0.55),
         ),
       ),
     ),
     snackBarTheme: const SnackBarThemeData(
-      backgroundColor: AppColors.primaryDeep,
+      backgroundColor: AppColors.inkViolet,
       behavior: SnackBarBehavior.floating,
     ),
   );
