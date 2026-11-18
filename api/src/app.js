@@ -6,9 +6,14 @@ import { rateLimit } from 'express-rate-limit';
 import mongoose from 'mongoose';
 import config from './config.js';
 import { errorHandler, notFound } from './middleware/error.js';
+import { loadUser } from './middleware/auth.js';
+import { createMailer } from './services/mail.js';
+import { authRouter } from './routes/auth.js';
+import { usersRouter } from './routes/users.js';
 
 export function createApp(opts = {}) {
   const cfg = { ...config, ...opts };
+  const mailer = cfg.mailer || createMailer(cfg);
   const app = express();
 
   app.set('trust proxy', 1); // di belakang Nginx
@@ -17,6 +22,16 @@ export function createApp(opts = {}) {
   app.use(cors({ origin: cfg.clientOrigin, credentials: true }));
   app.use(express.json({ limit: '1mb' }));
   app.use(cookieParser());
+
+  // Foto profil. Boleh dimuat dari origin lain (web dev di port 5173, aplikasi mobile).
+  app.use(
+    '/uploads',
+    (req, res, next) => {
+      res.set('Cross-Origin-Resource-Policy', 'cross-origin');
+      next();
+    },
+    express.static(cfg.uploadDir, { index: false, dotfiles: 'deny', fallthrough: true }),
+  );
 
   const api = express.Router();
   api.use(
@@ -33,7 +48,10 @@ export function createApp(opts = {}) {
     res.json({ ok: true, db: mongoose.connection.readyState === 1 });
   });
 
-  // Router fitur (auth, users, places, ...) dipasang di tugas berikutnya.
+  api.use(loadUser(cfg));
+  api.use('/auth', authRouter(cfg, { mailer }));
+  api.use('/users', usersRouter(cfg));
+  // Router fitur lain (places, routes, ...) dipasang di tugas berikutnya.
 
   app.use('/api', api);
   app.use(notFound);

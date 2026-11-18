@@ -1,8 +1,11 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import dotenv from 'dotenv';
 
 dotenv.config({ quiet: true });
 
 const env = process.env;
+const apiRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 const config = {
   nodeEnv: env.NODE_ENV || 'development',
@@ -28,6 +31,18 @@ const config = {
     windowMs: 15 * 60 * 1000,
     limit: Number(env.RATE_LIMIT) || 300,
   },
+  // Batas lebih ketat untuk login/daftar/lupa/reset password (anti tebak password).
+  authRateLimit: {
+    windowMs: 15 * 60 * 1000,
+    limit: Number(env.AUTH_RATE_LIMIT) || 20,
+  },
+  smtp: {
+    user: env.SMTP_USER,
+    pass: env.SMTP_PASS,
+    from: env.SMTP_FROM || env.SMTP_USER,
+  },
+  // Foto profil disimpan di disk dan disajikan di /uploads.
+  uploadDir: env.UPLOAD_DIR || path.join(apiRoot, 'uploads'),
 };
 
 export function assertConfig(cfg = config) {

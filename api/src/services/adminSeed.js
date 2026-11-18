@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import { hashPassword } from '../lib/password.js';
 import User from '../models/User.js';
 
 // Membuat akun admin dari ADMIN_EMAIL/ADMIN_USERNAME/ADMIN_PASSWORD bila belum ada.
@@ -30,7 +30,7 @@ export async function ensureAdmin({ email, username, password } = {}, { logger =
   const user = await User.create({
     email,
     username,
-    password: await bcrypt.hash(password, 12),
+    password: await hashPassword(password),
     role: 'admin',
   });
   return { status: 'dibuat', id: user.id };
