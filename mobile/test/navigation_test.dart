@@ -93,6 +93,7 @@ Future<(NavigationScreenState, _Server)> _pump(
   String? query,
   LatLng? ke,
   LokasiHasil lokasi = const LokasiHasil('ok', _usu),
+  Future<void> Function(String, String)? share,
 }) async {
   tester.view.physicalSize = const Size(360, 760);
   tester.view.devicePixelRatio = 1;
@@ -112,6 +113,7 @@ Future<(NavigationScreenState, _Server)> _pump(
           initialQuery: query,
           ke: ke,
           locate: () async => lokasi,
+          share: share ?? (_, _) async {},
           tileProvider: FakeTiles(),
         ),
       ),
@@ -297,7 +299,24 @@ void main() {
     expect(find.textContaining('© Mapillary, warga'), findsOneWidget);
   });
 
-  testWidgets('Share menyalin ringkasan + tautan OSM', (tester) async {
+  testWidgets('Share membuka lembar bagikan dengan ringkasan + tautan OSM', (
+    tester,
+  ) async {
+    final dibagikan = <(String, String)>[];
+    await _pump(
+      tester,
+      ke: const LatLng(3.5855, 98.6747),
+      share: (teks, judul) async => dibagikan.add((teks, judul)),
+    );
+    await _tap(tester, find.text('Share'));
+    expect(dibagikan, hasLength(1));
+    final (teks, judul) = dibagikan.single;
+    expect(judul, 'Rute ke Travellers Suites');
+    expect(teks, startsWith('Rute mobil ke Travellers Suites: 9 mnt · 6,1 km'));
+    expect(teks, contains('openstreetmap.org/directions'));
+  });
+
+  testWidgets('Share gagal → teks disalin ke papan klip', (tester) async {
     String? disalin;
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
@@ -314,13 +333,18 @@ void main() {
         null,
       ),
     );
-    await _pump(tester, ke: const LatLng(3.5855, 98.6747));
-    await _tap(tester, find.text('Share'));
-    expect(
-      disalin,
-      startsWith('Rute mobil ke Travellers Suites: 9 mnt · 6,1 km'),
+    await _pump(
+      tester,
+      ke: const LatLng(3.5855, 98.6747),
+      share: (_, _) async => throw Exception('tidak tersedia'),
     );
-    expect(disalin, contains('openstreetmap.org/directions'));
+    await _tap(tester, find.text('Share'));
+    expect(disalin, startsWith('Rute mobil ke Travellers Suites'));
+    expect(
+      find.text('Rute disalin. Tempel di chat untuk membagikannya.'),
+      findsOneWidget,
+    );
+    await tester.pump(const Duration(seconds: 4));
   });
 
   testWidgets('izin lokasi ditolak → arahan memilih titik asal', (

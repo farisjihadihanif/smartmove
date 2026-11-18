@@ -6,6 +6,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../api.dart';
@@ -48,6 +49,10 @@ Future<LokasiHasil> lokasiPerangkat() async {
   }
 }
 
+/// Buka lembar bagikan sistem Android (share_plus).
+Future<void> bagikanSistem(String teks, String judul) =>
+    SharePlus.instance.share(ShareParams(text: teks, subject: judul));
+
 const _segera = {
   'traffic': 'Lapisan Traffic hadir bersama Live Traffic Information.',
   'transit': 'Rute transportasi umum sedang disiapkan.',
@@ -72,6 +77,7 @@ class NavigationScreen extends StatefulWidget {
     this.ke,
     this.mode = Moda.driving,
     this.locate = lokasiPerangkat,
+    this.share = bagikanSistem,
     this.tileProvider,
   });
 
@@ -83,6 +89,9 @@ class NavigationScreen extends StatefulWidget {
   final LatLng? ke;
   final Moda mode;
   final Future<LokasiHasil> Function() locate;
+
+  /// Tombol Share: `(teks, judul)`. Bila gagal, teks disalin ke papan klip.
+  final Future<void> Function(String teks, String judul) share;
 
   /// Untuk tes: tile palsu tanpa jaringan.
   final TileProvider? tileProvider;
@@ -397,12 +406,14 @@ class NavigationScreenState extends State<NavigationScreen> {
   Future<void> _bagikan() async {
     final r = rute, a = dari, b = ke;
     if (r == null || a == null || b == null) return;
-    await Clipboard.setData(
-      ClipboardData(
-        text: teksBagikan(dari: a, ke: b, mode: mode, rute: r),
-      ),
-    );
-    _kabari('Rute disalin. Tempel di chat untuk membagikannya.');
+    final teks = teksBagikan(dari: a, ke: b, mode: mode, rute: r);
+    try {
+      await widget.share(teks, 'Rute ke ${b.nama}');
+    } catch (_) {
+      // Lembar bagikan tidak tersedia: salin saja.
+      await Clipboard.setData(ClipboardData(text: teks));
+      _kabari('Rute disalin. Tempel di chat untuk membagikannya.');
+    }
   }
 
   void _gantiTarget(String t) {
