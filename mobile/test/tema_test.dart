@@ -77,7 +77,10 @@ void main() {
     );
     await tester.pump();
     expect(find.text('Tampilan'), findsOneWidget);
-    await tester.tap(find.text('Gelap'));
+    expect(find.text('Ikuti sistem'), findsOneWidget);
+    await tester.tap(find.byType(DropdownButton<String>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Gelap').last);
     await tester.runAsync(() => Future<void>.delayed(Duration.zero));
     await tester.pump();
     expect(state.tema, 'gelap');
@@ -86,7 +89,10 @@ void main() {
       'gelap',
     );
 
-    await tester.tap(find.text('Ikuti sistem'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(DropdownButton<String>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Ikuti sistem').last);
     await tester.runAsync(() => Future<void>.delayed(Duration.zero));
     expect(state.tema, 'sistem');
     expect(
