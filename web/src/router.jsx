@@ -2,6 +2,11 @@ import { createBrowserRouter } from 'react-router-dom'
 import AppLayout from './components/AppLayout.jsx'
 import { GuestOnly, RequireAuth } from './lib/auth.jsx'
 import Index from './pages/Index.jsx'
+import Kampanye from './pages/Kampanye.jsx'
+import EventAlert from './pages/kampanye/EventAlert.jsx'
+import Poster from './pages/kampanye/Poster.jsx'
+import Tips from './pages/kampanye/Tips.jsx'
+import UmpanBalik from './pages/kampanye/UmpanBalik.jsx'
 import LaluLintas from './pages/LaluLintas.jsx'
 import Navigasi from './pages/Navigasi.jsx'
 import NotFound from './pages/NotFound.jsx'
@@ -31,7 +36,11 @@ export const router = createBrowserRouter([
   { path: 'navigasi', element: <Navigasi />, errorElement: <NotFound /> },
   { path: 'lalu-lintas', element: <LaluLintas />, errorElement: <NotFound /> },
   { path: 'pembayaran', element: <Segera title="Digital Payment" /> },
-  { path: 'kampanye', element: <Segera title="Traffic Mitigation Campaign" /> },
+  { path: 'kampanye', element: <Kampanye />, errorElement: <NotFound /> },
+  { path: 'kampanye/tips', element: <Tips /> },
+  { path: 'kampanye/poster', element: <Poster /> },
+  { path: 'kampanye/event', element: <EventAlert />, errorElement: <NotFound /> },
+  { path: 'kampanye/umpan-balik', element: <UmpanBalik /> },
   {
     // … kecuali yang menyimpan data pribadi: tamu diarahkan ke /masuk lalu kembali.
     element: <RequireAuth />,

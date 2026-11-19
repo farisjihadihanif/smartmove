@@ -13,6 +13,8 @@ import '../auth/login_screen.dart';
 import '../auth/register_screen.dart';
 import '../coming_soon_screen.dart';
 import '../navigation/navigation_screen.dart';
+import '../campaign/campaign_screen.dart';
+import '../campaign/event_screen.dart';
 import '../traffic/traffic_screen.dart';
 import '../trip/trip_planner_screen.dart';
 import 'notification_sheet.dart';
@@ -145,7 +147,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String _destinationFor(String? jenis) => switch (jenis) {
     'trip' => 'Trip Planner',
     'poin' => 'Rewards',
-    _ => 'Live Traffic Information',
+    _ => 'EventAlert',
   };
 
   void _open(String title, {String? query}) {
@@ -155,6 +157,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           'Smart Navigation' => NavigationScreen(initialQuery: query),
           'Trip Planner' => const TripPlannerScreen(),
           'Live Traffic Information' => const TrafficScreen(),
+          'Traffic Mitigation Campaign' => const CampaignScreen(),
+          'EventAlert' => const EventAlertScreen(),
           _ => ComingSoonScreen(title: title),
         },
       ),

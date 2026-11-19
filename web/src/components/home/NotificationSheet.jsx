@@ -6,7 +6,7 @@ import { isUnread } from '../../lib/notifications.js'
 import { hariWib, sejak } from '../../lib/wib.js'
 
 const JENIS = {
-  event: { icon: CalendarClock, to: '/lalu-lintas', tint: 'bg-icon-blue/15 text-icon-blue-deep' },
+  event: { icon: CalendarClock, to: '/kampanye/event', tint: 'bg-icon-blue/15 text-icon-blue-deep' },
   trip: { icon: Route, to: '/trip-planner', tint: 'bg-pill-soft/15 text-login-button' },
   poin: { icon: Coins, to: '/rewards', tint: 'bg-traffic-padat/15 text-[#9A5B00]' },
 }
@@ -83,7 +83,7 @@ export default function NotificationSheet({ open, onClose, items, lastSeen, now 
               return (
                 <li key={n.id}>
                   <Link
-                    to={j.to}
+                    to={n.jenis === 'event' && n.ref ? `${j.to}?id=${n.ref}` : j.to}
                     onClick={onClose}
                     className={`flex items-start gap-3 rounded-2xl px-3 py-3 transition hover:bg-ink/[0.04] ${baru ? 'bg-[color:rgb(218_184_246/0.22)]' : ''}`}
                   >

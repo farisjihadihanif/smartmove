@@ -38,7 +38,7 @@ class MenuTile extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(24),
           child: Padding(
-            padding: const EdgeInsets.all(AppSizes.s2),
+            padding: const EdgeInsets.all(AppSizes.s1),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -53,10 +53,12 @@ class MenuTile extends StatelessWidget {
                   child: icon,
                 ),
                 const SizedBox(height: AppSizes.s3),
+                // Satu baris seperti mockup hal. 7 ("Tips Keselamatan" muat di 360 dp).
                 GradientPill(
                   label: label,
                   bold: true,
-                  padding: const EdgeInsets.symmetric(horizontal: AppSizes.s4),
+                  maxLines: 1,
+                  padding: const EdgeInsets.symmetric(horizontal: AppSizes.s3),
                 ),
               ],
             ),
