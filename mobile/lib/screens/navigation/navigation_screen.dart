@@ -584,9 +584,22 @@ class NavigationScreenState extends State<NavigationScreen> {
                   selected: _nilaiLapisan,
                   onChanged: _ubahLapisan,
                   options: const [
-                    PillOption('traffic', 'Traffic'),
-                    PillOption('transit', 'Transportasi umum'),
-                    PillOption('street', 'Street view'),
+                    PillOption(
+                      'traffic',
+                      'Traffic',
+                      icon: Icons.traffic_rounded,
+                    ),
+                    PillOption(
+                      'transit',
+                      'Transportasi umum',
+                      short: 'Umum',
+                      icon: Icons.directions_bus_rounded,
+                    ),
+                    PillOption(
+                      'street',
+                      'Street view',
+                      icon: Icons.photo_camera_outlined,
+                    ),
                   ],
                 ),
               ],

@@ -13,6 +13,11 @@ const TONE = {
  * - `multiple` (lapisan, mis. Traffic · Transportasi umum · Street view): `value` array.
  * `fitDesktop`: di desktop (lg) lebar kapsul mengikuti teks, satu baris (toolbar header).
  * Yang aktif juga diberi ikon centang + teks tebal (penanda bentuk, bukan warna saja) dan aria-pressed.
+ *
+ * Opsi boleh punya `icon` (komponen lucide) dan `short` (label pendek di bawah lg, label lengkap
+ * jadi aria-label). Bila salah satu opsi punya ikon, kapsul selalu satu baris: centang menggantikan
+ * ikon saat aktif (lebar tidak berubah), dan bila tetap tidak muat (mis. huruf diperbesar) baris
+ * bisa digeser ke samping, bukan turun ke dua baris.
  */
 export default function PillToggle({
   options,
@@ -25,6 +30,7 @@ export default function PillToggle({
   className = '',
 }) {
   const isOn = (v) => (multiple ? (value ?? []).includes(v) : value === v)
+  const satuBaris = options.some((o) => o.icon)
 
   function toggle(v) {
     if (!multiple) return onChange?.(v)
@@ -33,25 +39,42 @@ export default function PillToggle({
   }
 
   return (
-    <div role="group" aria-label={label} className={`flex justify-between gap-2 ${className}`}>
+    <div
+      role="group"
+      aria-label={label}
+      className={`flex justify-between gap-2 ${
+        satuBaris ? '-my-2 overflow-x-auto py-2 [scrollbar-width:none] lg:my-0 lg:overflow-visible lg:py-0' : ''
+      } ${className}`}
+    >
       {options.map((opt) => {
         const on = isOn(opt.value)
+        const Ikon = on ? Check : opt.icon
         return (
           <button
             key={opt.value}
             type="button"
             aria-pressed={on}
+            aria-label={opt.short ? opt.label : undefined}
             onClick={() => toggle(opt.value)}
-            className={`flex min-h-touch min-w-0 max-w-[10rem] flex-auto items-center justify-center gap-1.5 rounded-full px-3 py-1 text-center text-[0.875rem] leading-tight transition ${
-              fitDesktop ? 'lg:max-w-none lg:flex-none lg:whitespace-nowrap lg:px-4' : ''
-            } ${
+            className={`flex min-h-touch items-center justify-center gap-1.5 rounded-full py-1 text-center text-[0.875rem] leading-tight transition ${
+              satuBaris
+                ? 'shrink-0 grow basis-auto whitespace-nowrap px-3'
+                : 'min-w-0 max-w-[10rem] flex-auto px-3'
+            } ${fitDesktop ? 'lg:max-w-none lg:flex-none lg:grow-0 lg:whitespace-nowrap lg:px-4' : ''} ${
               on
                 ? `${TONE[tone]} font-semibold text-white shadow-[0_6px_14px_-6px_rgb(114_13_129/0.8)]`
                 : 'bg-white/80 text-ink-violet ring-1 ring-ink-violet/15 hover:bg-white'
             }`}
           >
-            {on && <Check size={16} strokeWidth={3} className="shrink-0" aria-hidden="true" />}
-            {opt.label}
+            {Ikon && <Ikon size={16} strokeWidth={on ? 3 : 2.25} className="shrink-0" aria-hidden="true" />}
+            {opt.short ? (
+              <>
+                <span className="lg:hidden">{opt.short}</span>
+                <span className="hidden lg:inline">{opt.label}</span>
+              </>
+            ) : (
+              opt.label
+            )}
           </button>
         )
       })}

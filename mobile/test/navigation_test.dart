@@ -12,6 +12,7 @@ import 'package:smartmove/screens/navigation/navigation_screen.dart';
 import 'package:smartmove/state.dart';
 import 'package:smartmove/theme.dart';
 import 'package:smartmove/transit.dart';
+import 'package:smartmove/widgets/widgets.dart';
 
 import 'font_preload.dart';
 import 'widgets_test.dart' show FakeTiles;
@@ -352,8 +353,35 @@ void main() {
       tester,
       ke: const LatLng(3.5913, 98.6776),
     );
-    await _tap(tester, find.text('Transportasi umum'));
+    await _tap(tester, find.bySemanticsLabel('Transportasi umum'));
     expect(state.mode, Moda.transit);
+    expect(state.lapisan, isEmpty);
+
+    // 360 px: kapsul satu baris (label pendek "Umum"), tidak turun baris
+    // walau Street view ikut aktif.
+    await _tap(tester, find.bySemanticsLabel('Street view'));
+    for (final t in ['Traffic', 'Street view']) {
+      final teks = find.descendant(
+        of: find.byType(PillToggle<String>),
+        matching: find.text(t),
+      );
+      expect(tester.getSize(teks).height, lessThan(24));
+    }
+    expect(tester.takeException(), isNull);
+    expect(
+      find.descendant(
+        of: find.byType(PillToggle<String>),
+        matching: find.text('Umum'),
+      ),
+      findsOneWidget,
+    );
+    await _tap(
+      tester,
+      find.descendant(
+        of: find.byType(PillToggle<String>),
+        matching: find.text('Street view'),
+      ),
+    );
     expect(state.lapisan, isEmpty);
     expect(
       server.calls
@@ -384,7 +412,7 @@ void main() {
     expect(state.play, isNull);
 
     // Kapsul dimatikan → kembali ke moda sebelumnya.
-    await _tap(tester, find.text('Transportasi umum'));
+    await _tap(tester, find.bySemanticsLabel('Transportasi umum'));
     expect(state.mode, Moda.driving);
     expect(tester.takeException(), isNull);
   });

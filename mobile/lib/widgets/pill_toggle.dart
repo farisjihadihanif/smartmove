@@ -2,11 +2,16 @@ import 'package:material_ui/material_ui.dart';
 
 import '../theme.dart';
 
-/// Pilihan kapsul.
+/// Pilihan kapsul. [icon] + [short]: lihat [PillToggle].
 class PillOption<T> {
-  const PillOption(this.value, this.label);
+  const PillOption(this.value, this.label, {this.icon, this.short});
   final T value;
   final String label;
+  final IconData? icon;
+
+  /// Label pendek bila label lengkap tidak muat satu baris; label lengkap
+  /// tetap dibacakan pembaca layar.
+  final String? short;
 }
 
 enum PillTone { pill, deep, soft }
@@ -18,6 +23,10 @@ enum PillTone { pill, deep, soft }
 ///   [onChanged] menerima himpunan berisi satu nilai.
 /// - [multiple] (lapisan Traffic · Transportasi umum · Street view).
 /// Yang aktif juga diberi ikon centang + teks tebal (bukan warna saja).
+///
+/// Bila opsi punya [PillOption.icon], kapsul selalu satu baris: centang
+/// menggantikan ikon saat aktif (lebar tetap). Urutan: label lengkap → label
+/// pendek ([PillOption.short]) → baris bisa digeser (mis. huruf diperbesar).
 class PillToggle<T> extends StatelessWidget {
   const PillToggle({
     super.key,
@@ -66,8 +75,73 @@ class PillToggle<T> extends StatelessWidget {
     return kata + (penuh - kata) / 2 + 12 + (on ? 20 : 0) + 8;
   }
 
+  static const _padSatuBaris = 12.0;
+
+  /// Lebar satu baris: teks tebal (lebar sama aktif/tidak) + ikon + padding.
+  double _lebarSatuBaris(BuildContext context, String teks) {
+    final tp = TextPainter(
+      text: TextSpan(
+        text: teks,
+        style: sans(size: 14, weight: FontWeight.w600),
+      ),
+      textDirection: TextDirection.ltr,
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 1,
+    )..layout();
+    final w = tp.width;
+    tp.dispose();
+    return (w + 16 + 6 + _padSatuBaris * 2 + 2).ceilToDouble();
+  }
+
+  Widget _satuBaris(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, c) {
+        const jarak = AppSizes.s2;
+        final celah = jarak * (options.length - 1);
+        List<double> ukur(bool pendek) => [
+          for (final o in options)
+            _lebarSatuBaris(context, pendek ? (o.short ?? o.label) : o.label),
+        ];
+        var pendek = false;
+        var lebar = ukur(false);
+        double total() => lebar.fold<double>(celah, (a, b) => a + b);
+        if (total() > c.maxWidth) {
+          pendek = true;
+          lebar = ukur(true);
+        }
+        final muat = total() <= c.maxWidth;
+        Widget pil(PillOption<T> o) => GradientPill(
+          label: pendek ? (o.short ?? o.label) : o.label,
+          semanticLabel: o.label,
+          icon: o.icon,
+          maxLines: 1,
+          tone: tone,
+          fontSize: 14,
+          padding: const EdgeInsets.symmetric(horizontal: _padSatuBaris),
+          selected: selected.contains(o.value),
+          onTap: () => _toggle(o.value),
+        );
+        final isi = [
+          for (final (i, o) in options.indexed) ...[
+            if (i > 0) const SizedBox(width: jarak),
+            muat
+                ? Expanded(flex: lebar[i].round(), child: pil(o))
+                : SizedBox(width: lebar[i], child: pil(o)),
+          ],
+        ];
+        if (muat) return Row(children: isi);
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          clipBehavior: Clip.none,
+          child: Row(children: isi),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (options.any((o) => o.icon != null)) return _satuBaris(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -117,9 +191,19 @@ class GradientPill extends StatelessWidget {
     this.fontSize = 15,
     this.bold = false,
     this.padding = const EdgeInsets.symmetric(horizontal: AppSizes.s3),
+    this.icon,
+    this.maxLines = 2,
+    this.semanticLabel,
   });
 
   final String label;
+
+  /// Ikon di depan label; saat aktif diganti centang (lebar tetap).
+  final IconData? icon;
+  final int maxLines;
+
+  /// Dibacakan pembaca layar bila berbeda dari [label] (label pendek).
+  final String? semanticLabel;
   final VoidCallback? onTap;
 
   /// null = bukan toggle (tanpa status terpilih).
@@ -145,9 +229,12 @@ class GradientPill extends StatelessWidget {
           ? BorderSide(color: AppColors.inkViolet.withValues(alpha: 0.15))
           : BorderSide.none,
     );
+    final ikon = on ? Icons.check : icon;
     return Semantics(
       button: true,
       toggled: selected,
+      label: semanticLabel,
+      excludeSemantics: semanticLabel != null,
       child: Material(
         type: MaterialType.transparency,
         child: Ink(
@@ -181,15 +268,17 @@ class GradientPill extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    if (on) ...[
-                      Icon(Icons.check, size: 16, color: fg),
-                      const SizedBox(width: 4),
+                    if (ikon != null) ...[
+                      Icon(ikon, size: 16, color: fg),
+                      SizedBox(width: icon != null ? 6 : 4),
                     ],
                     Flexible(
                       child: Text(
                         label,
                         textAlign: TextAlign.center,
-                        maxLines: 2,
+                        maxLines: maxLines,
+                        softWrap: maxLines > 1,
+                        overflow: maxLines > 1 ? null : TextOverflow.fade,
                         style: sans(
                           color: fg,
                           size: fontSize,

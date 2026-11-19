@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Loader2, MapPin, Play, Route, Share2 } from 'lucide-react'
+import { Bus, Camera, Loader2, MapPin, Play, Route, Share2, TrafficCone } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import BottomActionBar from '../components/BottomActionBar.jsx'
 import ErrorBanner from '../components/ErrorBanner.jsx'
@@ -21,9 +21,9 @@ import { teksBagikanTransit } from '../lib/transit.js'
 // URL: ?q= (dari Beranda), ?dari=lat,lng&ke=lat,lng&mode=&dariNama=&keNama= (dari Trip Planner).
 
 const LAPISAN = [
-  { value: 'traffic', label: 'Traffic' },
-  { value: 'transit', label: 'Transportasi umum' },
-  { value: 'street', label: 'Street view' },
+  { value: 'traffic', label: 'Traffic', icon: TrafficCone },
+  { value: 'transit', label: 'Transportasi umum', short: 'Umum', icon: Bus },
+  { value: 'street', label: 'Street view', icon: Camera },
 ]
 const SEGERA = {
   traffic: 'Lapisan Traffic hadir bersama Live Traffic Information.',
