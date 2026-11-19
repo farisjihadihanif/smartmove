@@ -8,6 +8,7 @@ import config from './config.js';
 import { errorHandler, notFound } from './middleware/error.js';
 import { loadUser } from './middleware/auth.js';
 import { createMailer } from './services/mail.js';
+import { createMidtrans } from './services/midtrans.js';
 import { authRouter } from './routes/auth.js';
 import { usersRouter } from './routes/users.js';
 import { homeRouter } from './routes/home.js';
@@ -19,10 +20,12 @@ import { transitRouter } from './routes/transit.js';
 import { trafficRouter } from './routes/traffic.js';
 import { campaignRouter } from './routes/campaign.js';
 import { adminRouter } from './routes/admin/index.js';
+import { paymentsRouter } from './routes/payments.js';
 
 export function createApp(opts = {}) {
   const cfg = { ...config, ...opts };
   const mailer = cfg.mailer || createMailer(cfg);
+  const midtrans = cfg.midtransClient || createMidtrans(cfg);
   const app = express();
 
   app.set('trust proxy', 1); // di belakang Nginx
@@ -64,6 +67,7 @@ export function createApp(opts = {}) {
   api.use('/trips', tripsRouter(cfg));
   api.use('/transit', transitRouter(cfg));
   api.use('/campaign', campaignRouter());
+  api.use('/payments', paymentsRouter(cfg, { midtrans }));
   api.use('/admin', adminRouter(cfg));
   // Satu kuota bersama untuk semua endpoint yang memanggil layanan peta.
   const mapLimit = rateLimit({

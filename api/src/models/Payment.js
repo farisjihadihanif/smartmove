@@ -10,9 +10,15 @@ const paymentSchema = new mongoose.Schema(
     user: ref('User', false),
     penggunaDihapus: { type: Boolean, default: false },
     orderId: { type: String, required: true, unique: true },
+    // Salinan data layanan saat dipesan (e-tiket tetap utuh walau katalog diubah admin).
     layanan: {
       kode: { type: String, required: true },
       nama: { type: String, required: true },
+      jenis: String,
+      operator: String,
+      asal: String,
+      tujuan: String,
+      harga: Number,
     },
     jadwal: Date, // waktu berangkat / mulai parkir
     penumpang: { type: Number, min: 1, default: 1 }, // jumlah orang, atau jam untuk parkir
@@ -22,6 +28,7 @@ const paymentSchema = new mongoose.Schema(
     status: { type: String, enum: PAYMENT_STATUS, default: 'menunggu' },
     metode: String,
     snapToken: String,
+    redirectUrl: String, // halaman Snap untuk melanjutkan pembayaran yang masih menunggu
     midtransRaw: { type: mongoose.Schema.Types.Mixed, select: false }, // tanpa data kartu
     dibayarPada: Date,
   },

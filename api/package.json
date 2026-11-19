@@ -9,6 +9,7 @@
     "impor:osm": "node scripts/impor-osm.js",
     "impor:jalan": "node scripts/impor-jalan.js",
     "isi:kampanye": "node scripts/isi-kampanye.js",
+    "isi:layanan": "node scripts/isi-layanan.js",
     "test": "node --test --test-concurrency=1 \"test/**/*.test.js\"",
     "lint": "eslint ."
   },

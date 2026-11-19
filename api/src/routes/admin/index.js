@@ -1,6 +1,7 @@
 import express from 'express';
 import { requireAdmin, requireAuth } from '../../middleware/auth.js';
 import { adminKontenRouter } from './konten.js';
+import { adminPembayaranRouter } from './pembayaran.js';
 import { adminPenggunaRouter } from './pengguna.js';
 import { adminTransitRouter } from './transit.js';
 
@@ -11,5 +12,6 @@ export function adminRouter(cfg) {
   r.use('/transit', adminTransitRouter(cfg));
   r.use(adminKontenRouter(cfg));
   r.use(adminPenggunaRouter(cfg));
+  r.use(adminPembayaranRouter(cfg));
   return r;
 }

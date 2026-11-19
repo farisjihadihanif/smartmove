@@ -53,6 +53,11 @@ const config = {
   // Foto jalan (Street view). Token hanya di server.
   mapillaryToken: env.MAPILLARY_TOKEN,
   mapillaryUrl: env.MAPILLARY_URL,
+  // Midtrans Snap — selalu sandbox (TASK Keputusan #7). Server key hanya di API.
+  midtrans: {
+    serverKey: env.MIDTRANS_SERVER_KEY,
+    clientKey: env.MIDTRANS_CLIENT_KEY,
+  },
   // Kebijakan OSM: User-Agent yang mengenali aplikasi + alamat kontak.
   mapUserAgent: `SmartMoveMedan/1.0 (+${env.APP_URL || 'http://localhost:4200'})`,
   // console | smtp (lihat services/mail.js). Diabaikan di produksi.

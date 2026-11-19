@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 import config, { assertConfig } from './config.js';
 import { createApp } from './app.js';
 import { ensureAdmin } from './services/adminSeed.js';
+import { createMidtrans } from './services/midtrans.js';
+import { kedaluwarsakanPembayaran } from './services/payments.js';
 
 async function main() {
   assertConfig();
@@ -20,7 +22,22 @@ async function main() {
     console.log(`API berjalan di port ${config.port}`);
   });
 
+  // Cron (ARCHITECTURE §6): Payment `menunggu` > 24 jam → cocokkan dengan Midtrans /
+  // kedaluwarsa. Dicek tiap jam supaya tidak menunggu sampai sehari penuh setelah restart.
+  const midtrans = createMidtrans(config);
+  const cron = async () => {
+    const n = await kedaluwarsakanPembayaran({ midtrans }).catch((err) => {
+      console.warn(`Cron pembayaran gagal: ${err.message}`);
+      return 0;
+    });
+    if (n) console.log(`Cron pembayaran: ${n} transaksi diproses`);
+  };
+  const cronTimer = setInterval(cron, 60 * 60 * 1000);
+  cronTimer.unref();
+  setTimeout(cron, 30_000).unref();
+
   const stop = async () => {
+    clearInterval(cronTimer);
     server.close();
     await mongoose.disconnect();
     process.exit(0);
