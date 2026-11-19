@@ -91,7 +91,7 @@ class ErrorBanner extends StatelessWidget {
                         ? Icons.cloud_off
                         : Icons.error_outline,
                     size: 20,
-                    color: const Color(0xFFC62828),
+                    color: AppColors.teksMerah,
                   ),
                 ),
               ),
@@ -103,7 +103,7 @@ class ErrorBanner extends StatelessWidget {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       text,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         height: 1.35,
                         color: AppColors.ink,

@@ -240,7 +240,7 @@ class GradientPill extends StatelessWidget {
         child: Ink(
           decoration: ShapeDecoration(
             color: plain
-                ? AppColors.white.withValues(alpha: 0.8)
+                ? AppColors.card.withValues(alpha: 0.8)
                 : tone == PillTone.soft
                 ? AppColors.pillSoft
                 : null,

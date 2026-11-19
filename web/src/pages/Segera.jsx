@@ -1,6 +1,7 @@
 import { Hammer } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import EmptyState from '../components/EmptyState.jsx'
+import PilihTema from '../components/PilihTema.jsx'
 import PageShell from '../components/PageShell.jsx'
 import { useAuth } from '../lib/useAuth.js'
 
@@ -17,6 +18,17 @@ export default function Segera({ title, account = false }) {
             <br />
             {user.email}
           </p>
+        )}
+        {account && (
+          <div className="mt-6 w-full max-w-sm px-2">
+            <PilihTema />
+            <Link
+              to="/pembayaran/riwayat"
+              className="mt-4 flex min-h-touch items-center justify-center rounded-full font-semibold text-ink-violet ring-1 ring-ink-violet/30 hover:bg-ink-violet/5"
+            >
+              Riwayat pemesanan
+            </Link>
+          </div>
         )}
         {account && user?.role === 'admin' && (
           <Link to="/admin" className="mt-6 inline-flex min-h-touch items-center rounded-full bg-pill px-6 font-semibold text-white">

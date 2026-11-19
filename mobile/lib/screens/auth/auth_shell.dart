@@ -54,7 +54,7 @@ class AuthShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final top = MediaQuery.paddingOf(context).top;
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.card,
       body: LayoutBuilder(
         builder: (context, box) => SingleChildScrollView(
           child: ConstrainedBox(
@@ -174,8 +174,8 @@ class _Sheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        color: AppColors.white,
+      decoration: BoxDecoration(
+        color: AppColors.card,
         borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
       ),
       child: Stack(
@@ -239,7 +239,7 @@ class _Medallion extends StatelessWidget {
             color: AppColors.white,
             shape: BoxShape.circle,
           ),
-          child: const DecoratedBox(
+          child: DecoratedBox(
             decoration: BoxDecoration(
               color: AppColors.loginAvatar,
               shape: BoxShape.circle,
@@ -343,7 +343,7 @@ class _AuthFieldState extends State<AuthField> {
             children: [
               Container(
                 width: 48,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: AppColors.loginField,
                   borderRadius: BorderRadius.horizontal(left: radius),
                 ),
@@ -352,7 +352,7 @@ class _AuthFieldState extends State<AuthField> {
               const SizedBox(width: AppSizes.s1),
               Expanded(
                 child: Container(
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: AppColors.loginField,
                     borderRadius: BorderRadius.horizontal(right: radius),
                   ),

@@ -40,8 +40,8 @@ export const kelasInput =
 export function Tombol({ jenis = 'utama', memuat = false, children, className = '', ...rest }) {
   const k = {
     utama: 'bg-pill text-white shadow-[0_6px_14px_-6px_rgb(114_13_129/0.8)]',
-    biasa: 'bg-white text-ink-violet ring-1 ring-ink-violet/25 hover:bg-ink-violet/5',
-    bahaya: 'bg-white text-[#B71C1C] ring-1 ring-traffic-macet/40 hover:bg-traffic-macet/5',
+    biasa: 'bg-card text-ink-violet ring-1 ring-ink-violet/25 hover:bg-ink-violet/5',
+    bahaya: 'bg-card text-[#B71C1C] ring-1 ring-traffic-macet/40 hover:bg-traffic-macet/5',
   }[jenis]
   return (
     <button

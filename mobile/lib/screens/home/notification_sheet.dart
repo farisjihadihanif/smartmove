@@ -26,7 +26,7 @@ final _jenis = {
   'poin': _Jenis(
     Icons.toll_rounded,
     AppColors.trafficPadat.withValues(alpha: 0.15),
-    const Color(0xFF9A5B00),
+    AppColors.teksKuning,
   ),
 };
 
@@ -43,7 +43,7 @@ Future<void> showNotificationSheet(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
-    backgroundColor: AppColors.white,
+    backgroundColor: AppColors.card,
     barrierColor: AppColors.inkViolet.withValues(alpha: 0.45),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
@@ -147,7 +147,7 @@ class _NotifTile extends StatelessWidget {
       child: Material(
         color: baru
             ? AppColors.lilacWash.withValues(alpha: 0.22)
-            : AppColors.white,
+            : AppColors.card,
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           onTap: onTap,

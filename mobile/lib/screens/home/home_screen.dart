@@ -575,7 +575,7 @@ class _TripPlannerCard extends StatelessWidget {
   }
 }
 
-const _amber = Color(0xFF9A5B00);
+Color get _amber => AppColors.teksKuning;
 
 /// Pengganti ringkasan poin untuk tamu: ajakan masuk/daftar.
 class _GuestCard extends StatelessWidget {
@@ -586,7 +586,7 @@ class _GuestCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSizes.s4 + AppSizes.s1),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: AppColors.ink.withValues(alpha: 0.08)),
       ),
@@ -660,7 +660,7 @@ class _PointsTile extends StatelessWidget {
     final saldo = (poin?['saldo'] as num?)?.toInt() ?? 0;
     final bulanIni = (poin?['bulanIni'] as num?)?.toInt() ?? 0;
     return Material(
-      color: AppColors.white,
+      color: AppColors.card,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),
         side: BorderSide(color: AppColors.ink.withValues(alpha: 0.08)),
@@ -679,7 +679,7 @@ class _PointsTile extends StatelessWidget {
                   color: AppColors.trafficPadat.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.card_giftcard_rounded,
                   color: _amber,
                   size: 22,
@@ -752,7 +752,7 @@ class _OngoingEvents extends StatelessWidget {
         const SizedBox(height: AppSizes.s2),
         DecoratedBox(
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: AppColors.card,
             borderRadius: BorderRadius.circular(24),
             border: Border.all(color: AppColors.ink.withValues(alpha: 0.08)),
           ),

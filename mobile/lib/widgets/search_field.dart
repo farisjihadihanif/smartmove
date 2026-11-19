@@ -40,7 +40,7 @@ class SearchField extends StatelessWidget {
         shape: const StadiumBorder(),
         shadows: [
           BoxShadow(
-            color: AppColors.white.withValues(alpha: 0.7),
+            color: AppColors.card.withValues(alpha: 0.7),
             spreadRadius: 1,
           ),
           BoxShadow(
@@ -83,7 +83,7 @@ class SearchField extends StatelessWidget {
               tooltip: 'Cari',
               onPressed: () => onSubmitted?.call(controller?.text ?? ''),
               style: IconButton.styleFrom(
-                backgroundColor: AppColors.inkViolet,
+                backgroundColor: AppColors.inkVioletIsi,
                 foregroundColor: AppColors.white,
                 minimumSize: const Size(44, 44),
                 fixedSize: const Size(44, 44),

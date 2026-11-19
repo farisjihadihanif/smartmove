@@ -110,7 +110,7 @@ function BelumLunas({ p, cek, memeriksa, error }) {
   const menunggu = p.status === 'menunggu'
   const Ikon = menunggu ? Clock3 : CircleAlert
   return (
-    <section className="rounded-[1.75rem] bg-white p-6 shadow-[0_16px_40px_-24px_rgb(65_57_111/0.6)] ring-1 ring-ink-violet/10">
+    <section className="rounded-[1.75rem] bg-card p-6 shadow-[0_16px_40px_-24px_rgb(65_57_111/0.6)] ring-1 ring-ink-violet/10">
       <p className={`flex items-center gap-2 text-[15px] font-semibold ${menunggu ? 'text-[#8A5300]' : 'text-ink/70'}`}>
         <Ikon size={20} aria-hidden="true" />
         {STATUS[p.status]?.label ?? p.status}

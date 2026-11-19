@@ -63,7 +63,7 @@ export default function PillToggle({
             } ${fitDesktop ? 'lg:max-w-none lg:flex-none lg:grow-0 lg:whitespace-nowrap lg:px-4' : ''} ${
               on
                 ? `${TONE[tone]} font-semibold text-white shadow-[0_6px_14px_-6px_rgb(114_13_129/0.8)]`
-                : 'bg-white/80 text-ink-violet ring-1 ring-ink-violet/15 hover:bg-white'
+                : 'bg-card/80 text-ink-violet ring-1 ring-ink-violet/15 hover:bg-card'
             }`}
           >
             {Ikon && <Ikon size={16} strokeWidth={on ? 3 : 2.25} className="shrink-0" aria-hidden="true" />}

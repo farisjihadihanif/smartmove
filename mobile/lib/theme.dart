@@ -1,15 +1,26 @@
 import 'package:google_fonts/google_fonts.dart';
 import 'package:material_ui/material_ui.dart';
 
+/// Mode gelap (T-110, DESIGN §2.1b). Diatur [buildTheme]; warna adaptif di [AppColors]
+/// membaca nilai ini. Pohon widget dibangun ulang saat tema berganti (lihat main.dart).
+abstract final class AppPalette {
+  static bool gelap = false;
+}
+
 /// Token warna dari piksel mockup – DESIGN.md §2.1.
 /// Ubah bersamaan dengan DESIGN.md dan web/src/index.css.
+/// Warna identitas (gradasi, kartu Trip Planner, bar aksi, lalu lintas) tetap di kedua mode;
+/// permukaan, teks, dan aksen ungu tua adaptif (getter, nilai gelap = web `[data-theme=dark]`).
 abstract final class AppColors {
+  static bool get _g => AppPalette.gelap;
   // Login (hal. 2)
   static const loginFrom = Color(0xFF333399);
   static const loginTo = Color(0xFFFF00CC);
-  static const indigo = Color(0xFF333399);
+  static Color get indigo =>
+      _g ? const Color(0xFFADA8F5) : const Color(0xFF333399);
   static const loginButton = Color(0xFF7324A9);
-  static const loginField = Color(0xFFFCEDED);
+  static Color get loginField =>
+      _g ? const Color(0xFF2C2240) : const Color(0xFFFCEDED);
   static const loginAvatar = Color(0xFFB79FD1);
 
   // Splash (hal. 1)
@@ -19,7 +30,8 @@ abstract final class AppColors {
   static const leaf = Color(0xFFE1E6D3);
 
   // Warna dasar tekstur (fallback saat gambar belum termuat)
-  static const lilacWash = Color(0xFFDAB8F6);
+  static Color get lilacWash =>
+      _g ? const Color(0xFF3A2A57) : const Color(0xFFDAB8F6);
   static const barDark = Color(0xFF3B0B64);
 
   // Kapsul & bar
@@ -30,7 +42,14 @@ abstract final class AppColors {
   static const pillDeepVia = Color(0xFF720D81);
   static const pillDeepTo = Color(0xFF512A77);
   static const pillSoft = Color(0xFF9B59B6);
-  static const inkViolet = Color(0xFF41396F);
+  static Color get inkViolet => _g ? const Color(0xFFC9B8F2) : inkVioletTetap;
+
+  /// Ungu tua yang tidak berubah (teks di atas kapsul putih #F4F0F0, isian chip terpilih).
+  static const inkVioletTetap = Color(0xFF41396F);
+
+  /// Isian solid "ungu tua" bertulisan putih (chip/kapsul terpilih).
+  static Color get inkVioletIsi =>
+      _g ? const Color(0xFF5A4A9C) : inkVioletTetap;
   static const actionPill = Color(0xFFF4F0F0);
   static const sysnavFrom = Color(0xFF4C2F73);
   static const sysnavVia = Color(0xFF740C82);
@@ -45,11 +64,31 @@ abstract final class AppColors {
   // Ikon, teks, permukaan
   static const iconBlue = Color(0xFF68B4E7);
   static const iconBlueDeep = Color(0xFF1E63C3);
-  static const ink = Color(0xFF000000);
+  static Color get ink =>
+      _g ? const Color(0xFFF2EDFA) : const Color(0xFF000000);
   static const white = Color(0xFFFFFFFF);
-  static const surfaceMenu = Color(0xFFFAFDFD);
-  static const surfaceNav = Color(0xFFF4F4F3);
-  static const search = Color(0xFFF6F6F6);
+
+  /// Latar halaman.
+  static Color get surface => _g ? const Color(0xFF15101E) : white;
+
+  /// Kartu & lembar di atas latar (putih di mode terang).
+  static Color get card => _g ? const Color(0xFF211A2E) : white;
+  static Color get surfaceMenu =>
+      _g ? const Color(0xFF1A1426) : const Color(0xFFFAFDFD);
+  static Color get surfaceNav =>
+      _g ? const Color(0xFF1B1527) : const Color(0xFFF4F4F3);
+
+  /// Teks status di atas tint (hijau / kuning / merah / abu), dicerahkan di mode gelap.
+  static Color get teksHijau =>
+      _g ? const Color(0xFF86DCA8) : const Color(0xFF1D6B3D);
+  static Color get teksKuning =>
+      _g ? const Color(0xFFFFC870) : const Color(0xFF8A5300);
+  static Color get teksMerah =>
+      _g ? const Color(0xFFFF9A8F) : const Color(0xFFB42318);
+  static Color get teksAbu =>
+      _g ? const Color(0xFFB8B3C4) : const Color(0xFF5F5F6B);
+  static Color get search =>
+      _g ? const Color(0xFF2A2239) : const Color(0xFFF6F6F6);
 
   // Peta & lalu lintas (hal. 4, 6)
   static const route = Color(0xFF0F53FF);
@@ -101,13 +140,17 @@ abstract final class AppTextures {
   /// Logo dari mockup hal. 1 (sementara sampai logo final, DESIGN §9).
   static const logoAsset = 'assets/brand/logo.webp';
 
-  /// Latar header lilac: gambar menutupi area, rata atas.
-  static const lilacWash = BoxDecoration(
+  /// Latar header lilac: gambar menutupi area, rata atas. Mode gelap: tekstur yang sama
+  /// dikalikan ungu tua (guratan cat air tetap terlihat, teks terang terbaca) = web multiply.
+  static BoxDecoration get lilacWash => BoxDecoration(
     color: AppColors.lilacWash,
     image: DecorationImage(
-      image: AssetImage(lilacWashAsset),
+      image: const AssetImage(lilacWashAsset),
       fit: BoxFit.cover,
       alignment: Alignment.topCenter,
+      colorFilter: AppPalette.gelap
+          ? ColorFilter.mode(AppColors.lilacWash, BlendMode.multiply)
+          : null,
     ),
   );
 
@@ -153,12 +196,16 @@ TextStyle sans({
 );
 
 /// Gaya judul Bree Serif (judul kartu besar, sapaan).
-TextStyle titleSerif({double size = 22, Color color = AppColors.ink}) =>
-    GoogleFonts.breeSerif(fontSize: size, color: color, height: 1.2);
+TextStyle titleSerif({double size = 22, Color? color}) => GoogleFonts.breeSerif(
+  fontSize: size,
+  color: color ?? AppColors.ink,
+  height: 1.2,
+);
 
-ThemeData buildTheme() {
-  const scheme = ColorScheme(
-    brightness: Brightness.light,
+ThemeData buildTheme({bool gelap = false}) {
+  AppPalette.gelap = gelap;
+  final scheme = ColorScheme(
+    brightness: gelap ? Brightness.dark : Brightness.light,
     primary: AppColors.loginButton,
     onPrimary: AppColors.white,
     primaryContainer: AppColors.lilacWash,
@@ -169,7 +216,7 @@ ThemeData buildTheme() {
     onTertiary: AppColors.white,
     error: AppColors.trafficMacet,
     onError: AppColors.white,
-    surface: AppColors.white,
+    surface: AppColors.card,
     onSurface: AppColors.ink,
   );
 
@@ -185,7 +232,9 @@ ThemeData buildTheme() {
 
   return base.copyWith(
     textTheme: text,
-    scaffoldBackgroundColor: AppColors.white,
+    scaffoldBackgroundColor: AppColors.surface,
+    canvasColor: AppColors.surface,
+    dividerColor: AppColors.ink.withValues(alpha: 0.1),
     materialTapTargetSize: MaterialTapTargetSize.padded,
     appBarTheme: AppBarTheme(
       backgroundColor: AppColors.lilacWash,
@@ -220,7 +269,7 @@ ThemeData buildTheme() {
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.inkViolet,
-        side: const BorderSide(color: AppColors.inkViolet),
+        side: BorderSide(color: AppColors.inkViolet),
         minimumSize: minTouch,
         shape: pill,
       ),
@@ -253,7 +302,7 @@ ThemeData buildTheme() {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(999),
-        borderSide: const BorderSide(color: AppColors.inkViolet, width: 2),
+        borderSide: BorderSide(color: AppColors.inkViolet, width: 2),
       ),
     ),
     navigationBarTheme: NavigationBarThemeData(
@@ -267,8 +316,8 @@ ThemeData buildTheme() {
         ),
       ),
     ),
-    snackBarTheme: const SnackBarThemeData(
-      backgroundColor: AppColors.inkViolet,
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: AppColors.inkVioletIsi,
       behavior: SnackBarBehavior.floating,
     ),
   );

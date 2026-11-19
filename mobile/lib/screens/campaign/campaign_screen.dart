@@ -216,7 +216,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
             MenuTile(
               variant: MenuTileVariant.pill,
               label: 'Poster',
-              icon: const Icon(
+              icon: Icon(
                 Icons.image_outlined,
                 size: 60,
                 color: AppColors.indigo,
@@ -619,7 +619,7 @@ class _PenampilPoster extends StatelessWidget {
               label: const Text('Share'),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.actionPill,
-                foregroundColor: AppColors.inkViolet,
+                foregroundColor: AppColors.inkVioletTetap,
                 minimumSize: const Size(160, AppSizes.touch),
               ),
             ),
@@ -824,8 +824,8 @@ class FeedbackScreenState extends State<FeedbackScreen> {
                     ? AppColors.white
                     : AppColors.ink.withValues(alpha: 0.8),
               ),
-              selectedColor: AppColors.inkViolet,
-              backgroundColor: AppColors.white,
+              selectedColor: AppColors.inkVioletIsi,
+              backgroundColor: AppColors.card,
               side: BorderSide(
                 color: fitur == v
                     ? AppColors.inkViolet

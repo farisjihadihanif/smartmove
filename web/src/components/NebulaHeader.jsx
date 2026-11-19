@@ -25,7 +25,7 @@ export default function NebulaHeader({
       <div className={row ? 'lg:mx-auto lg:flex lg:max-w-7xl lg:items-center lg:gap-8 lg:px-6' : undefined}>
       <div className={`flex min-h-touch items-center gap-3 ${row ? 'lg:shrink-0' : ''}`}>
         {leading && (
-          <div className="grid size-12 shrink-0 place-items-center overflow-hidden rounded-full bg-white text-ink-violet shadow-[0_2px_8px_rgb(65_57_111/0.25)] ring-2 ring-white">
+          <div className="grid size-12 shrink-0 place-items-center overflow-hidden rounded-full bg-card text-ink-violet shadow-[0_2px_8px_rgb(65_57_111/0.25)] ring-2 ring-white">
             {leading}
           </div>
         )}

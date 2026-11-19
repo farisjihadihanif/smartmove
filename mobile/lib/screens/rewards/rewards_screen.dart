@@ -194,7 +194,7 @@ class RewardsScreenState extends State<RewardsScreen> {
                   style: sans(
                     size: 15,
                     weight: FontWeight.w600,
-                    color: const Color(0xFF1D6B3D),
+                    color: AppColors.teksHijau,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -351,9 +351,9 @@ class RewardsScreenState extends State<RewardsScreen> {
     final v = (r['voucher'] as Map?) ?? const {};
     final status = '${r['status']}';
     final (label, warna) = switch (status) {
-      'aktif' => ('Bisa dipakai', const Color(0xFF1D6B3D)),
-      'dipakai' => ('Sudah dipakai', const Color(0xFF5F5F6B)),
-      _ => ('Kedaluwarsa', const Color(0xFF5F5F6B)),
+      'aktif' => ('Bisa dipakai', AppColors.teksHijau),
+      'dipakai' => ('Sudah dipakai', AppColors.teksAbu),
+      _ => ('Kedaluwarsa', AppColors.teksAbu),
     };
     final kode = '${r['kode']}';
     return Padding(
@@ -403,7 +403,7 @@ class RewardsScreenState extends State<RewardsScreen> {
                       );
                     }
                   },
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.copy_rounded,
                     size: 18,
                     color: AppColors.inkViolet,
@@ -475,7 +475,7 @@ class RewardsScreenState extends State<RewardsScreen> {
                   style: titleSerif(
                     size: 20,
                     color: (l['jumlah'] as num) > 0
-                        ? const Color(0xFF1D6B3D)
+                        ? AppColors.teksHijau
                         : AppColors.ink.withValues(alpha: 0.7),
                   ),
                 ),
@@ -667,7 +667,7 @@ class Kupon extends StatelessWidget {
       opacity: redup ? 0.6 : 1,
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: AppColors.card,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: AppColors.inkViolet.withValues(alpha: 0.12),

@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'api.dart';
 
@@ -15,6 +16,37 @@ class AppState extends ChangeNotifier {
 
   AuthStatus _status = AuthStatus.unknown;
   Map<String, dynamic>? _user;
+
+  /// Mode gelap (T-110): 'sistem' | 'terang' | 'gelap', disimpan di perangkat.
+  static const kunciTema = 'smartmove-tema';
+  String _tema = 'sistem';
+  String get tema => _tema;
+
+  Future<void> muatTema() async {
+    try {
+      final v = (await SharedPreferences.getInstance()).getString(kunciTema);
+      if (v == 'terang' || v == 'gelap') {
+        _tema = v!;
+        notifyListeners();
+      }
+    } catch (_) {
+      // Penyimpanan tidak tersedia: ikut sistem.
+    }
+  }
+
+  Future<void> setTema(String v) async {
+    if (v != 'sistem' && v != 'terang' && v != 'gelap') return;
+    _tema = v;
+    notifyListeners();
+    try {
+      final p = await SharedPreferences.getInstance();
+      if (v == 'sistem') {
+        await p.remove(kunciTema);
+      } else {
+        await p.setString(kunciTema, v);
+      }
+    } catch (_) {}
+  }
 
   AuthStatus get status => _status;
   Map<String, dynamic>? get user => _user;

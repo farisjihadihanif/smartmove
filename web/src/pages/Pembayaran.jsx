@@ -216,7 +216,7 @@ export default function Pembayaran() {
   const biayaPanel = (
     <section
       aria-labelledby="judul-biaya"
-      className={`${!desktop && langkah !== 'biaya' ? 'hidden' : ''} lg:sticky lg:top-6 lg:self-start lg:rounded-[1.75rem] lg:bg-white lg:p-6 lg:shadow-[0_16px_40px_-24px_rgb(65_57_111/0.6)] lg:ring-1 lg:ring-ink-violet/10`}
+      className={`${!desktop && langkah !== 'biaya' ? 'hidden' : ''} lg:sticky lg:top-6 lg:self-start lg:rounded-[1.75rem] lg:bg-card lg:p-6 lg:shadow-[0_16px_40px_-24px_rgb(65_57_111/0.6)] lg:ring-1 lg:ring-ink-violet/10`}
     >
       <h2 id="judul-biaya" className="font-serif text-[1.5rem] leading-tight">
         Estimasi biaya
@@ -351,7 +351,7 @@ function JenisChips({ value, onChange }) {
             aria-pressed={on}
             onClick={() => onChange(j.value)}
             className={`flex min-h-touch shrink-0 items-center gap-1.5 rounded-full px-4 text-sm font-semibold transition ${
-              on ? 'bg-ink-violet text-white' : 'bg-white text-ink/80 ring-1 ring-ink/15 hover:bg-ink/[0.04]'
+              on ? 'bg-ink-violet text-white' : 'bg-card text-ink/80 ring-1 ring-ink/15 hover:bg-ink/[0.04]'
             }`}
           >
             {Ikon && <Ikon size={16} aria-hidden="true" />}
@@ -391,7 +391,7 @@ function PitaTanggal({ value, onChange, hariIni }) {
               className={`flex w-[3.75rem] shrink-0 flex-col items-center rounded-2xl py-2 transition ${
                 on
                   ? 'bg-pill text-white shadow-[0_6px_14px_-6px_rgb(114_13_129/0.8)]'
-                  : 'bg-white text-ink ring-1 ring-ink/10 hover:bg-lilac-wash/30'
+                  : 'bg-card text-ink ring-1 ring-ink/10 hover:bg-lilac-wash/30'
               }`}
             >
               <span className={`text-[12px] font-semibold ${on ? 'text-white/85' : 'text-ink/55'}`}>
@@ -458,7 +458,7 @@ function BarisLayanan({ layanan, tanggal, terpilih, jam, onPilih, onJam }) {
                     disabled={!s.tersedia}
                     onClick={() => onJam(s)}
                     className={`flex min-h-touch items-center gap-1 rounded-full px-4 font-serif text-[1rem] tabular-nums transition disabled:text-ink/30 disabled:line-through ${
-                      jam === s.jam ? 'bg-ink-violet text-white' : 'bg-white ring-1 ring-ink/15 hover:bg-white/70'
+                      jam === s.jam ? 'bg-ink-violet text-white' : 'bg-card ring-1 ring-ink/15 hover:bg-card/70'
                     }`}
                   >
                     {jam === s.jam && <Check size={15} strokeWidth={3} aria-hidden="true" />}

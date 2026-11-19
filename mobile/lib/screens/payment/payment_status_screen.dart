@@ -180,7 +180,7 @@ class PaymentStatusScreenState extends State<PaymentStatusScreen>
     return Container(
       padding: const EdgeInsets.all(AppSizes.s6),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(28),
         border: Border.all(color: AppColors.inkViolet.withValues(alpha: 0.1)),
       ),

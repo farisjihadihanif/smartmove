@@ -78,7 +78,7 @@ class NebulaHeader extends StatelessWidget {
                         clipBehavior: Clip.antiAlias,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: AppColors.white,
+                          color: AppColors.card,
                           shape: BoxShape.circle,
                           border: Border.all(color: AppColors.white, width: 2),
                           boxShadow: [
@@ -155,7 +155,7 @@ class NotificationButton extends StatelessWidget {
                 height: 40,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.white.withValues(alpha: 0.75),
+                  color: AppColors.card.withValues(alpha: 0.75),
                   boxShadow: [
                     BoxShadow(
                       color: AppColors.inkViolet.withValues(alpha: 0.18),
@@ -164,7 +164,7 @@ class NotificationButton extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.notifications_none_rounded,
                   size: 20,
                   color: AppColors.ink,

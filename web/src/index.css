@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Mode gelap (T-110): `data-theme="dark"` di <html>, dipasang lib/tema.js (Sistem / Terang / Gelap). */
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
 /* Token warna dari piksel mockup – DESIGN.md §2.1. Ubah bersamaan dengan DESIGN.md dan mobile/lib/theme.dart. */
 @theme {
   /* Login (hal. 2) */
@@ -45,6 +48,7 @@
   --color-icon-blue-deep: #1E63C3;
   --color-ink: #000000;
   --color-surface: #FFFFFF;
+  --color-card: #FFFFFF; /* kartu/lembar di atas surface (putih di mode terang) */
   --color-surface-menu: #FAFDFD;
   --color-surface-nav: #F4F4F3;
   --color-search: #F6F6F6;
@@ -63,12 +67,78 @@
   --spacing-touch: 48px;
 }
 
+/* Mode gelap (T-110, DESIGN §2.1b): warna identitas (gradasi kapsul, kartu Trip Planner, bar aksi,
+   warna lalu lintas) tetap; yang berubah hanya permukaan, teks, dan aksen ungu tua → lavender
+   supaya kontras ≥ 4.5:1 di latar gelap. Ubah bersamaan dengan mobile/lib/theme.dart (AppPalette.gelap). */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-ink: #F2EDFA;
+  --color-ink-violet: #C9B8F2;
+  --color-surface: #15101E;
+  --color-card: #211A2E;
+  --color-surface-menu: #1A1426;
+  --color-surface-nav: #1B1527;
+  --color-search: #2A2239;
+  --color-login-field: #2C2240;
+  --color-lilac-wash: #3A2A57;
+  --color-trip-4: #5F3F73;
+  --color-indigo: #ADA8F5; /* ikon & teks kolom login */
+}
+/* Teks ungu tombol login (Lupa password?, Buat akun) dicerahkan; isian tombol tetap #7324A9. */
+:root[data-theme="dark"] .text-login-button:not(.tema-terang *) {
+  color: #D3A6F7;
+}
+:root[data-theme="dark"] .border-login-button:not(.tema-terang *) {
+  border-color: #B97BEA;
+}
+/* Bagian yang sengaja tetap terang (kertas e-tiket, poster Splash): token terang dipulihkan. */
+.tema-terang {
+  color-scheme: light;
+  --color-ink: #000000;
+  --color-ink-violet: #41396F;
+  --color-surface: #FFFFFF;
+  --color-card: #FFFFFF;
+  --color-search: #F6F6F6;
+  --color-login-field: #FCEDED;
+  color: var(--color-ink);
+}
+/* Isian solid ungu tua (chip/kapsul terpilih bertulisan putih) tetap gelap di mode gelap. */
+:root[data-theme="dark"] .bg-ink-violet:not(.tema-terang *) {
+  background-color: #5A4A9C;
+}
+/* Kapsul putih di bar aksi (Rute · Play · Share) tetap terang → teksnya tetap ungu tua. */
+:root[data-theme="dark"] .bg-action-pill {
+  --color-ink-violet: #41396F;
+  --color-ink: #000000;
+}
+/* Teks status bernada tua (hijau/kuning/merah di atas tint) dicerahkan supaya ≥ 4.5:1 di latar gelap. */
+:root[data-theme="dark"] :is(.text-\[\#1D6B3D\], .text-\[\#1B6B3C\]):not(.tema-terang *) {
+  color: #86DCA8;
+}
+:root[data-theme="dark"] :is(.text-\[\#8A5300\], .text-\[\#7A4A00\], .text-\[\#9A5B00\], .text-\[\#B26A00\]):not(.tema-terang *) {
+  color: #FFC870;
+}
+:root[data-theme="dark"] :is(.text-\[\#B42318\], .text-\[\#B71C1C\], .text-\[\#C62828\]):not(.tema-terang *) {
+  color: #FF9A8F;
+}
+/* Peta OSM digelapkan (ubin saja; garis rute, penanda, dan atribusi tetap berwarna asli). */
+:root[data-theme="dark"] .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.88) saturate(0.7);
+}
+:root[data-theme="dark"] .leaflet-container {
+  background: #1d1a24;
+}
+
 /* Header lilac: gambar tekstur dari mockup, bukan gradasi buatan. */
 @utility bg-lilac-wash {
   background-color: var(--color-lilac-wash);
   background-image: url("./assets/textures/lilac-wash.webp");
   background-size: cover;
   background-position: top center;
+  /* Gelap: tekstur yang sama dikalikan ungu tua → guratan cat air tetap terlihat, teks terang terbaca. */
+  :root[data-theme="dark"] & {
+    background-blend-mode: multiply;
+  }
 }
 
 /* Bar aksi bawah: tekstur ungu tua dari mockup. */
@@ -150,7 +220,7 @@
   font-family: var(--font-sans);
 }
 .leaflet-container .leaflet-control-attribution {
-  background: rgb(255 255 255 / 0.85);
+  background: color-mix(in oklab, var(--color-card) 85%, transparent);
   color: var(--color-ink);
   font-size: 11px;
   padding: 1px 6px;
@@ -184,7 +254,8 @@
   align-items: flex-start;
   min-width: 3.75rem;
   padding: 4px 9px 5px;
-  background: #fff;
+  background: var(--color-card);
+  color: var(--color-ink);
   border: 1px solid rgb(65 57 111 / 0.35);
   border-radius: 8px;
   box-shadow: 0 4px 12px -4px rgb(65 57 111 / 0.45);
@@ -200,7 +271,7 @@
   bottom: -6px;
   width: 10px;
   height: 10px;
-  background: #fff;
+  background: var(--color-card);
   border-right: 1px solid rgb(65 57 111 / 0.35);
   border-bottom: 1px solid rgb(65 57 111 / 0.35);
   transform: translateX(-50%) rotate(45deg);
@@ -211,7 +282,7 @@
 }
 .lt-kotak span {
   font-size: 12px;
-  color: rgb(0 0 0 / 0.62);
+  color: color-mix(in oklab, var(--color-ink) 62%, transparent);
 }
 .lt-kotak-aktif {
   border-color: var(--color-pill-via);

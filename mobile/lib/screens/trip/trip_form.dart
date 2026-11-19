@@ -21,7 +21,7 @@ Future<Trip?> showTripForm(
   context: context,
   isScrollControlled: true,
   useSafeArea: true,
-  backgroundColor: AppColors.white,
+  backgroundColor: AppColors.card,
   showDragHandle: true,
   shape: const RoundedRectangleBorder(
     borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
@@ -277,7 +277,7 @@ class TripFormState extends State<TripForm> {
                     asal = tujuan;
                     tujuan = a;
                   }),
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.swap_vert_rounded,
                     color: AppColors.inkViolet,
                   ),
@@ -734,7 +734,7 @@ class _PilihTempatScreenState extends State<PilihTempatScreen> {
                 if (widget.locate != null && items == null)
                   ListTile(
                     minTileHeight: AppSizes.touch,
-                    leading: const Icon(
+                    leading: Icon(
                       Icons.my_location_rounded,
                       color: AppColors.inkViolet,
                     ),
@@ -775,7 +775,7 @@ class _PilihTempatScreenState extends State<PilihTempatScreen> {
                   for (final j in items)
                     ListTile(
                       minTileHeight: AppSizes.touch + 8,
-                      leading: const Icon(
+                      leading: Icon(
                         Icons.place_outlined,
                         color: AppColors.inkViolet,
                       ),

@@ -131,7 +131,7 @@ class KotakWaktu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = koridor['tingkat'] as String?;
-    final warna = t == null ? const Color(0xFFC62828) : warnaTeksTingkat(t);
+    final warna = t == null ? AppColors.teksMerah : warnaTeksTingkat(t);
     final garis = aktif
         ? AppColors.pillVia
         : AppColors.inkViolet.withValues(alpha: 0.35);
@@ -148,7 +148,7 @@ class KotakWaktu extends StatelessWidget {
             Container(
               padding: const EdgeInsets.fromLTRB(9, 4, 9, 5),
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: AppColors.card,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: garis, width: aktif ? 2 : 1),
                 boxShadow: [

@@ -154,7 +154,7 @@ class DaftarKoridor extends StatelessWidget {
                               style: sans(
                                 size: 13,
                                 weight: FontWeight.w600,
-                                color: const Color(0xFFC62828),
+                                color: AppColors.teksMerah,
                               ),
                             ),
                           ),
@@ -293,7 +293,7 @@ class DetailLaporan extends StatelessWidget {
                               style: sans(
                                 size: 16,
                                 weight: FontWeight.w600,
-                                color: const Color(0xFFC62828),
+                                color: AppColors.teksMerah,
                               ),
                             ),
                         ],
@@ -340,7 +340,7 @@ class DetailLaporan extends StatelessWidget {
               onPressed: mengirim ? null : onKonfirmasi,
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.actionPill,
-                foregroundColor: AppColors.inkViolet,
+                foregroundColor: AppColors.inkVioletTetap,
                 minimumSize: const Size.fromHeight(AppSizes.touch),
                 textStyle: sans(size: 15, weight: FontWeight.w600),
               ),
@@ -529,8 +529,8 @@ class _FormLaporanState extends State<FormLaporan> {
                       ? AppColors.white
                       : AppColors.ink.withValues(alpha: 0.8),
                 ),
-                selectedColor: AppColors.inkViolet,
-                backgroundColor: AppColors.white,
+                selectedColor: AppColors.inkVioletIsi,
+                backgroundColor: AppColors.card,
                 side: BorderSide(
                   color: kejadian == e.key
                       ? AppColors.inkViolet

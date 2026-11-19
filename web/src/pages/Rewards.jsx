@@ -91,7 +91,7 @@ export default function Rewards() {
 function Kupon({ kiri, children, redup = false }) {
   return (
     <div
-      className={`relative grid grid-cols-[5.5rem_minmax(0,1fr)] overflow-hidden rounded-[1.25rem] bg-white ring-1 ring-ink-violet/12 ${
+      className={`relative grid grid-cols-[5.5rem_minmax(0,1fr)] overflow-hidden rounded-[1.25rem] bg-card ring-1 ring-ink-violet/12 ${
         redup ? 'opacity-60' : 'shadow-[0_10px_24px_-18px_rgb(65_57_111/0.7)]'
       }`}
     >

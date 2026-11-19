@@ -189,7 +189,7 @@ export default function Home() {
 /** Pengganti ringkasan poin untuk tamu: ajakan masuk/daftar. */
 function GuestCard() {
   return (
-    <section className="rounded-[1.5rem] bg-white px-5 py-5 ring-1 ring-ink/[0.08] lg:px-6 lg:py-6">
+    <section className="rounded-[1.5rem] bg-card px-5 py-5 ring-1 ring-ink/[0.08] lg:px-6 lg:py-6">
       <h2 className="font-serif text-xl leading-snug">Simpan perjalanan & kumpulkan poin</h2>
       <p className="mt-1.5 text-[15px] leading-relaxed text-ink/70">
         Masuk untuk memakai Trip Planner, Rewards, dan pembayaran tiket.
@@ -254,7 +254,7 @@ function TripPlannerCard() {
           Buat perencanaan terbaik untuk setiap perjalananmu
         </span>
       </span>
-      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white/20 transition group-hover:bg-white/30 lg:size-12">
+      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white/20 transition group-hover:bg-card/30 lg:size-12">
         <ChevronRight size={22} aria-hidden="true" />
       </span>
     </Link>
@@ -265,7 +265,7 @@ function PointsLink({ poin, loading }) {
   return (
     <Link
       to="/rewards"
-      className="flex items-center gap-4 rounded-[1.5rem] bg-white px-4 py-4 ring-1 ring-ink/[0.08] transition hover:ring-ink-violet/30 lg:flex-col lg:items-start lg:gap-3 lg:px-6 lg:py-6"
+      className="flex items-center gap-4 rounded-[1.5rem] bg-card px-4 py-4 ring-1 ring-ink/[0.08] transition hover:ring-ink-violet/30 lg:flex-col lg:items-start lg:gap-3 lg:px-6 lg:py-6"
     >
       <span className="grid size-12 shrink-0 place-items-center rounded-full bg-traffic-padat/15 text-[#9A5B00]">
         <Gift size={22} aria-hidden="true" />
@@ -295,7 +295,7 @@ function OngoingEvents({ events, now }) {
       <h2 id="event-title" className="px-1 text-base font-bold">
         Sedang berlangsung
       </h2>
-      <ul className="mt-2 divide-y divide-ink/[0.07] rounded-[1.5rem] bg-white px-4 ring-1 ring-ink/[0.08]">
+      <ul className="mt-2 divide-y divide-ink/[0.07] rounded-[1.5rem] bg-card px-4 ring-1 ring-ink/[0.08]">
         {events.map((e) => {
           const Icon = EVENT_ICON[e.jenis] ?? Info
           return (

@@ -38,7 +38,7 @@ export default function PageShell({ title, backTo = '/', backLabel = 'Kembali ke
               <Link
                 to={backTo}
                 aria-label={backLabel}
-                className="grid size-12 shrink-0 place-items-center rounded-full bg-white text-ink-violet shadow-[0_2px_8px_rgb(65_57_111/0.25)] ring-2 ring-white transition hover:bg-[color:var(--color-lilac-wash)]"
+                className="grid size-12 shrink-0 place-items-center rounded-full bg-card text-ink-violet shadow-[0_2px_8px_rgb(65_57_111/0.25)] ring-2 ring-white transition hover:bg-[color:var(--color-lilac-wash)]"
               >
                 <ArrowLeft size={22} aria-hidden="true" />
               </Link>

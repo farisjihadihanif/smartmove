@@ -109,7 +109,7 @@ export default function TripForm({ awal, onSimpan, onBatal, idJudul }) {
                 className={`relative flex min-h-[3.5rem] flex-col items-center justify-center gap-0.5 rounded-2xl px-2 py-2 text-[13px] leading-tight transition ${
                   aktif
                     ? 'bg-pill font-semibold text-white shadow-[0_6px_14px_-6px_rgb(114_13_129/0.8)]'
-                    : 'bg-white text-ink-violet ring-1 ring-ink-violet/20 hover:bg-ink-violet/[0.05]'
+                    : 'bg-card text-ink-violet ring-1 ring-ink-violet/20 hover:bg-ink-violet/[0.05]'
                 }`}
               >
                 <Ikon size={20} aria-hidden="true" />

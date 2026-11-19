@@ -242,10 +242,7 @@ class PaymentScreenState extends State<PaymentScreen> {
               SearchField(
                 hint: 'Cari layanan atau tujuan',
                 label: 'Cari layanan',
-                leading: const Icon(
-                  Icons.search_rounded,
-                  color: AppColors.inkViolet,
-                ),
+                leading: Icon(Icons.search_rounded, color: AppColors.inkViolet),
                 showSubmit: false,
                 onChanged: (v) => setState(() => _cari = v),
               ),
@@ -329,7 +326,7 @@ class PaymentScreenState extends State<PaymentScreen> {
       const SizedBox(height: AppSizes.s4),
       Row(
         children: [
-          const Icon(
+          Icon(
             Icons.calendar_today_rounded,
             size: 16,
             color: AppColors.inkViolet,
@@ -430,8 +427,8 @@ class PaymentScreenState extends State<PaymentScreen> {
           weight: FontWeight.w600,
           color: on ? AppColors.white : AppColors.ink.withValues(alpha: 0.8),
         ),
-        selectedColor: AppColors.inkViolet,
-        backgroundColor: AppColors.white,
+        selectedColor: AppColors.inkVioletIsi,
+        backgroundColor: AppColors.card,
         side: BorderSide(
           color: on
               ? AppColors.inkViolet

@@ -170,7 +170,7 @@ export default function TripPlanner() {
 
         {desktop ? (
           <aside className="hidden lg:block">
-            <div className="sticky top-6 rounded-[1.75rem] bg-white p-6 shadow-[0_18px_40px_-22px_rgb(65_57_111/0.55)] ring-1 ring-ink/[0.07]">
+            <div className="sticky top-6 rounded-[1.75rem] bg-card p-6 shadow-[0_18px_40px_-22px_rgb(65_57_111/0.55)] ring-1 ring-ink/[0.07]">
               <PanelForm aktif={formAktif} onSimpan={simpan} onBatal={form ? tutupForm : null} />
             </div>
           </aside>

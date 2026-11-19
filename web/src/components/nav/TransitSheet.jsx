@@ -96,7 +96,7 @@ function PilihOpsi({ opsi, idx, onIdx }) {
             aria-label={`${formatDurasi(o.totalS)}, ${o.bagian.filter((b) => b.jenis === 'naik').map(judulNaik).join(', lalu ')}. ${ringkasOpsi(o)}`}
             onClick={() => onIdx(i)}
             className={`flex min-h-touch shrink-0 snap-start items-center gap-2 rounded-2xl px-3 py-2 text-left transition ${
-              on ? 'bg-white ring-2 ring-pill-via shadow-[0_6px_16px_-10px_rgb(114_13_129/0.9)]' : 'bg-search ring-1 ring-ink/[0.06] hover:bg-white'
+              on ? 'bg-card ring-2 ring-pill-via shadow-[0_6px_16px_-10px_rgb(114_13_129/0.9)]' : 'bg-search ring-1 ring-ink/[0.06] hover:bg-card'
             }`}
           >
             <span className={`text-[15px] tabular-nums ${on ? 'font-bold' : 'font-semibold text-ink/75'}`}>{formatDurasi(o.totalS)}</span>
@@ -167,8 +167,8 @@ function BarisNaik({ b, warna }) {
     <li className="grid grid-cols-[2.25rem_minmax(0,1fr)] gap-x-3">
       <span aria-hidden="true" className="relative flex justify-center">
         <span className="absolute bottom-4 top-4 w-1.5 rounded-full" style={{ backgroundColor: warna }} />
-        <span className="relative mt-3 size-4 rounded-full border-[3.5px] bg-white" style={{ borderColor: warna }} />
-        <span className="absolute bottom-3 size-4 rounded-full border-[3.5px] bg-white" style={{ borderColor: warna }} />
+        <span className="relative mt-3 size-4 rounded-full border-[3.5px] bg-card" style={{ borderColor: warna }} />
+        <span className="absolute bottom-3 size-4 rounded-full border-[3.5px] bg-card" style={{ borderColor: warna }} />
       </span>
       <div className="flex flex-col gap-2.5 py-2">
         <p className="text-[15px] font-semibold leading-snug">{teksNaik(b)}</p>
@@ -262,7 +262,7 @@ export function TransitPanduan({ opsi, idx, onPlay, children }) {
           type="button"
           onClick={() => onPlay(idx - 1)}
           disabled={idx === 0}
-          className="flex min-h-touch items-center justify-center gap-1 rounded-full bg-search font-semibold text-ink-violet ring-1 ring-ink/[0.06] transition hover:bg-white disabled:opacity-40"
+          className="flex min-h-touch items-center justify-center gap-1 rounded-full bg-search font-semibold text-ink-violet ring-1 ring-ink/[0.06] transition hover:bg-card disabled:opacity-40"
         >
           <ChevronLeft size={20} aria-hidden="true" />
           Sebelumnya

@@ -46,7 +46,7 @@ class _NavPreviewState extends State<NavPreview> {
       children: [
         NebulaHeader(
           title: 'Smart Navigation',
-          leading: const Icon(Icons.map_outlined, color: AppColors.inkViolet),
+          leading: Icon(Icons.map_outlined, color: AppColors.inkViolet),
           unread: 2,
           onNotifications: () => tapped = 'notif',
           children: [

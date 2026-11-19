@@ -13,7 +13,7 @@ class PitaSimulasi extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final warna = gelap ? AppColors.white : const Color(0xFF7A4A00);
+    final warna = gelap ? AppColors.white : AppColors.teksKuning;
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: AppSizes.s4,
@@ -101,7 +101,7 @@ class PitaTanggal extends StatelessWidget {
                   width: 60,
                   decoration: BoxDecoration(
                     gradient: on ? AppGradients.pill : null,
-                    color: on ? null : AppColors.white,
+                    color: on ? null : AppColors.card,
                     borderRadius: BorderRadius.circular(16),
                     border: on
                         ? null
@@ -313,7 +313,7 @@ class _ChipJam extends StatelessWidget {
       label: slot.tersedia ? teks : '$teks, sudah lewat',
       excludeSemantics: true,
       child: Material(
-        color: aktif ? AppColors.inkViolet : AppColors.white,
+        color: aktif ? AppColors.inkVioletIsi : AppColors.card,
         shape: StadiumBorder(
           side: aktif
               ? BorderSide.none
@@ -529,7 +529,7 @@ class ETiket extends StatelessWidget {
       label: 'E-tiket simulasi ${l['nama']}',
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: AppColors.card,
           borderRadius: BorderRadius.circular(28),
           border: Border.all(color: AppColors.inkViolet.withValues(alpha: 0.1)),
           boxShadow: [

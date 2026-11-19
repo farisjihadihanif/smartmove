@@ -60,6 +60,8 @@ class MapView extends StatelessWidget {
           urlTemplate: _tileUrl,
           userAgentPackageName: _userAgentPackage,
           tileProvider: tileProvider,
+          // Mode gelap: ubin OSM dibalik warnanya (garis rute & penanda tetap asli) = web.
+          tileBuilder: AppPalette.gelap ? darkModeTileBuilder : null,
         ),
         ...children,
         Padding(
@@ -98,7 +100,7 @@ class OsmAttribution extends StatelessWidget {
                 topLeft: Radius.circular(6),
               ),
             ),
-            child: const Text(
+            child: Text(
               '© OpenStreetMap contributors',
               style: TextStyle(fontSize: 11, color: AppColors.ink),
             ),

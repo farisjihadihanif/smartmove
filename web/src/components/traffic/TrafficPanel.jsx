@@ -209,7 +209,7 @@ export function FormLaporan({ titik, namaTitik, onLokasiSaya, onBatal, onKirim }
                 aria-pressed={on}
                 onClick={() => setKejadian(v)}
                 className={`min-h-touch rounded-full px-4 text-sm font-semibold transition ${
-                  on ? 'bg-ink-violet text-white' : 'bg-white text-ink/80 ring-1 ring-ink/15 hover:bg-ink/[0.04]'
+                  on ? 'bg-ink-violet text-white' : 'bg-card text-ink/80 ring-1 ring-ink/15 hover:bg-ink/[0.04]'
                 }`}
               >
                 {KEJADIAN[v]}

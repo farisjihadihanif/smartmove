@@ -83,7 +83,7 @@ class _ActionPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fg = action.filled ? AppColors.white : AppColors.inkViolet;
+    final fg = action.filled ? AppColors.white : AppColors.inkVioletTetap;
     final enabled = action.onPressed != null;
     return Opacity(
       opacity: enabled ? 1 : 0.5,

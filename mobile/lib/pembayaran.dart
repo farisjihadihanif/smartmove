@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import 'trip.dart';
+import 'theme.dart';
 
 // Pemesanan & Digital Payment — SELALU simulasi (T-302, PRD §6.3).
 // Sama dengan web lib/pembayaran.js.
@@ -62,12 +63,12 @@ String? namaMetode(String? m) =>
 
 /// Label + warna status (warna selalu disertai teks).
 (String, Color) statusPembayaran(String? s) => switch (s) {
-  'menunggu' => ('Menunggu pembayaran', const Color(0xFF8A5300)),
-  'lunas' => ('Lunas', const Color(0xFF1D6B3D)),
-  'gagal' => ('Gagal', const Color(0xFFB42318)),
-  'kedaluwarsa' => ('Kedaluwarsa', const Color(0xFF5F5F6B)),
-  'dibatalkan' => ('Dibatalkan', const Color(0xFF5F5F6B)),
-  _ => (s ?? '', const Color(0xFF5F5F6B)),
+  'menunggu' => ('Menunggu pembayaran', AppColors.teksKuning),
+  'lunas' => ('Lunas', AppColors.teksHijau),
+  'gagal' => ('Gagal', AppColors.teksMerah),
+  'kedaluwarsa' => ('Kedaluwarsa', AppColors.teksAbu),
+  'dibatalkan' => ('Dibatalkan', AppColors.teksAbu),
+  _ => (s ?? '', AppColors.teksAbu),
 };
 
 /// "Rp35.000"

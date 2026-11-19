@@ -13,6 +13,16 @@
       rel="stylesheet"
     />
     <title>SmartMove Medan</title>
+    <script>
+      // Mode gelap (T-110): pasang tema sebelum halaman digambar supaya tidak berkedip. Sama dengan src/lib/tema.js.
+      try {
+        var p = localStorage.getItem('smartmove-tema')
+        var g = p === 'gelap' || (p !== 'terang' && matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.dataset.theme = g ? 'dark' : 'light'
+      } catch (e) {
+        document.documentElement.dataset.theme = 'light'
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

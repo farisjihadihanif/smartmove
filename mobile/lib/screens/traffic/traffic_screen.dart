@@ -401,10 +401,7 @@ class TrafficScreenState extends State<TrafficScreen> {
                       onPressed: () => Navigator.of(context).pop(),
                       icon: const Icon(Icons.arrow_back_rounded),
                     )
-                  : const Icon(
-                      Icons.traffic_outlined,
-                      color: AppColors.inkViolet,
-                    ),
+                  : Icon(Icons.traffic_outlined, color: AppColors.inkViolet),
               children: [
                 SearchField(
                   controller: _query,
@@ -487,7 +484,7 @@ class TrafficScreenState extends State<TrafficScreen> {
     }
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.card,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         boxShadow: [
           BoxShadow(

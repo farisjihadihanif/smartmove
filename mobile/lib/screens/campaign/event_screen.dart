@@ -298,7 +298,7 @@ class EventAlertScreenState extends State<EventAlertScreen> {
     }
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.card,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         boxShadow: [
           BoxShadow(

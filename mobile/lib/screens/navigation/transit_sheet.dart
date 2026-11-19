@@ -300,7 +300,7 @@ class _BarisJalan extends StatelessWidget {
                     shape: BoxShape.circle,
                     border: Border.all(color: AppColors.white, width: 4),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.directions_walk_rounded,
                     size: 16,
                     color: AppColors.inkViolet,

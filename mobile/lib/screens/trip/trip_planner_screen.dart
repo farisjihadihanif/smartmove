@@ -814,7 +814,7 @@ class _ItemRencana extends StatelessWidget {
                         IconButton(
                           tooltip: 'Ubah rencana',
                           onPressed: onUbah,
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.edit_outlined,
                             color: AppColors.inkViolet,
                             size: 20,

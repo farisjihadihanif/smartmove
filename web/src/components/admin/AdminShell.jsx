@@ -35,7 +35,7 @@ export default function AdminShell() {
           <Link
             to="/"
             aria-label="Ke Beranda SmartMove"
-            className="grid size-touch shrink-0 place-items-center rounded-full bg-white text-ink-violet shadow-[0_2px_8px_rgb(65_57_111/0.25)]"
+            className="grid size-touch shrink-0 place-items-center rounded-full bg-card text-ink-violet shadow-[0_2px_8px_rgb(65_57_111/0.25)]"
           >
             <Home size={20} aria-hidden="true" />
           </Link>
@@ -53,7 +53,7 @@ export default function AdminShell() {
                   end={end}
                   className={({ isActive }) =>
                     `flex min-h-touch items-center gap-3 whitespace-nowrap rounded-full px-4 text-sm font-semibold transition lg:rounded-2xl ${
-                      isActive ? 'bg-white text-ink-violet' : 'text-white/80 hover:bg-white/10 hover:text-white'
+                      isActive ? 'bg-card text-ink-violet' : 'text-white/80 hover:bg-card/10 hover:text-white'
                     }`
                   }
                 >

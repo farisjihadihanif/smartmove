@@ -37,7 +37,7 @@ function Leaf({ className }) {
 export default function Splash() {
   useEffect(markWelcomeSeen, [])
   return (
-    <div className="relative min-h-dvh overflow-hidden bg-splash-bg text-olive">
+    <div className="tema-terang relative min-h-dvh overflow-hidden bg-splash-bg text-olive">
       <Leaf className="pointer-events-none absolute -left-12 top-24 w-36 -rotate-12 text-leaf lg:-bottom-10 lg:left-[1%] lg:top-auto lg:w-48" />
       <Leaf className="pointer-events-none absolute -right-14 -top-6 w-44 rotate-[18deg] text-leaf lg:right-[4%] lg:w-64" />
 

@@ -6,6 +6,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'api.dart';
+import 'theme.dart';
 import 'navigasi.dart';
 
 // Live Traffic Information (T-205): label, warna, teks, dan pemuat data.
@@ -27,7 +28,7 @@ const tingkatLaluLintas = {
 const tanpaLaporan = InfoTingkat('Belum ada laporan', Color(0xFF0F53FF));
 
 /// Teks "Padat" di atas putih memakai oranye gelap agar kontras cukup.
-const warnaTeksPadat = Color(0xFFB26A00);
+Color get warnaTeksPadat => AppColors.teksKuning;
 
 const kejadianLaluLintas = {
   'none': 'Tidak ada',

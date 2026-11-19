@@ -12,11 +12,13 @@ import 'theme.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   setupFonts();
-  final state = AppState(ApiClient())..bootstrap();
+  final state = AppState(ApiClient())
+    ..muatTema()
+    ..bootstrap();
   runApp(SmartMoveApp(state: state));
 }
 
-class SmartMoveApp extends StatelessWidget {
+class SmartMoveApp extends StatefulWidget {
   const SmartMoveApp({
     super.key,
     required this.state,
@@ -29,14 +31,65 @@ class SmartMoveApp extends StatelessWidget {
   final Duration splashDuration;
 
   @override
+  State<SmartMoveApp> createState() => _SmartMoveAppState();
+}
+
+/// Tema mengikuti pilihan pengguna (Sistem / Terang / Gelap) dan setelan sistem.
+class _SmartMoveAppState extends State<SmartMoveApp>
+    with WidgetsBindingObserver {
+  bool? _gelapSebelum;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    widget.state.addListener(_cekTema);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    widget.state.removeListener(_cekTema);
+    super.dispose();
+  }
+
+  @override
+  void didChangePlatformBrightness() => _cekTema();
+
+  bool get _gelap {
+    final t = widget.state.tema;
+    if (t == 'gelap') return true;
+    if (t == 'terang') return false;
+    return WidgetsBinding.instance.platformDispatcher.platformBrightness ==
+        Brightness.dark;
+  }
+
+  void _cekTema() {
+    if (_gelap == _gelapSebelum) return;
+    setState(() {});
+    // Banyak widget membaca AppColors langsung (bukan lewat Theme): tandai seluruh pohon
+    // untuk dibangun ulang tanpa membuang state (tumpukan layar & isian tetap).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      void bangun(Element e) {
+        e.markNeedsBuild();
+        e.visitChildren(bangun);
+      }
+
+      if (mounted) (context as Element).visitChildren(bangun);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final gelap = _gelap;
+    _gelapSebelum = gelap;
     return AppScope(
-      state: state,
+      state: widget.state,
       child: MaterialApp(
         title: 'SmartMove Medan',
         debugShowCheckedModeBanner: false,
-        theme: buildTheme(),
-        home: RootGate(splashDuration: splashDuration),
+        theme: buildTheme(gelap: gelap),
+        home: RootGate(splashDuration: widget.splashDuration),
       ),
     );
   }

@@ -50,7 +50,7 @@ export function TopNav({ className = '' }) {
               end={end}
               className={({ isActive }) =>
                 `flex min-h-10 items-center gap-2 rounded-full px-4 text-sm transition-colors ${
-                  isActive ? 'bg-white font-bold text-ink shadow-[0_2px_8px_rgb(65_57_111/0.18)]' : 'font-medium text-ink/75 hover:bg-white/60'
+                  isActive ? 'bg-card font-bold text-ink shadow-[0_2px_8px_rgb(65_57_111/0.18)]' : 'font-medium text-ink/75 hover:bg-card/60'
                 }`
               }
             >

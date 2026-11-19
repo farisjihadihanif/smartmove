@@ -65,7 +65,7 @@ class PlaceResults extends StatelessWidget {
               leading: CircleAvatar(
                 radius: 18,
                 backgroundColor: AppColors.lilacWash.withValues(alpha: 0.45),
-                child: const Icon(
+                child: Icon(
                   Icons.place_outlined,
                   size: 18,
                   color: AppColors.inkViolet,
@@ -90,7 +90,7 @@ class PlaceResults extends StatelessWidget {
       );
     }
     return Material(
-      color: AppColors.white,
+      color: AppColors.card,
       elevation: 10,
       shadowColor: AppColors.inkViolet.withValues(alpha: 0.5),
       borderRadius: BorderRadius.circular(24),
@@ -111,7 +111,7 @@ class MapToast extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: ShapeDecoration(
-          color: AppColors.inkViolet,
+          color: AppColors.inkVioletIsi,
           shape: const StadiumBorder(),
           shadows: [
             BoxShadow(
