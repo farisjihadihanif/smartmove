@@ -1,6 +1,5 @@
 import TrafficReport from '../models/TrafficReport.js';
 import { denganCache } from './cache.js';
-import { keRute } from './osrm.js';
 import { publicLaporan } from './trafficReports.js';
 
 /*
@@ -10,60 +9,14 @@ import { publicLaporan } from './trafficReports.js';
  *   nama: string
  *   kejadianDiArea(bbox) → Promise<Kejadian[]>
  *       bbox { minLng, minLat, maxLng, maxLat }; Kejadian = bentuk `publicLaporan` + `sumber`.
- *   estimasiKoridor(koridor) → Promise<Estimasi>
- *       koridor dari KORIDOR_UTAMA; Estimasi lihat `estimasiDariLaporan`.
+ *   estimasiKoridor(koridor) → Promise<Estimasi | null>
+ *       koridor = dokumen RoadCorridor (geometri dari OSM, `npm run impor:jalan`);
+ *       Estimasi lihat `estimasiDariLaporan`; null = waktu tempuh tidak bisa dihitung.
  *
  * MVP: penyedia "komunitas" (laporan pengguna seperti Waze + waktu tempuh OSRM).
  * Layanan berbayar (mis. TomTom) cukup ditambah di PENYEDIA lalu dipilih lewat
  * TRAFFIC_PROVIDER; rute /traffic tidak perlu diubah.
  */
-
-// Koridor jalan utama Medan untuk tab "Estimasi Waktu". Titik ujung perkiraan;
-// rute sebenarnya dihitung OSRM.
-export const KORIDOR_UTAMA = [
-  {
-    kode: 'GATSU',
-    nama: 'Jl. Gatot Subroto',
-    dari: { nama: 'Simpang Pinang Baris', lat: 3.597, lng: 98.604 },
-    ke: { nama: 'Simpang Sekip', lat: 3.5895, lng: 98.666 },
-  },
-  {
-    kode: 'SMRAJA',
-    nama: 'Jl. Sisingamangaraja',
-    dari: { nama: 'Terminal Amplas', lat: 3.5385, lng: 98.7175 },
-    ke: { nama: 'Masjid Raya', lat: 3.575, lng: 98.6875 },
-  },
-  {
-    kode: 'JAMINGINTING',
-    nama: 'Jl. Jamin Ginting',
-    dari: { nama: 'Simpang Selayang', lat: 3.529, lng: 98.633 },
-    ke: { nama: 'Simpang Dr. Mansyur', lat: 3.563, lng: 98.6575 },
-  },
-  {
-    kode: 'RINGROAD',
-    nama: 'Jl. Gagak Hitam (Ring Road)',
-    dari: { nama: 'Simpang Manhattan', lat: 3.5935, lng: 98.629 },
-    ke: { nama: 'Simpang Setia Budi', lat: 3.556, lng: 98.637 },
-  },
-  {
-    kode: 'PUTRIHIJAU',
-    nama: 'Jl. Putri Hijau – Yos Sudarso',
-    dari: { nama: 'Lapangan Merdeka', lat: 3.5913, lng: 98.6782 },
-    ke: { nama: 'Simpang Pulo Brayan', lat: 3.627, lng: 98.673 },
-  },
-  {
-    kode: 'KATAMSO',
-    nama: 'Jl. Brigjend Katamso',
-    dari: { nama: 'Kampung Baru', lat: 3.56, lng: 98.683 },
-    ke: { nama: 'Istana Maimun', lat: 3.5752, lng: 98.6837 },
-  },
-  {
-    kode: 'AHNASUTION',
-    nama: 'Jl. A.H. Nasution',
-    dari: { nama: 'Simpang Pos', lat: 3.5355, lng: 98.656 },
-    ke: { nama: 'Simpang Marindal', lat: 3.531, lng: 98.706 },
-  },
-];
 
 // Pengali waktu tempuh per laporan. Kejadian dinilai minimal setara tingkatnya.
 export const FAKTOR_TINGKAT = { lancar: 1, padat: 1.6, macet: 3 };
@@ -215,7 +168,49 @@ async function laporanAktif(bbox, batas) {
     .lean();
 }
 
+const JARAK_SAMPEL_M = 1500;
+const SAMPEL_MAKS = 25;
+
+// Titik-titik di sepanjang garis (tiap ±1,5 km, termasuk kedua ujung) beserta arah
+// jalannya, untuk dilewati OSRM.
+export function titikSampel(garis, antar = JARAK_SAMPEL_M, maks = SAMPEL_MAKS) {
+  const cum = [0];
+  for (let i = 1; i < garis.length; i++) {
+    const [ax, ay] = keXY(garis[i - 1]);
+    const [bx, by] = keXY(garis[i]);
+    cum.push(cum[i - 1] + Math.hypot(bx - ax, by - ay));
+  }
+  const total = cum.at(-1);
+  const n = Math.min(maks, Math.max(2, Math.round(total / antar) + 1));
+  const out = [];
+  let i = 1;
+  for (let k = 0; k < n; k++) {
+    const s = (total * k) / (n - 1);
+    while (i < garis.length - 1 && cum[i] < s) i++;
+    const [p, q] = [garis[i - 1], garis[i]];
+    const t = cum[i] > cum[i - 1] ? Math.min(1, Math.max(0, (s - cum[i - 1]) / (cum[i] - cum[i - 1]))) : 0;
+    const [px, py] = keXY(p);
+    const [qx, qy] = keXY(q);
+    const arah = ((Math.atan2(qx - px, qy - py) * 180) / Math.PI + 360) % 360;
+    out.push({ lng: p[0] + t * (q[0] - p[0]), lat: p[1] + t * (q[1] - p[1]), arah });
+  }
+  return out;
+}
+
 export function createKomunitasProvider(cfg, { osrm }) {
+  // Waktu tempuh normal (tanpa laporan) dari OSRM. Kecepatan rata-rata OSRM dikalikan
+  // panjang garis OSM supaya selisih kecil akibat titik yang "menempel" tidak berpengaruh.
+  async function durasiNormal(k) {
+    const versi = new Date(k.diperbaruiPada || k.updatedAt || 0).getTime();
+    const hasil = await denganCache(`traffic:koridor:${k.kode}:${versi}`, async () => {
+      const body = await osrm.routeLewat(titikSampel(k.jalur.coordinates), 'driving');
+      const r = body?.code === 'Ok' ? body.routes?.[0] : null;
+      if (!r || !(r.distance > 0)) return undefined;
+      return { durasiS: Math.round((r.duration * k.panjangM) / r.distance) };
+    });
+    return hasil?.durasiS ?? null;
+  }
+
   return {
     nama: 'komunitas',
 
@@ -225,13 +220,12 @@ export function createKomunitasProvider(cfg, { osrm }) {
     },
 
     async estimasiKoridor(k) {
-      const rute = await denganCache(`traffic:koridor:${k.kode}`, async () => {
-        const hasil = keRute(await osrm.route(k.dari, k.ke, 'driving'), 'driving');
-        return hasil ? { jarakM: hasil.jarakM, durasiS: hasil.durasiS, garis: hasil.garis } : undefined;
-      });
-      if (!rute || rute.garis.length < 2) return null;
-      const laporan = await laporanAktif(kotakDariGaris(rute.garis, JARAK_KE_RUTE_M * 2), 1000);
-      return { ...estimasiDariLaporan(rute, laporan), garis: rute.garis, sumber: 'komunitas' };
+      const garis = k.jalur?.coordinates || [];
+      if (garis.length < 2) return null;
+      const durasiS = await durasiNormal(k);
+      if (durasiS === null) return null;
+      const laporan = await laporanAktif(kotakDariGaris(garis, JARAK_KE_RUTE_M * 2), 1000);
+      return { ...estimasiDariLaporan({ jarakM: k.panjangM, durasiS, garis }, laporan), garis, sumber: 'komunitas' };
     },
   };
 }

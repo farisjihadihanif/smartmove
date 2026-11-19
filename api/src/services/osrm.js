@@ -19,6 +19,27 @@ export function createOsrm(cfg, { fetch = globalThis.fetch } = {}) {
   };
   const timeout = cfg.osrmTimeoutMs ?? 10000;
 
+  async function minta(url) {
+    let res;
+    try {
+      res = await fetch(url, {
+        headers: { 'User-Agent': cfg.mapUserAgent, Accept: 'application/json' },
+        signal: AbortSignal.timeout(timeout),
+      });
+    } catch {
+      throw gagal();
+    }
+    let body;
+    try {
+      body = await res.json();
+    } catch {
+      throw gagal();
+    }
+    // OSRM membalas 400 untuk NoRoute/NoSegment; itu bukan kegagalan layanan.
+    if (!res.ok && !['NoRoute', 'NoSegment'].includes(body?.code)) throw gagal();
+    return body;
+  }
+
   return {
     async route(from, to, profil) {
       if (!base[profil]) throw new Error(`Profil OSRM tidak dikenal: ${profil}`);
@@ -27,25 +48,22 @@ export function createOsrm(cfg, { fetch = globalThis.fetch } = {}) {
       url.searchParams.set('overview', 'full');
       url.searchParams.set('geometries', 'geojson');
       url.searchParams.set('steps', 'true');
+      return minta(url);
+    },
 
-      let res;
-      try {
-        res = await fetch(url, {
-          headers: { 'User-Agent': cfg.mapUserAgent, Accept: 'application/json' },
-          signal: AbortSignal.timeout(timeout),
-        });
-      } catch {
-        throw gagal();
+    // Rute melewati beberapa titik [{lat, lng, arah?}] tanpa geometri/langkah. `arah` (derajat
+    // dari utara) membatasi OSRM ke ruas yang searah, supaya titik di jalan dua jalur tidak
+    // menempel ke jalur seberang lalu memaksa putar balik.
+    async routeLewat(titik, profil) {
+      if (!base[profil]) throw new Error(`Profil OSRM tidak dikenal: ${profil}`);
+      const koordinat = titik.map((t) => `${t.lng},${t.lat}`).join(';');
+      const url = new URL(`${base[profil]}/route/v1/${profil}/${koordinat}`);
+      url.searchParams.set('overview', 'false');
+      url.searchParams.set('steps', 'false');
+      if (titik.every((t) => Number.isFinite(t.arah))) {
+        url.searchParams.set('bearings', titik.map((t) => `${Math.round(t.arah) % 360},45`).join(';'));
       }
-      let body;
-      try {
-        body = await res.json();
-      } catch {
-        throw gagal();
-      }
-      // OSRM membalas 400 untuk NoRoute/NoSegment; itu bukan kegagalan layanan.
-      if (!res.ok && !['NoRoute', 'NoSegment'].includes(body?.code)) throw gagal();
-      return body;
+      return minta(url);
     },
   };
 }

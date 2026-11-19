@@ -7,11 +7,12 @@ import { createApp } from '../src/app.js';
 import User from '../src/models/User.js';
 import TrafficReport from '../src/models/TrafficReport.js';
 import GeoCache from '../src/models/GeoCache.js';
+import RoadCorridor from '../src/models/RoadCorridor.js';
 import {
-  KORIDOR_UTAMA,
   createTrafficProvider,
   estimasiDariLaporan,
   proyeksiKeGaris,
+  titikSampel,
 } from '../src/services/trafficProvider.js';
 import { BATAS_PER_JAM } from '../src/services/trafficReports.js';
 
@@ -21,19 +22,17 @@ let app;
 let panggilanOsrm;
 let osrmGagal;
 
-// OSRM palsu: garis lurus dari titik asal ke tujuan, 10 m/dtk.
+// OSRM palsu: lewat semua titik, jarak = 1,1 × garis lurus (titik "menempel"), 10 m/dtk.
 const fetchPalsu = async (url) => {
   const u = new URL(url);
   panggilanOsrm.push(u);
   if (osrmGagal) throw new Error('jaringan putus');
-  const [a, b] = decodeURIComponent(u.pathname.split('/').pop())
+  const t = decodeURIComponent(u.pathname.split('/').pop())
     .split(';')
-    .map((s) => s.split(',').map(Number));
-  const jarak = Math.hypot((a[0] - b[0]) * 111320, (a[1] - b[1]) * 110574);
-  const body = {
-    code: 'Ok',
-    routes: [{ distance: jarak, duration: jarak / 10, geometry: { coordinates: [a, b] }, legs: [] }],
-  };
+    .map((x) => x.split(',').map(Number));
+  let jarak = 0;
+  for (let i = 1; i < t.length; i++) jarak += Math.hypot((t[i][0] - t[i - 1][0]) * 111320, (t[i][1] - t[i - 1][1]) * 110574);
+  const body = { code: 'Ok', routes: [{ distance: jarak * 1.1, duration: jarak / 10, legs: [] }] };
   return { ok: true, status: 200, json: async () => body };
 };
 
@@ -43,7 +42,7 @@ const geser = (p, meterUtara) => ({ lat: p.lat + meterUtara / 110574, lng: p.lng
 before(async () => {
   mongod = await MongoMemoryServer.create();
   await mongoose.connect(mongod.getUri());
-  await Promise.all([User.init(), TrafficReport.init(), GeoCache.init()]);
+  await Promise.all([User.init(), TrafficReport.init(), GeoCache.init(), RoadCorridor.init()]);
   app = createApp({
     jwtSecret: 'rahasia-tes',
     nodeEnv: 'test',
@@ -60,7 +59,12 @@ after(async () => {
 });
 
 beforeEach(async () => {
-  await Promise.all([User.deleteMany({}), TrafficReport.deleteMany({}), GeoCache.deleteMany({})]);
+  await Promise.all([
+    User.deleteMany({}),
+    TrafficReport.deleteMany({}),
+    GeoCache.deleteMany({}),
+    RoadCorridor.deleteMany({}),
+  ]);
   panggilanOsrm = [];
   osrmGagal = false;
 });
@@ -265,37 +269,70 @@ describe('estimasi koridor', () => {
 });
 
 describe('GET /traffic/corridors', () => {
-  test('estimasi semua koridor utama dari OSRM + laporan, dicache', async () => {
+  // Dua koridor lurus ke utara: 3 km dan 1 km.
+  const lurus = (lat, lng, meterPanjang) => [
+    [lng, lat],
+    [lng, lat + meterPanjang / 2 / 110574],
+    [lng, lat + meterPanjang / 110574],
+  ];
+  const seedKoridor = () =>
+    RoadCorridor.create([
+      { kode: 'GATSU', nama: 'Jl. Gatot Subroto', urutan: 0, panjangM: 3000, jalur: { type: 'LineString', coordinates: lurus(3.59, 98.62, 3000) } },
+      { kode: 'KATAMSO', nama: 'Jl. Brigjend Katamso', urutan: 1, panjangM: 1000, jalur: { type: 'LineString', coordinates: lurus(3.56, 98.683, 1000) } },
+      { kode: 'LAMA', nama: 'Disembunyikan', urutan: 2, panjangM: 1000, aktif: false, jalur: { type: 'LineString', coordinates: lurus(3.56, 98.7, 1000) } },
+    ]);
+
+  test('titik sampel tiap ±1,5 km dengan arah jalan', () => {
+    const t = titikSampel(lurus(3.59, 98.62, 3000));
+    assert.equal(t.length, 3);
+    assert.ok(t.every((x) => x.arah < 1 || x.arah > 359), 'arah ke utara ≈ 0°');
+    assert.ok(Math.abs(t[1].lat - (3.59 + 1500 / 110574)) < 1e-6);
+  });
+
+  test('belum diimpor → daftar kosong', async () => {
+    const res = await request(app).get('/api/traffic/corridors');
+    assert.equal(res.status, 200);
+    assert.deepEqual(res.body.items, []);
+  });
+
+  test('geometri dari DB, waktu normal dari OSRM (lewat titik + bearings), dicache', async () => {
+    await seedKoridor();
     const budi = await daftar('budi');
-    const gatsu = KORIDOR_UTAMA.find((k) => k.kode === 'GATSU');
-    const tengah = { lat: (gatsu.dari.lat + gatsu.ke.lat) / 2, lng: (gatsu.dari.lng + gatsu.ke.lng) / 2 };
-    await lapor(budi, macetDi(tengah));
+    await lapor(budi, macetDi({ lat: 3.59 + 1500 / 110574, lng: 98.62 }));
 
     const res = await request(app).get('/api/traffic/corridors');
     assert.equal(res.status, 200);
     assert.equal(res.body.sumber, 'komunitas');
-    assert.equal(res.body.items.length, KORIDOR_UTAMA.length);
-    assert.equal(panggilanOsrm.length, KORIDOR_UTAMA.length);
-    assert.ok(panggilanOsrm.every((u) => u.pathname.includes('/route/v1/driving/')));
+    assert.deepEqual(res.body.items.map((k) => k.kode), ['GATSU', 'KATAMSO']);
+    assert.equal(panggilanOsrm.length, 2);
+    const u = panggilanOsrm[0];
+    assert.ok(u.pathname.includes('/route/v1/driving/'));
+    assert.equal(u.pathname.split('/').pop().split(';').length, 3);
+    assert.equal(u.searchParams.get('bearings').split(';').length, 3);
 
-    const g = res.body.items.find((k) => k.kode === 'GATSU');
+    const g = res.body.items[0];
     assert.equal(g.tersedia, true);
+    assert.equal(g.jarakM, 3000);
+    // OSRM: 3000 m / 10 m/dtk = 300 dtk untuk 3300 m → disesuaikan ke panjang OSM 3000 m.
+    assert.ok(Math.abs(g.durasiNormalS - 273) <= 2, `normal ${g.durasiNormalS}`);
     assert.equal(g.laporan, 1);
     assert.ok(g.durasiS > g.durasiNormalS);
     assert.equal(g.segmen[0].tingkat, 'macet');
-    assert.ok(g.garis.length >= 2);
-    const lain = res.body.items.find((k) => k.kode === 'KATAMSO');
-    assert.equal(lain.tingkat, null);
-    assert.equal(lain.durasiS, lain.durasiNormalS);
+    assert.equal(g.garis.length, 3);
+    assert.equal(g.sumberGaris, 'osm');
+    const k = res.body.items[1];
+    assert.equal(k.tingkat, null);
+    assert.equal(k.durasiS, k.durasiNormalS);
 
-    // Panggilan kedua memakai cache rute, tapi laporan tetap terbaru.
+    // Panggilan kedua memakai cache waktu normal, tapi laporan tetap terbaru.
     await TrafficReport.deleteMany({});
     const lagi = await request(app).get('/api/traffic/corridors');
-    assert.equal(panggilanOsrm.length, KORIDOR_UTAMA.length);
-    assert.equal(lagi.body.items.find((k) => k.kode === 'GATSU').laporan, 0);
+    assert.equal(panggilanOsrm.length, 2);
+    assert.equal(lagi.body.items[0].laporan, 0);
   });
 
   test('OSRM gagal total → 502', async () => {
+    await seedKoridor();
     osrmGagal = true;
     const res = await request(app).get('/api/traffic/corridors');
     assert.equal(res.status, 502);
@@ -312,8 +349,10 @@ describe('GET /traffic/corridors', () => {
     const a = await request(app2).get('/api/traffic?bbox=98.6,3.5,98.7,3.6');
     assert.equal(a.body.sumber, 'uji');
     assert.equal(a.body.items[0].sumber, 'uji');
+    await seedKoridor();
     const b = await request(app2).get('/api/traffic/corridors');
     assert.equal(b.body.sumber, 'uji');
+    assert.equal(b.body.items.length, 2);
     assert.ok(b.body.items.every((k) => k.tingkat === 'padat'));
   });
 });

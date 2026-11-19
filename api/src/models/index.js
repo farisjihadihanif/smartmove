@@ -12,3 +12,4 @@ export { default as Event } from './Event.js';
 export { default as Content } from './Content.js';
 export { default as Feedback } from './Feedback.js';
 export { default as GeoCache } from './GeoCache.js';
+export { default as RoadCorridor } from './RoadCorridor.js';

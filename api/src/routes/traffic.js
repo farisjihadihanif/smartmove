@@ -4,7 +4,8 @@ import { str } from '../lib/validate.js';
 import { wajibDalamWilayah } from '../lib/wilayah.js';
 import { requireAuth } from '../middleware/auth.js';
 import { createOsrm } from '../services/osrm.js';
-import { KORIDOR_UTAMA, createTrafficProvider } from '../services/trafficProvider.js';
+import RoadCorridor from '../models/RoadCorridor.js';
+import { createTrafficProvider } from '../services/trafficProvider.js';
 import { KEJADIAN, TINGKAT, kirimLaporan, publicLaporan } from '../services/trafficReports.js';
 
 const BBOX_MAKS_DERAJAT = 1; // ±110 km, cukup untuk seluruh Mebidang
@@ -55,12 +56,16 @@ export function trafficRouter(cfg, { mapLimit } = {}) {
     res.json({ items: await penyedia.kejadianDiArea(bbox), sumber: penyedia.nama });
   });
 
-  // GET /traffic/corridors → estimasi waktu koridor utama (memanggil OSRM, dicache).
+  // GET /traffic/corridors → estimasi waktu koridor jalan utama (OSRM dicache).
+  // Geometri koridor dari OSM (`npm run impor:jalan`); kosong bila belum diimpor.
   r.get('/corridors', lewat, async (req, res) => {
+    const koridor = await RoadCorridor.find({ aktif: { $ne: false } })
+      .sort({ urutan: 1, kode: 1 })
+      .lean();
     const items = [];
     let gagal = 0;
     // Berurutan supaya cache kosong tidak membanjiri server OSRM publik.
-    for (const k of KORIDOR_UTAMA) {
+    for (const k of koridor) {
       let est = null;
       try {
         est = await penyedia.estimasiKoridor(k);
@@ -71,21 +76,21 @@ export function trafficRouter(cfg, { mapLimit } = {}) {
       items.push({
         kode: k.kode,
         nama: k.nama,
-        dari: { nama: k.dari.nama, lokasi: { lat: k.dari.lat, lng: k.dari.lng } },
-        ke: { nama: k.ke.nama, lokasi: { lat: k.ke.lat, lng: k.ke.lng } },
         tersedia: Boolean(est),
-        jarakM: est?.jarakM ?? null,
+        jarakM: k.panjangM,
         durasiNormalS: est?.durasiNormalS ?? null,
         durasiS: est?.durasiS ?? null,
         tingkat: est?.tingkat ?? null,
         laporan: est?.laporan ?? 0,
         kejadian: est?.kejadian ?? [],
         ditutup: est?.ditutup ?? false,
-        garis: est?.garis ?? [],
+        garis: k.jalur.coordinates,
         segmen: est?.segmen ?? [],
+        sumberGaris: k.sumber, // osm | admin
+        garisDiperbaruiPada: k.diperbaruiPada,
       });
     }
-    if (gagal === KORIDOR_UTAMA.length) {
+    if (koridor.length && gagal === koridor.length) {
       throw httpError(502, 'Layanan peta sedang bermasalah, coba lagi nanti', 'LAYANAN_PETA_GAGAL');
     }
     res.json({ items, sumber: penyedia.nama, diperbaruiPada: new Date() });
