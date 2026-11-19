@@ -339,3 +339,57 @@
 @keyframes sheet-fade { from { opacity: 0; } }
 @keyframes sheet-rise { from { transform: translateY(100%); } }
 @keyframes sheet-drop { from { opacity: 0; transform: translateY(-8px) scale(0.98); } }
+
+/* Cetak e-tiket (T-114): yang tercetak hanya kartu tiket, 1 halaman A4, warna & QR tetap. */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 14mm;
+  }
+  html,
+  body {
+    background: #fff !important;
+    min-width: 0;
+  }
+  body:has(.cetak-tiket) * {
+    visibility: hidden;
+  }
+  body:has(.cetak-tiket) .cetak-tiket,
+  body:has(.cetak-tiket) .cetak-tiket * {
+    visibility: visible;
+  }
+  .cetak-tiket {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    width: 120mm !important;
+    max-width: none !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: 1px solid #d9d4e6;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .cetak-tiket * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  /* Takik perforasi memakai warna latar halaman: di kertas selalu putih. */
+  .cetak-tiket .takik {
+    background: #fff !important;
+  }
+  .cetak-tiket svg[role="img"] {
+    shape-rendering: crispEdges;
+  }
+  /* Kontainer fixed (navigasi bawah, bar aksi) tidak boleh ikut memakan tempat. */
+  nav,
+  header {
+    display: none !important;
+  }
+  header.cetak-tiket-kepala {
+    display: block !important;
+  }
+}

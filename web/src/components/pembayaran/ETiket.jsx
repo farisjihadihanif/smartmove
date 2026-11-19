@@ -14,9 +14,9 @@ export default function ETiket({ payment }) {
   return (
     <article
       aria-label={`E-tiket simulasi ${layanan.nama}`}
-      className="tema-terang relative mx-auto w-full max-w-[26rem] overflow-hidden rounded-[1.75rem] bg-white shadow-[0_20px_40px_-20px_rgb(65_57_111/0.65)] ring-1 ring-ink-violet/10 print:shadow-none"
+      className="cetak-tiket tema-terang relative mx-auto w-full max-w-[26rem] overflow-hidden rounded-[1.75rem] bg-white shadow-[0_20px_40px_-20px_rgb(65_57_111/0.65)] ring-1 ring-ink-violet/10 print:shadow-none"
     >
-      <header className="bg-pill-deep grain relative px-6 pb-6 pt-5 text-white">
+      <header className="cetak-tiket-kepala bg-pill-deep grain relative px-6 pb-6 pt-5 text-white">
         <p className="flex items-center gap-2 text-[13px] font-semibold text-white/85">
           <Ikon size={16} aria-hidden="true" />
           {labelJenis(layanan.jenis)}
@@ -39,8 +39,8 @@ export default function ETiket({ payment }) {
 
       {/* Perforasi: dua takik setengah lingkaran + garis putus-putus. */}
       <div aria-hidden="true" className="relative h-0">
-        <span className="absolute -left-3 -top-3 size-6 rounded-full bg-surface ring-1 ring-ink-violet/10 dark:bg-[#15101E]" />
-        <span className="absolute -right-3 -top-3 size-6 rounded-full bg-surface ring-1 ring-ink-violet/10 dark:bg-[#15101E]" />
+        <span className="takik absolute -left-3 -top-3 size-6 rounded-full bg-surface ring-1 ring-ink-violet/10 dark:bg-[#15101E]" />
+        <span className="takik absolute -right-3 -top-3 size-6 rounded-full bg-surface ring-1 ring-ink-violet/10 dark:bg-[#15101E]" />
         <span className="absolute inset-x-5 top-0 border-t-2 border-dashed border-ink-violet/20" />
       </div>
 
