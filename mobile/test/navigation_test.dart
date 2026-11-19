@@ -493,7 +493,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Street view: tanpa foto → pesan kosong; Traffic belum aktif', (
+  testWidgets('Street view: tanpa foto → pesan kosong; Traffic + legenda', (
     tester,
   ) async {
     final (state, server) = await _pump(
@@ -512,11 +512,10 @@ void main() {
     expect(find.text('Belum ada foto jalan di sini'), findsOneWidget);
 
     await _tap(tester, find.text('Traffic'));
-    expect(state.lapisan, {'street'});
-    expect(
-      find.text('Lapisan Traffic hadir bersama Live Traffic Information.'),
-      findsOneWidget,
-    );
+    expect(state.lapisan, {'street', 'traffic'});
+    expect(find.textContaining('Lapisan Traffic aktif'), findsOneWidget);
+    expect(find.text('Belum ada laporan'), findsOneWidget); // legenda
+    expect(server.calls.any((u) => u.path == '/api/traffic/corridors'), isTrue);
     await tester.pump(const Duration(seconds: 4));
     expect(state.pesan, isNull);
   });

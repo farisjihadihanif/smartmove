@@ -111,11 +111,7 @@ void main() {
       await expectLater(
         api.get('/home'),
         throwsA(
-          isA<ApiException>().having(
-            (e) => e.code,
-            'code',
-            kServerUnreachable,
-          ),
+          isA<ApiException>().having((e) => e.code, 'code', kServerUnreachable),
         ),
       );
     });

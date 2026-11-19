@@ -21,8 +21,7 @@ bool isOfflineError(Object? error) =>
     error is ApiException && error.code == kOffline;
 
 /// True bila galat jaringan apa pun (offline atau server tak terjangkau).
-bool isNetworkError(Object? error) =>
-    error is ApiException && error.isNetwork;
+bool isNetworkError(Object? error) => error is ApiException && error.isNetwork;
 
 /// Pesan pengguna untuk galat apa pun.
 String errorMessageFor(Object? error) {

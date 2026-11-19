@@ -13,6 +13,7 @@ import '../auth/login_screen.dart';
 import '../auth/register_screen.dart';
 import '../coming_soon_screen.dart';
 import '../navigation/navigation_screen.dart';
+import '../traffic/traffic_screen.dart';
 import '../trip/trip_planner_screen.dart';
 import 'notification_sheet.dart';
 
@@ -153,6 +154,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         builder: (_) => switch (title) {
           'Smart Navigation' => NavigationScreen(initialQuery: query),
           'Trip Planner' => const TripPlannerScreen(),
+          'Live Traffic Information' => const TrafficScreen(),
           _ => ComingSoonScreen(title: title),
         },
       ),

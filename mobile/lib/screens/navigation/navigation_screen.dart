@@ -10,11 +10,14 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../api.dart';
+import '../../lalulintas.dart';
 import '../../navigasi.dart';
 import '../../state.dart';
 import '../../theme.dart';
 import '../../transit.dart';
+import '../../widgets/map_screen.dart';
 import '../../widgets/widgets.dart';
+import '../traffic/traffic_layers.dart';
 import 'transit_sheet.dart';
 
 /// Hasil membaca lokasi perangkat. [status]: ok | ditolak | luar | tidak.
@@ -54,10 +57,6 @@ Future<LokasiHasil> lokasiPerangkat() async {
 /// Buka lembar bagikan sistem Android (share_plus).
 Future<void> bagikanSistem(String teks, String judul) =>
     SharePlus.instance.share(ShareParams(text: teks, subject: judul));
-
-const _segera = {
-  'traffic': 'Lapisan Traffic hadir bersama Live Traffic Information.',
-};
 
 const _teksLokasi = {
   'mencari': 'Mencari lokasimu…',
@@ -148,6 +147,31 @@ class NavigationScreenState extends State<NavigationScreen> {
 
   ApiClient get _api => AppScope.of(context).api;
 
+  // Lapisan Traffic (T-205): dimuat hanya selama kapsul Traffic aktif.
+  LaluLintasData? _lalin;
+  StreamSubscription<MapEvent>? _gerak;
+  Timer? _jeda;
+
+  void _aturTraffic(bool on) {
+    if (!on) {
+      _lalin?.berhenti();
+      return;
+    }
+    final d = _lalin ??= LaluLintasData(_api)..addListener(() => _set(() {}));
+    d.mulai();
+    if (_mapReady) d.aturArea(_map.camera.visibleBounds);
+    _gerak ??= _mapReady
+        ? _map.mapEventStream.listen((_) {
+            _jeda?.cancel();
+            _jeda = Timer(const Duration(milliseconds: 350), () {
+              if (mounted && lapisan.contains('traffic')) {
+                _lalin?.aturArea(_map.camera.visibleBounds);
+              }
+            });
+          })
+        : null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -157,6 +181,9 @@ class NavigationScreenState extends State<NavigationScreen> {
 
   @override
   void dispose() {
+    _gerak?.cancel();
+    _jeda?.cancel();
+    _lalin?.dispose();
     _pesanTimer?.cancel();
     _query.dispose();
     _map.dispose();
@@ -425,18 +452,17 @@ class NavigationScreenState extends State<NavigationScreen> {
 
   void _ubahLapisan(Set<String> next) {
     final baru = next.difference(_nilaiLapisan);
-    for (final v in baru) {
-      if (_segera.containsKey(v)) return _kabari(_segera[v]!);
-    }
     final transitOn = next.contains('transit');
     if (transitOn != _umum) {
       gantiModa(transitOn ? Moda.transit : _modaSebelum);
     }
-    setState(
-      () => lapisan = next
-          .where((v) => !_segera.containsKey(v) && v != 'transit')
-          .toSet(),
-    );
+    setState(() => lapisan = next.where((v) => v != 'transit').toSet());
+    _aturTraffic(lapisan.contains('traffic'));
+    if (baru.contains('traffic')) {
+      _kabari(
+        'Lapisan Traffic aktif: garis berwarna = kondisi jalan utama, lingkaran = laporan warga.',
+      );
+    }
     if (lapisan.contains('street')) {
       _muatFoto();
     } else {
@@ -504,10 +530,10 @@ class NavigationScreenState extends State<NavigationScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: CustomMultiChildLayout(
-        delegate: _NavLayout(),
+        delegate: MapScreenLayout(),
         children: [
           LayoutId(
-            id: _Slot.map,
+            id: MapSlot.map,
             child: MapView(
               tucked: true,
               controller: _map,
@@ -516,18 +542,19 @@ class NavigationScreenState extends State<NavigationScreen> {
               onMapReady: () {
                 _mapReady = true;
                 _fitRute();
+                if (lapisan.contains('traffic')) _aturTraffic(true);
               },
               children: _lapisanPeta(),
             ),
           ),
-          LayoutId(id: _Slot.sheet, child: _lembar()),
+          LayoutId(id: MapSlot.sheet, child: _lembar()),
           if (pesan != null)
             LayoutId(
-              id: _Slot.toast,
-              child: _Toast(teks: pesan!),
+              id: MapSlot.toast,
+              child: MapToast(teks: pesan!),
             ),
           LayoutId(
-            id: _Slot.bar,
+            id: MapSlot.bar,
             child: BottomActionBar(
               actions: [
                 BarAction(
@@ -557,7 +584,7 @@ class NavigationScreenState extends State<NavigationScreen> {
             ),
           ),
           LayoutId(
-            id: _Slot.header,
+            id: MapSlot.header,
             child: NebulaHeader(
               title: 'Smart Navigation',
               leading: canPop
@@ -607,8 +634,8 @@ class NavigationScreenState extends State<NavigationScreen> {
           ),
           if (_hasil != null)
             LayoutId(
-              id: _Slot.results,
-              child: _HasilCari(
+              id: MapSlot.results,
+              child: PlaceResults(
                 hasil: _hasil!,
                 onPilih: pilih,
                 onTutup: () => setState(() => _hasil = null),
@@ -619,10 +646,44 @@ class NavigationScreenState extends State<NavigationScreen> {
     );
   }
 
-  List<Widget> _lapisanPeta() {
+  List<Widget> _lapisanPeta() => [
+    ..._lapisanPetaIsi(),
+    if (lapisan.contains('traffic'))
+      Align(
+        alignment: Alignment.topLeft,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 40, 12, 0),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.white.withValues(alpha: 0.9),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.inkViolet.withValues(alpha: 0.35),
+                  blurRadius: 10,
+                  spreadRadius: -4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: const TrafficLegend(),
+          ),
+        ),
+      ),
+  ];
+
+  List<Widget> _lapisanPetaIsi() {
     final g = _garis;
     final fokus = _titikPlay(play);
+    final lalin = lapisan.contains('traffic') ? _lalin : null;
     return [
+      if (lalin != null)
+        ...lapisanLaluLintas(
+          koridor: lalin.koridor,
+          laporan: lalin.laporan,
+          redup: _adaRute,
+        ),
       if (_umum) ..._lapisanTransit(),
       if (!_umum && g.length > 1)
         PolylineLayer(
@@ -1423,130 +1484,6 @@ class _SegmenModa extends StatelessWidget {
   }
 }
 
-class _HasilCari extends StatelessWidget {
-  const _HasilCari({
-    required this.hasil,
-    required this.onPilih,
-    required this.onTutup,
-  });
-
-  final ({String status, List<Tempat> items, Object? error}) hasil;
-  final ValueChanged<Tempat> onPilih;
-  final VoidCallback onTutup;
-
-  @override
-  Widget build(BuildContext context) {
-    final muted = AppColors.ink.withValues(alpha: 0.65);
-    Widget isi;
-    if (hasil.status == 'memuat') {
-      isi = Padding(
-        padding: const EdgeInsets.all(AppSizes.s3),
-        child: Row(
-          children: [
-            const SizedBox.square(
-              dimension: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-            const SizedBox(width: AppSizes.s2),
-            Text('Mencari tempat…', style: sans(size: 14, color: muted)),
-          ],
-        ),
-      );
-    } else if (hasil.status == 'galat') {
-      isi = ErrorBanner(error: hasil.error, onDismiss: onTutup);
-    } else if (hasil.items.isEmpty) {
-      isi = Padding(
-        padding: const EdgeInsets.all(AppSizes.s3),
-        child: Text(
-          'Tempat tidak ditemukan di Medan dan sekitarnya. Coba nama lain atau ketuk peta.',
-          style: sans(size: 14, color: muted, height: 1.4),
-        ),
-      );
-    } else {
-      isi = ListView(
-        shrinkWrap: true,
-        padding: EdgeInsets.zero,
-        children: [
-          for (final t in hasil.items)
-            ListTile(
-              onTap: () => onPilih(t),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-              leading: CircleAvatar(
-                radius: 18,
-                backgroundColor: AppColors.lilacWash.withValues(alpha: 0.45),
-                child: const Icon(
-                  Icons.place_outlined,
-                  size: 18,
-                  color: AppColors.inkViolet,
-                ),
-              ),
-              title: Text(
-                t.nama,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: sans(size: 15, weight: FontWeight.w600),
-              ),
-              subtitle: t.alamat.isEmpty
-                  ? null
-                  : Text(
-                      t.alamat,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: sans(size: 12, color: muted),
-                    ),
-            ),
-        ],
-      );
-    }
-    return Material(
-      color: AppColors.white,
-      elevation: 10,
-      shadowColor: AppColors.inkViolet.withValues(alpha: 0.5),
-      borderRadius: BorderRadius.circular(24),
-      child: Padding(padding: const EdgeInsets.all(AppSizes.s2), child: isi),
-    );
-  }
-}
-
-class _Toast extends StatelessWidget {
-  const _Toast({required this.teks});
-  final String teks;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      liveRegion: true,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: ShapeDecoration(
-          color: AppColors.inkViolet,
-          shape: const StadiumBorder(),
-          shadows: [
-            BoxShadow(
-              color: AppColors.inkViolet.withValues(alpha: 0.6),
-              blurRadius: 20,
-              spreadRadius: -8,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Text(
-          teks,
-          textAlign: TextAlign.center,
-          style: sans(
-            size: 14,
-            weight: FontWeight.w600,
-            color: AppColors.white,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 /// Kerangka abu saat memuat.
 class _Tulang extends StatelessWidget {
   const _Tulang({this.width, this.height});
@@ -1562,66 +1499,4 @@ class _Tulang extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
     ),
   );
-}
-
-enum _Slot { map, sheet, toast, bar, header, results }
-
-/// Header di atas, bar aksi di bawah, peta diselipkan 28 dp di bawah keduanya,
-/// lembar bawah menempel di atas bar (ikut terselip di bawah sudutnya).
-class _NavLayout extends MultiChildLayoutDelegate {
-  static const _tuck = 28.0;
-
-  @override
-  void performLayout(Size size) {
-    final w = size.width;
-    final hh = layoutChild(
-      _Slot.header,
-      BoxConstraints(minWidth: w, maxWidth: w, maxHeight: size.height),
-    ).height;
-    final bh = layoutChild(
-      _Slot.bar,
-      BoxConstraints(minWidth: w, maxWidth: w, maxHeight: size.height),
-    ).height;
-    positionChild(_Slot.header, Offset.zero);
-    positionChild(_Slot.bar, Offset(0, size.height - bh));
-
-    final mapTop = hh - _tuck;
-    final mapH = math.max(0.0, size.height - bh + _tuck - mapTop);
-    layoutChild(_Slot.map, BoxConstraints.tight(Size(w, mapH)));
-    positionChild(_Slot.map, Offset(0, mapTop));
-
-    final tersedia = math.max(0.0, size.height - bh - hh);
-    if (hasChild(_Slot.sheet)) {
-      final s = layoutChild(
-        _Slot.sheet,
-        BoxConstraints(
-          minWidth: w,
-          maxWidth: w,
-          maxHeight: tersedia * 0.62 + _tuck,
-        ),
-      );
-      positionChild(
-        _Slot.sheet,
-        Offset(0, size.height - bh + _tuck - s.height),
-      );
-    }
-    if (hasChild(_Slot.toast)) {
-      final s = layoutChild(_Slot.toast, BoxConstraints(maxWidth: w - 32));
-      positionChild(_Slot.toast, Offset((w - s.width) / 2, hh + 12));
-    }
-    if (hasChild(_Slot.results)) {
-      layoutChild(
-        _Slot.results,
-        BoxConstraints(
-          minWidth: w - 32,
-          maxWidth: w - 32,
-          maxHeight: tersedia * 0.75,
-        ),
-      );
-      positionChild(_Slot.results, Offset(16, hh + 4));
-    }
-  }
-
-  @override
-  bool shouldRelayout(_NavLayout oldDelegate) => false;
 }

@@ -8,10 +8,15 @@ class BarAction {
     required this.label,
     required this.onPressed,
     this.icon,
+    this.short,
     this.filled = false,
   });
 
   final String label;
+
+  /// Label pendek bila kapsul terlalu sempit (mis. "Lapor" untuk "Laporkan");
+  /// label penuh tetap dibacakan pembaca layar.
+  final String? short;
   final IconData? icon;
   final VoidCallback? onPressed;
 
@@ -107,11 +112,36 @@ class _ActionPill extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Flexible(
-                    child: Text(
-                      action.label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: sans(size: 15, color: fg, weight: FontWeight.w600),
+                    child: LayoutBuilder(
+                      builder: (context, c) {
+                        final style = sans(
+                          size: 15,
+                          color: fg,
+                          weight: FontWeight.w600,
+                        );
+                        var teks = action.label;
+                        final pendek = action.short;
+                        if (pendek != null) {
+                          final tp = TextPainter(
+                            text: TextSpan(text: teks, style: style),
+                            maxLines: 1,
+                            textScaler: MediaQuery.textScalerOf(context),
+                            textDirection: TextDirection.ltr,
+                          )..layout();
+                          if (tp.width > c.maxWidth) teks = pendek;
+                          tp.dispose();
+                        }
+                        return Semantics(
+                          label: action.label,
+                          excludeSemantics: true,
+                          child: Text(
+                            teks,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: style,
+                          ),
+                        );
+                      },
                     ),
                   ),
                   if (action.icon != null) ...[

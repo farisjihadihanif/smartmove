@@ -1,18 +1,21 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Bus, Camera, Loader2, MapPin, Play, Route, Share2, TrafficCone } from 'lucide-react'
+import { Bus, Camera, Play, Route, Share2, TrafficCone } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import BottomActionBar from '../components/BottomActionBar.jsx'
-import ErrorBanner from '../components/ErrorBanner.jsx'
 import MapView from '../components/MapView.jsx'
 import PageShell from '../components/PageShell.jsx'
 import PillToggle from '../components/PillToggle.jsx'
 import SearchField from '../components/SearchField.jsx'
+import HasilCari from '../components/HasilCari.jsx'
 import NavLayers from '../components/nav/NavLayers.jsx'
+import TrafficLayers from '../components/traffic/TrafficLayers.jsx'
+import TrafficLegend from '../components/TrafficLegend.jsx'
 import RouteSheet from '../components/nav/RouteSheet.jsx'
 import { api, latLng } from '../lib/api.js'
 import { MEDAN_CENTER } from '../lib/geo.js'
-import { MODA, formatJarak, teksBagikan, titikFoto } from '../lib/navigasi.js'
+import { MODA, teksBagikan, titikFoto } from '../lib/navigasi.js'
 import { teksBagikanTransit } from '../lib/transit.js'
+import { useLaluLintas } from '../lib/useLaluLintas.js'
 
 // Smart Navigation (mockup hal. 4, PRD §6.1): cari tujuan, pilih moda, rute di peta,
 // ringkasan & langkah di lembar bawah (desktop: panel samping kiri), Play (panduan langkah), Share, Street view (Mapillary).
@@ -25,9 +28,6 @@ const LAPISAN = [
   { value: 'transit', label: 'Transportasi umum', short: 'Umum', icon: Bus },
   { value: 'street', label: 'Street view', icon: Camera },
 ]
-const SEGERA = {
-  traffic: 'Lapisan Traffic hadir bersama Live Traffic Information.',
-}
 const MEBIDANG = { minLat: 3.25, maxLat: 3.9, minLng: 98.35, maxLng: 99.0 }
 const dalamWilayah = ({ lat, lng }) =>
   lat >= MEBIDANG.minLat && lat <= MEBIDANG.maxLat && lng >= MEBIDANG.minLng && lng <= MEBIDANG.maxLng
@@ -69,6 +69,8 @@ export default function Navigasi() {
   const [tengah, setTengah] = useState({ lat: MEDAN_CENTER[0], lng: MEDAN_CENTER[1] })
   const [pesan, setPesan] = useState('')
   const pesanTimer = useRef(null)
+  const trafficAktif = lapisan.includes('traffic')
+  const lalin = useLaluLintas(trafficAktif)
 
   const kabari = useCallback((teks) => {
     setPesan(teks)
@@ -231,10 +233,10 @@ export default function Navigasi() {
   const nilaiLapisan = umum ? [...lapisan, 'transit'] : lapisan
   function ubahLapisan(next) {
     const baru = next.find((v) => !nilaiLapisan.includes(v))
-    if (SEGERA[baru]) return kabari(SEGERA[baru])
     const transitOn = next.includes('transit')
     if (transitOn !== umum) gantiModa(transitOn ? 'transit' : modaSebelum.current)
-    setLapisan(next.filter((v) => !SEGERA[v] && v !== 'transit'))
+    setLapisan(next.filter((v) => v !== 'transit'))
+    if (baru === 'traffic') kabari('Lapisan Traffic aktif: garis berwarna = kondisi jalan utama, lingkaran = laporan warga.')
   }
 
   async function bagikan() {
@@ -294,6 +296,8 @@ export default function Navigasi() {
       <div className="relative z-0 flex min-h-0 flex-1 flex-col lg:flex-row">
         <div className="relative flex min-h-0 flex-1 flex-col">
           <MapView tucked attribution="topright" className="flex-1 lg:mb-0" label="Peta rute">
+            {/* Lapisan Traffic di bawah garis rute (T-205). */}
+            {trafficAktif && <TrafficLayers koridor={lalin.koridor.items} laporan={lalin.laporan} onArea={lalin.onArea} redup={Boolean(rute || opsi)} />}
             <NavLayers
               dari={dari}
               ke={ke}
@@ -306,6 +310,9 @@ export default function Navigasi() {
             />
           </MapView>
 
+          {trafficAktif && (
+            <TrafficLegend className="absolute left-3 right-3 top-10 z-[5] w-fit rounded-2xl bg-surface/90 px-3 py-1.5 shadow-[0_2px_10px_-4px_rgb(65_57_111/0.6)]" />
+          )}
           {pesan && (
             <p
               role="status"
@@ -363,44 +370,5 @@ export default function Navigasi() {
 
       <BottomActionBar actions={aksi} className="lg:hidden" />
     </PageShell>
-  )
-}
-
-function HasilCari({ hasil, onPilih, onTutup }) {
-  return (
-    <div className="absolute inset-x-0 top-full z-40 mt-2 max-h-[min(22rem,55dvh)] overflow-y-auto rounded-3xl bg-surface p-2 shadow-[0_18px_40px_-14px_rgb(65_57_111/0.6)] ring-1 ring-ink/[0.06]">
-      {hasil.status === 'memuat' && (
-        <p className="flex items-center gap-2 px-3 py-3 text-sm text-ink/70">
-          <Loader2 size={18} className="animate-spin" aria-hidden="true" />
-          Mencari tempat…
-        </p>
-      )}
-      {hasil.status === 'galat' && <ErrorBanner error={hasil.error} onDismiss={onTutup} />}
-      {hasil.status === 'ok' && hasil.items.length === 0 && (
-        <p className="px-3 py-3 text-sm text-ink/70">Tempat tidak ditemukan di Medan dan sekitarnya. Coba nama lain atau ketuk peta.</p>
-      )}
-      {hasil.status === 'ok' && hasil.items.length > 0 && (
-        <ul aria-label="Hasil pencarian">
-          {hasil.items.map((t) => (
-            <li key={t.id}>
-              <button
-                type="button"
-                onClick={() => onPilih(t)}
-                className="flex min-h-touch w-full items-center gap-3 rounded-2xl px-2 py-2 text-left transition hover:bg-ink/[0.04]"
-              >
-                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[color:rgb(218_184_246/0.45)] text-ink-violet">
-                  <MapPin size={18} aria-hidden="true" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[15px] font-semibold">{t.nama}</span>
-                  {t.alamat && <span className="block truncate text-xs text-ink/60">{t.alamat}</span>}
-                </span>
-                {t.jarakM !== undefined && <span className="shrink-0 text-xs tabular-nums text-ink/55">{formatJarak(t.jarakM)}</span>}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
   )
 }

@@ -1,6 +1,7 @@
 /**
  * Bar aksi bawah bertekstur ungu tua (mockup hal. 4–7).
- * `actions`: [{ label, icon: KomponenIkon, onClick, variant: 'light' | 'pill', disabled }]
+ * `actions`: [{ label, short?, icon: KomponenIkon, onClick, variant: 'light' | 'pill', disabled }]
+ *   `short` = label pendek di ponsel (< sm) bila label penuh tidak muat; label penuh tetap dibacakan.
  * - `light` = kapsul putih #F4F0F0, teks ungu (Rute · Play · Share)
  * - `pill`  = kapsul gradasi (Pay Now · Share di Digital Payment)
  * `children` tampil di atas tombol (mis. pita "Simulasi").
@@ -14,7 +15,7 @@ export default function BottomActionBar({ actions = [], children, className = ''
       {children}
       {actions.length > 0 && (
         <div className="flex items-center justify-center gap-3">
-          {actions.map(({ label, icon: Icon, onClick, variant = 'light', disabled }) => (
+          {actions.map(({ label, short, icon: Icon, onClick, variant = 'light', disabled }) => (
             <button
               key={label}
               type="button"
@@ -24,7 +25,14 @@ export default function BottomActionBar({ actions = [], children, className = ''
                 variant === 'pill' ? 'bg-pill text-white' : 'bg-action-pill text-ink-violet'
               }`}
             >
-              <span className="truncate">{label}</span>
+              {short ? (
+                <>
+                  <span className="truncate sm:hidden" aria-hidden="true">{short}</span>
+                  <span className="sr-only sm:not-sr-only sm:truncate">{label}</span>
+                </>
+              ) : (
+                <span className="truncate">{label}</span>
+              )}
               {Icon && <Icon size={20} strokeWidth={2} className="shrink-0" aria-hidden="true" />}
             </button>
           ))}
