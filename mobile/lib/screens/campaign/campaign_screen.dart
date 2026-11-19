@@ -644,6 +644,7 @@ class FeedbackScreenState extends State<FeedbackScreen> {
   final _komentar = TextEditingController();
   bool kirim = false;
   bool selesai = false;
+  int poin = 0;
   Object? galat;
 
   @override
@@ -660,7 +661,7 @@ class FeedbackScreenState extends State<FeedbackScreen> {
       galat = null;
     });
     try {
-      await api.post('/campaign/feedback', {
+      final res = await api.post('/campaign/feedback', {
         'rating': rating,
         if (_komentar.text.trim().isNotEmpty) 'komentar': _komentar.text.trim(),
         'fitur': ?fitur,
@@ -669,6 +670,7 @@ class FeedbackScreenState extends State<FeedbackScreen> {
         setState(() {
           kirim = false;
           selesai = true;
+          poin = res is Map ? (res['poin'] as int? ?? 0) : 0;
         });
       }
     } on ApiException catch (e) {
@@ -708,7 +710,8 @@ class FeedbackScreenState extends State<FeedbackScreen> {
           _kartu(
             judul: 'Terima kasih!',
             isi:
-                'Masukanmu sudah terkirim dan akan dibaca tim SmartMove Medan.',
+                'Masukanmu sudah terkirim dan akan dibaca tim SmartMove Medan.'
+                '${poin > 0 ? ' Kamu dapat +$poin poin.' : ''}',
             aksi: Wrap(
               alignment: WrapAlignment.center,
               spacing: 12,

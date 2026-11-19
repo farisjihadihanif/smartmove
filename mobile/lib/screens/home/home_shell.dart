@@ -4,6 +4,7 @@ import '../../state.dart';
 import '../../theme.dart';
 import '../auth/login_screen.dart';
 import '../coming_soon_screen.dart';
+import '../rewards/rewards_screen.dart';
 import 'home_screen.dart';
 
 /// Kerangka setelah masuk: navigasi bawah Beranda · Rewards · Akun
@@ -17,16 +18,21 @@ class HomeShell extends StatefulWidget {
 
 class _HomeShellState extends State<HomeShell> {
   int _index = 0;
+  // Rewards dibuat saat tab dibuka dan dimuat ulang tiap kali dibuka lagi.
+  int _kunjunganRewards = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
         index: _index,
-        children: const [
-          HomeScreen(),
-          ComingSoonScreen(title: 'Rewards'),
-          ComingSoonScreen(title: 'Akun', account: true),
+        children: [
+          const HomeScreen(),
+          if (_kunjunganRewards == 0)
+            const SizedBox.shrink()
+          else
+            RewardsScreen(key: ValueKey(_kunjunganRewards)),
+          const ComingSoonScreen(title: 'Akun', account: true),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -37,7 +43,10 @@ class _HomeShellState extends State<HomeShell> {
             pushLogin(context);
             return;
           }
-          setState(() => _index = i);
+          setState(() {
+            if (i == 1 && _index != 1) _kunjunganRewards++;
+            _index = i;
+          });
         },
         height: 72,
         labelTextStyle: WidgetStateProperty.resolveWith(

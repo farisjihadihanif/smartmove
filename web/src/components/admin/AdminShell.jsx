@@ -1,4 +1,4 @@
-import { BarChart3, Bus, CalendarClock, FileText, Home, MessageSquare, Route, TriangleAlert, Users } from 'lucide-react'
+import { BarChart3, Bus, CalendarClock, FileText, Gift, Home, MessageSquare, Receipt, Route, Ticket, TriangleAlert, Users } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../../lib/useAuth.js'
@@ -14,6 +14,9 @@ const MENU = [
   { to: '/admin/konten', label: 'Tips & poster', icon: FileText },
   { to: '/admin/laporan', label: 'Laporan lalu lintas', icon: TriangleAlert },
   { to: '/admin/umpan-balik', label: 'Umpan balik', icon: MessageSquare },
+  { to: '/admin/layanan', label: 'Katalog pemesanan', icon: Ticket },
+  { to: '/admin/voucher', label: 'Voucher', icon: Gift },
+  { to: '/admin/transaksi', label: 'Transaksi', icon: Receipt },
   { to: '/admin/pengguna', label: 'Pengguna', icon: Users },
 ]
 

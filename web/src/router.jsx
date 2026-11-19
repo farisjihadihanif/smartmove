@@ -14,6 +14,7 @@ import NotFound from './pages/NotFound.jsx'
 import Pembayaran from './pages/Pembayaran.jsx'
 import RiwayatPembayaran from './pages/pembayaran/Riwayat.jsx'
 import StatusPembayaran from './pages/pembayaran/Status.jsx'
+import Rewards from './pages/Rewards.jsx'
 import Segera from './pages/Segera.jsx'
 import Splash from './pages/Splash.jsx'
 import TripPlanner from './pages/TripPlanner.jsx'
@@ -54,7 +55,7 @@ export const router = createBrowserRouter([
       { path: 'trip-planner', element: <TripPlanner /> },
       { path: 'pembayaran/riwayat', element: <RiwayatPembayaran /> },
       { path: 'pembayaran/:orderId', element: <StatusPembayaran /> },
-      { path: 'rewards', element: <Segera title="Rewards" /> },
+      { path: 'rewards', element: <Rewards /> },
       { path: 'akun', element: <Segera title="Akun" account /> },
     ],
   },
@@ -74,6 +75,9 @@ export const router = createBrowserRouter([
           { path: 'konten', lazy: async () => ({ Component: (await import('./pages/admin/Konten.jsx')).default }) },
           { path: 'laporan', lazy: async () => ({ Component: (await import('./pages/admin/Laporan.jsx')).default }) },
           { path: 'umpan-balik', lazy: async () => ({ Component: (await import('./pages/admin/UmpanBalik.jsx')).default }) },
+          { path: 'layanan', lazy: async () => ({ Component: (await import('./pages/admin/Layanan.jsx')).default }) },
+          { path: 'voucher', lazy: async () => ({ Component: (await import('./pages/admin/Voucher.jsx')).default }) },
+          { path: 'transaksi', lazy: async () => ({ Component: (await import('./pages/admin/Transaksi.jsx')).default }) },
           { path: 'pengguna', lazy: async () => ({ Component: (await import('./pages/admin/Pengguna.jsx')).default }) },
         ],
       },

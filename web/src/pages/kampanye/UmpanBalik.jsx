@@ -40,15 +40,15 @@ function Form() {
   const [rating, setRating] = useState(0)
   const [fitur, setFitur] = useState(null)
   const [komentar, setKomentar] = useState('')
-  const [status, setStatus] = useState({ kirim: false, error: null, selesai: false })
+  const [status, setStatus] = useState({ kirim: false, error: null, selesai: false, poin: 0 })
 
   async function kirim(e) {
     e.preventDefault()
     if (!rating) return
     setStatus({ kirim: true, error: null, selesai: false })
     try {
-      await api.post('/campaign/feedback', { rating, komentar: komentar.trim() || undefined, fitur: fitur ?? undefined })
-      setStatus({ kirim: false, error: null, selesai: true })
+      const res = await api.post('/campaign/feedback', { rating, komentar: komentar.trim() || undefined, fitur: fitur ?? undefined })
+      setStatus({ kirim: false, error: null, selesai: true, poin: res?.poin ?? 0 })
     } catch (error) {
       setStatus({ kirim: false, error, selesai: false })
     }
@@ -60,6 +60,7 @@ function Form() {
         <h2 className="font-serif text-[1.5rem]">Terima kasih!</h2>
         <p className="mx-auto mt-2 max-w-[34ch] text-[15px] leading-relaxed text-ink/70">
           Masukanmu sudah terkirim dan akan dibaca tim SmartMove Medan.
+          {status.poin > 0 && ` Kamu dapat +${status.poin} poin.`}
         </p>
         <div className="mt-5 flex flex-wrap justify-center gap-3">
           <Link to="/kampanye" className="inline-flex min-h-touch items-center rounded-full bg-login-button px-6 font-semibold text-white">
