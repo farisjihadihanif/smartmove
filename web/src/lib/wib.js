@@ -46,3 +46,9 @@ export function sejak(t, now) {
   if (m < 24 * 60) return `${Math.floor(m / 60)} jam lalu`
   return hariWib(t, now)
 }
+
+/** ISO → nilai <input type="datetime-local"> dalam WIB ("2026-11-20T06:00"). */
+export const keInputWib = (iso) => (iso ? new Date(new Date(iso).getTime() + WIB_MS).toISOString().slice(0, 16) : '')
+
+/** Nilai <input type="datetime-local"> (dibaca sebagai WIB) → ISO. */
+export const dariInputWib = (v) => (v ? new Date(`${v}:00+07:00`).toISOString() : null)

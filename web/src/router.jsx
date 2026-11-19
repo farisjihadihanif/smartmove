@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom'
 import AppLayout from './components/AppLayout.jsx'
-import { GuestOnly, RequireAuth } from './lib/auth.jsx'
+import { GuestOnly, RequireAdmin, RequireAuth } from './lib/auth.jsx'
+import AdminShell from './components/admin/AdminShell.jsx'
 import Index from './pages/Index.jsx'
 import Kampanye from './pages/Kampanye.jsx'
 import EventAlert from './pages/kampanye/EventAlert.jsx'
@@ -49,6 +50,27 @@ export const router = createBrowserRouter([
       { path: 'trip-planner', element: <TripPlanner /> },
       { path: 'rewards', element: <Segera title="Rewards" /> },
       { path: 'akun', element: <Segera title="Akun" account /> },
+    ],
+  },
+  {
+    // Dasbor admin (T-208), dimuat terpisah agar tidak membebani aplikasi warga.
+    path: 'admin',
+    element: <RequireAdmin />,
+    errorElement: <NotFound />,
+    children: [
+      {
+        element: <AdminShell />,
+        children: [
+          { index: true, lazy: async () => ({ Component: (await import('./pages/admin/Ringkasan.jsx')).default }) },
+          { path: 'transit', lazy: async () => ({ Component: (await import('./pages/admin/Transit.jsx')).default }) },
+          { path: 'jalan', lazy: async () => ({ Component: (await import('./pages/admin/Jalan.jsx')).default }) },
+          { path: 'event', lazy: async () => ({ Component: (await import('./pages/admin/Event.jsx')).default }) },
+          { path: 'konten', lazy: async () => ({ Component: (await import('./pages/admin/Konten.jsx')).default }) },
+          { path: 'laporan', lazy: async () => ({ Component: (await import('./pages/admin/Laporan.jsx')).default }) },
+          { path: 'umpan-balik', lazy: async () => ({ Component: (await import('./pages/admin/UmpanBalik.jsx')).default }) },
+          { path: 'pengguna', lazy: async () => ({ Component: (await import('./pages/admin/Pengguna.jsx')).default }) },
+        ],
+      },
     ],
   },
   {

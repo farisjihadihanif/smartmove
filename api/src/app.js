@@ -18,6 +18,7 @@ import { tripsRouter } from './routes/trips.js';
 import { transitRouter } from './routes/transit.js';
 import { trafficRouter } from './routes/traffic.js';
 import { campaignRouter } from './routes/campaign.js';
+import { adminRouter } from './routes/admin/index.js';
 
 export function createApp(opts = {}) {
   const cfg = { ...config, ...opts };
@@ -63,6 +64,7 @@ export function createApp(opts = {}) {
   api.use('/trips', tripsRouter(cfg));
   api.use('/transit', transitRouter(cfg));
   api.use('/campaign', campaignRouter());
+  api.use('/admin', adminRouter(cfg));
   // Satu kuota bersama untuk semua endpoint yang memanggil layanan peta.
   const mapLimit = rateLimit({
     windowMs: cfg.mapRateLimit.windowMs,

@@ -2,8 +2,8 @@ import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import express from 'express';
-import multer from 'multer';
 import User from '../models/User.js';
+import { jenisGambar, terimaGambar } from '../lib/gambar.js';
 import { httpError } from '../lib/httpError.js';
 import { hashPassword, checkPassword as cocok } from '../lib/password.js';
 import { str, checkUsername, checkPassword } from '../lib/validate.js';
@@ -12,38 +12,13 @@ import { requireAuth, publicUser, signToken, setAuthCookie } from '../middleware
 export const FOTO_MAX_BYTES = 2 * 1024 * 1024;
 export const AVATAR_PREFIX = '/uploads/avatars/';
 
-// Jenis gambar dicek dari isi file (magic bytes), bukan dari mimetype kiriman klien.
-function jenisGambar(buf) {
-  if (buf.length >= 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return 'jpg';
-  if (buf.length >= 8 && buf.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])))
-    return 'png';
-  if (buf.length >= 12 && buf.toString('ascii', 0, 4) === 'RIFF' && buf.toString('ascii', 8, 12) === 'WEBP')
-    return 'webp';
-  return null;
-}
-
 const FIELD_TEKS = { namaLengkap: 100, telepon: 20, alamat: 200, bio: 300 };
 
 export function usersRouter(cfg) {
   const r = express.Router();
   const avatarDir = path.join(cfg.uploadDir, 'avatars');
 
-  const upload = multer({
-    storage: multer.memoryStorage(),
-    limits: { fileSize: FOTO_MAX_BYTES, files: 1, fields: 20 },
-  }).single('foto');
-
-  function terimaFoto(req, res, next) {
-    if (!req.is('multipart/form-data')) return next();
-    upload(req, res, (err) => {
-      if (!err) return next();
-      if (err instanceof multer.MulterError) {
-        if (err.code === 'LIMIT_FILE_SIZE') return next(httpError(413, 'Ukuran foto maksimal 2 MB'));
-        return next(httpError(400, 'Unggahan foto tidak valid'));
-      }
-      next(err);
-    });
-  }
+  const terimaFoto = terimaGambar('foto', { maxBytes: FOTO_MAX_BYTES, label: 'foto' });
 
   r.patch('/me', requireAuth, terimaFoto, async (req, res) => {
     const b = req.body || {};
