@@ -48,6 +48,8 @@ const config = {
   nominatimEmail: env.NOMINATIM_EMAIL,
   // Impor koridor & halte (npm run impor:osm). Kosong = overpass-api.de.
   overpassUrl: env.OVERPASS_URL,
+  // Sumber info lalu lintas (services/trafficProvider.js). Bawaan: komunitas.
+  trafficProvider: env.TRAFFIC_PROVIDER || 'komunitas',
   // Foto jalan (Street view). Token hanya di server.
   mapillaryToken: env.MAPILLARY_TOKEN,
   mapillaryUrl: env.MAPILLARY_URL,

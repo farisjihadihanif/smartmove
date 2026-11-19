@@ -16,6 +16,7 @@ import { routesRouter } from './routes/routes.js';
 import { streetviewRouter } from './routes/streetview.js';
 import { tripsRouter } from './routes/trips.js';
 import { transitRouter } from './routes/transit.js';
+import { trafficRouter } from './routes/traffic.js';
 
 export function createApp(opts = {}) {
   const cfg = { ...config, ...opts };
@@ -71,6 +72,7 @@ export function createApp(opts = {}) {
   api.use('/places', mapLimit, placesRouter(cfg));
   api.use('/routes', mapLimit, routesRouter(cfg));
   api.use('/streetview', mapLimit, streetviewRouter(cfg));
+  api.use('/traffic', trafficRouter(cfg, { mapLimit }));
 
   app.use('/api', api);
   app.use(notFound);

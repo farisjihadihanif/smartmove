@@ -15,6 +15,17 @@ const trafficReportSchema = new mongoose.Schema(
     },
     catatan: { type: String, trim: true, maxlength: 200 },
     konfirmasi: { type: Number, default: 0, min: 0 },
+    // Siapa saja yang sudah mengonfirmasi (satu kali per orang). Tidak pernah dikirim ke klien.
+    konfirmasiOleh: {
+      type: [
+        new mongoose.Schema(
+          { user: ref('User'), pada: { type: Date, default: Date.now } },
+          { _id: false },
+        ),
+      ],
+      default: [],
+      select: false,
+    },
     expiresAt: { type: Date, default: () => new Date(Date.now() + TRAFFIC_TTL_MS) },
   },
   { timestamps: true },
@@ -23,6 +34,7 @@ const trafficReportSchema = new mongoose.Schema(
 trafficReportSchema.index({ lokasi: '2dsphere' });
 trafficReportSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 trafficReportSchema.index({ user: 1, createdAt: -1 }); // batas laporan per user
+trafficReportSchema.index({ 'konfirmasiOleh.user': 1, 'konfirmasiOleh.pada': -1 });
 
 export default mongoose.models.TrafficReport ||
   mongoose.model('TrafficReport', trafficReportSchema);
