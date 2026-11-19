@@ -11,10 +11,12 @@ import 'package:smartmove/theme.dart';
 ApiClient _client(
   Future<http.Response> Function(http.Request) handler, {
   String? token,
+  bool online = false,
 }) => ApiClient(
   client: MockClient(handler),
   tokens: MemoryTokenStore(token),
   baseUrl: 'http://api.test/api',
+  hasInternet: () async => online,
 );
 
 http.Response _json(Object body, [int status = 200]) => http.Response(
@@ -94,7 +96,26 @@ void main() {
       await expectLater(
         api.get('/home'),
         throwsA(
-          isA<ApiException>().having((e) => e.isNetwork, 'isNetwork', true),
+          isA<ApiException>()
+              .having((e) => e.isNetwork, 'isNetwork', true)
+              .having((e) => e.code, 'code', kOffline),
+        ),
+      );
+    });
+
+    test('internet ada tapi server mati → SERVER_TAK_TERJANGKAU', () async {
+      final api = _client(
+        (_) async => throw http.ClientException('connection refused'),
+        online: true,
+      );
+      await expectLater(
+        api.get('/home'),
+        throwsA(
+          isA<ApiException>().having(
+            (e) => e.code,
+            'code',
+            kServerUnreachable,
+          ),
         ),
       );
     });

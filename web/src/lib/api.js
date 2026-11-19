@@ -42,6 +42,16 @@ export function setUnauthorizedHandler(fn) {
 }
 
 /**
+ * Galat jaringan (status 0): bedakan perangkat offline dari server SmartMove
+ * yang tidak terjangkau. `navigator.onLine === false` berarti pasti tanpa jaringan.
+ */
+export function networkError(online = typeof navigator === 'undefined' || navigator.onLine !== false) {
+  return online
+    ? new ApiError(0, 'Tidak bisa terhubung ke server SmartMove. Coba lagi sebentar.', 'SERVER_TAK_TERJANGKAU')
+    : new ApiError(0, 'Kamu sedang offline', 'OFFLINE')
+}
+
+/**
  * Panggil API. Melempar ApiError { status, message, code } bila gagal
  * (format galat API_SPECS §1). `body` objek dikirim sebagai JSON; FormData apa adanya.
  */
@@ -64,7 +74,7 @@ export async function request(path, { method = 'GET', query, body, signal, heade
     res = await fetch(buildUrl(path, query), init)
   } catch (err) {
     if (err?.name === 'AbortError') throw err
-    throw new ApiError(0, 'Tidak dapat terhubung ke server. Periksa koneksi internet kamu.', 'JARINGAN')
+    throw networkError()
   }
 
   if (res.status === 204) return null

@@ -200,8 +200,12 @@ void main() {
   group('ErrorBanner', () {
     test('memetakan kode galat ke teks DESIGN §5', () {
       expect(
-        errorMessageFor(ApiException(0, 'timeout', 'JARINGAN')),
-        startsWith('Kamu sedang offline'),
+        errorMessageFor(ApiException(0, 'x', kOffline)),
+        'Kamu sedang offline',
+      );
+      expect(
+        errorMessageFor(ApiException(0, 'x', kServerUnreachable)),
+        'Tidak bisa terhubung ke server SmartMove. Coba lagi sebentar.',
       );
       expect(
         errorMessageFor(ApiException(422, 'x', 'DI_LUAR_WILAYAH')),
@@ -214,12 +218,21 @@ void main() {
       expect(errorMessageFor(null), '');
     });
 
+    testWidgets('server tak terjangkau: ikon cloud_off', (tester) async {
+      await pumpScreen(
+        tester,
+        ErrorBanner(error: ApiException(0, 'x', kServerUnreachable)),
+      );
+      expect(find.byIcon(Icons.cloud_off), findsOneWidget);
+      expect(find.byIcon(Icons.wifi_off), findsNothing);
+    });
+
     testWidgets('galat jaringan: ikon offline + Coba lagi', (tester) async {
       var retried = false;
       await pumpScreen(
         tester,
         ErrorBanner(
-          error: ApiException(0, 'x', 'JARINGAN'),
+          error: ApiException(0, 'x', kOffline),
           onRetry: () => retried = true,
         ),
       );

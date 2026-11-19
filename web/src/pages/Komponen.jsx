@@ -113,7 +113,8 @@ export default function Komponen() {
 
       {/* Galat & kosong */}
       <section className="flex flex-col gap-3 px-4 pb-4">
-        <ErrorBanner error={new ApiError(0, 'x', 'JARINGAN')} onRetry={noop} />
+        <ErrorBanner error={new ApiError(0, 'x', 'OFFLINE')} onRetry={noop} />
+        <ErrorBanner error={new ApiError(0, 'x', 'SERVER_TAK_TERJANGKAU')} onRetry={noop} />
         <ErrorBanner error={new ApiError(422, 'x', 'DI_LUAR_WILAYAH')} onDismiss={noop} />
       </section>
       <EmptyState

@@ -61,6 +61,27 @@ class MemoryTokenStore implements TokenStore {
   Future<void> clear() async => _token = null;
 }
 
+/// Kode galat jaringan buatan klien (status 0).
+const kOffline = 'OFFLINE';
+const kServerUnreachable = 'SERVER_TAK_TERJANGKAU';
+
+/// Cek cepat apakah perangkat punya internet: buka koneksi TCP ke resolver
+/// DNS publik (tanpa mengirim data). Dipanggil hanya saat permintaan ke API gagal.
+Future<bool> probeInternet() async {
+  for (final host in const ['1.1.1.1', '8.8.8.8']) {
+    try {
+      final s = await Socket.connect(
+        host,
+        53,
+        timeout: const Duration(seconds: 2),
+      );
+      s.destroy();
+      return true;
+    } catch (_) {}
+  }
+  return false;
+}
+
 String _defaultMessage(int status) {
   if (status == 401) return 'Sesi berakhir, silakan masuk lagi';
   if (status == 403) return 'Kamu tidak punya akses';
@@ -80,7 +101,9 @@ class ApiClient {
     TokenStore? tokens,
     String? baseUrl,
     this.timeout = const Duration(seconds: 20),
+    Future<bool> Function()? hasInternet,
   }) : _http = client ?? http.Client(),
+       _hasInternet = hasInternet ?? probeInternet,
        tokens = tokens ?? SecureTokenStore(),
        _base = baseUrl ?? apiBase;
 
@@ -88,6 +111,7 @@ class ApiClient {
   final TokenStore tokens;
   final String _base;
   final Duration timeout;
+  final Future<bool> Function() _hasInternet;
 
   /// Token sesi tanpa "Ingat saya": hanya di memori, hilang saat aplikasi ditutup.
   /// Bila diisi, dipakai menggantikan token di [tokens].
@@ -95,6 +119,21 @@ class ApiClient {
 
   /// Dipanggil saat API membalas 401 (mis. kosongkan sesi di [AppState]).
   void Function()? onUnauthorized;
+
+  /// Bedakan "perangkat offline" dari "server SmartMove tidak terjangkau".
+  Future<ApiException> _networkError() async {
+    var online = false;
+    try {
+      online = await _hasInternet();
+    } catch (_) {}
+    return online
+        ? ApiException(
+            0,
+            'Tidak bisa terhubung ke server SmartMove. Coba lagi sebentar.',
+            kServerUnreachable,
+          )
+        : ApiException(0, 'Kamu sedang offline', kOffline);
+  }
 
   Uri uri(String path, [Map<String, Object?>? query]) {
     final p = path.startsWith('/') ? path : '/$path';
@@ -133,19 +172,11 @@ class ApiClient {
         await _http.send(req).timeout(timeout),
       ).timeout(timeout);
     } on TimeoutException {
-      throw ApiException(0, 'Koneksi terlalu lama. Coba lagi.', 'JARINGAN');
+      throw await _networkError();
     } on SocketException {
-      throw ApiException(
-        0,
-        'Tidak dapat terhubung ke server. Periksa koneksi internet kamu.',
-        'JARINGAN',
-      );
+      throw await _networkError();
     } on http.ClientException {
-      throw ApiException(
-        0,
-        'Tidak dapat terhubung ke server. Periksa koneksi internet kamu.',
-        'JARINGAN',
-      );
+      throw await _networkError();
     }
 
     if (res.statusCode == 204) return null;

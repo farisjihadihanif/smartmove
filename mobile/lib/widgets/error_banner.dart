@@ -5,7 +5,9 @@ import '../theme.dart';
 
 // Pemetaan galat → teks pengguna (DESIGN §5). Samakan dengan web/src/lib/errors.js.
 const _byCode = {
-  'JARINGAN': 'Kamu sedang offline. Periksa koneksi, lalu coba lagi.',
+  kOffline: 'Kamu sedang offline',
+  kServerUnreachable:
+      'Tidak bisa terhubung ke server SmartMove. Coba lagi sebentar.',
   'DI_LUAR_WILAYAH': 'SmartMove baru melayani Medan dan sekitarnya.',
   'LAYANAN_PETA_GAGAL':
       'Rute belum bisa dihitung. Coba lagi atau buka di OpenStreetMap.',
@@ -14,23 +16,29 @@ const _byCode = {
   'FOTO_JALAN_NONAKTIF': 'Foto jalan belum tersedia saat ini.',
 };
 
-/// True bila galat berasal dari jaringan.
+/// True bila perangkat tidak punya internet.
 bool isOfflineError(Object? error) =>
-    error is ApiException && (error.isNetwork || error.code == 'JARINGAN');
+    error is ApiException && error.code == kOffline;
+
+/// True bila galat jaringan apa pun (offline atau server tak terjangkau).
+bool isNetworkError(Object? error) =>
+    error is ApiException && error.isNetwork;
 
 /// Pesan pengguna untuk galat apa pun.
 String errorMessageFor(Object? error) {
   if (error == null) return '';
   if (error is String) return error;
   if (error is ApiException) {
-    if (isOfflineError(error)) return _byCode['JARINGAN']!;
+    if (error.isNetwork) {
+      return _byCode[error.code] ?? _byCode[kServerUnreachable]!;
+    }
     return _byCode[error.code] ?? error.message;
   }
   return 'Terjadi kesalahan. Coba lagi.';
 }
 
 /// Banner galat. Isi [error] (mis. ApiException) atau [message].
-/// Galat jaringan otomatis memakai ikon offline.
+/// Offline memakai ikon wifi_off, server tak terjangkau ikon cloud_off.
 class ErrorBanner extends StatelessWidget {
   const ErrorBanner({
     super.key,
@@ -80,6 +88,8 @@ class ErrorBanner extends StatelessWidget {
                   child: Icon(
                     isOfflineError(error)
                         ? Icons.wifi_off
+                        : isNetworkError(error)
+                        ? Icons.cloud_off
                         : Icons.error_outline,
                     size: 20,
                     color: const Color(0xFFC62828),
