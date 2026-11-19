@@ -42,7 +42,7 @@ export default function PillToggle({
             type="button"
             aria-pressed={on}
             onClick={() => toggle(opt.value)}
-            className={`flex min-h-touch min-w-0 max-w-[10rem] flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-1 text-center text-[0.875rem] leading-tight transition ${
+            className={`flex min-h-touch min-w-0 max-w-[10rem] flex-auto items-center justify-center gap-1.5 rounded-full px-3 py-1 text-center text-[0.875rem] leading-tight transition ${
               fitDesktop ? 'lg:max-w-none lg:flex-none lg:whitespace-nowrap lg:px-4' : ''
             } ${
               on

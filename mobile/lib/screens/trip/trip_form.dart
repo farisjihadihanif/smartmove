@@ -5,6 +5,7 @@ import '../../api.dart';
 import '../../navigasi.dart';
 import '../../state.dart';
 import '../../theme.dart';
+import '../../transit.dart';
 import '../../trip.dart';
 import '../../widgets/widgets.dart';
 import '../navigation/navigation_screen.dart' show LokasiHasil;
@@ -53,11 +54,11 @@ class TripFormState extends State<TripForm> {
   late final _judul = TextEditingController(text: widget.awal?.judul ?? '');
 
   Map<String, num>? _estimasi;
+  bool _tanpaRuteUmum = false;
   String? _kunciEstimasi;
   bool _memuatEstimasi = false;
   bool _kirim = false;
   Object? _galat;
-  bool _pesanSegera = false;
 
   ApiClient get _api => AppScope.read(context).api;
 
@@ -81,7 +82,7 @@ class TripFormState extends State<TripForm> {
 
   String? get _kunci {
     final a = asal, b = tujuan;
-    if (a == null || b == null || moda.segera) return null;
+    if (a == null || b == null) return null;
     return '${a.lokasi.latitude},${a.lokasi.longitude};${b.lokasi.latitude},${b.lokasi.longitude};${moda.name}';
   }
 
@@ -91,24 +92,32 @@ class TripFormState extends State<TripForm> {
     setState(() {
       _kunciEstimasi = kunci;
       _estimasi = null;
+      _tanpaRuteUmum = false;
       _memuatEstimasi = kunci != null;
     });
     if (kunci == null) return;
     try {
-      final r = await _api.get(
-        '/routes',
-        query: {
-          'from': latLngQuery(asal!.lokasi.latitude, asal!.lokasi.longitude),
-          'to': latLngQuery(tujuan!.lokasi.latitude, tujuan!.lokasi.longitude),
-          'mode': moda.name,
-        },
-      ) as Map;
+      final query = {
+        'from': latLngQuery(asal!.lokasi.latitude, asal!.lokasi.longitude),
+        'to': latLngQuery(tujuan!.lokasi.latitude, tujuan!.lokasi.longitude),
+      };
+      Map<String, num>? hasil;
+      if (moda == ModaTrip.transit) {
+        // Opsi tercepat GET /routes/transit (+ tarif bila sudah diisi admin).
+        final r = await _api.get('/routes/transit', query: query) as Map;
+        final opsi = (r['opsi'] as List? ?? const []).whereType<Map>();
+        hasil = opsi.isEmpty ? null : ringkasanTrip(opsi.first);
+      } else {
+        final r = await _api.get(
+          '/routes',
+          query: {...query, 'mode': moda.name},
+        ) as Map;
+        hasil = {'jarakM': r['jarakM'] as num, 'durasiS': r['durasiS'] as num};
+      }
       if (!mounted || _kunciEstimasi != kunci) return;
       setState(() {
-        _estimasi = {
-          'jarakM': r['jarakM'] as num,
-          'durasiS': r['durasiS'] as num,
-        };
+        _estimasi = hasil;
+        _tanpaRuteUmum = hasil == null;
         _memuatEstimasi = false;
       });
     } catch (_) {
@@ -210,7 +219,7 @@ class TripFormState extends State<TripForm> {
   @override
   Widget build(BuildContext context) {
     final edit = widget.awal != null;
-    final ringkas = teksRingkasan(_estimasi);
+    final ringkas = teksRingkasan(_estimasi, moda);
     final label = sans(
       size: 14,
       weight: FontWeight.w600,
@@ -290,16 +299,16 @@ class TripFormState extends State<TripForm> {
                   _PilihanModa(
                     moda: m,
                     aktif: moda == m,
-                    onTap: () => m.segera
-                        ? setState(() => _pesanSegera = true)
-                        : _ubah(() => moda = m),
+                    onTap: () => _ubah(() => moda = m),
                   ),
               ],
             ),
-            if (_pesanSegera) ...[
+            if (moda == ModaTrip.transit &&
+                _tanpaRuteUmum &&
+                !_memuatEstimasi) ...[
               const SizedBox(height: AppSizes.s2),
               Text(
-                'Rute transportasi umum sedang disiapkan. Untuk sekarang pilih Mobil, Motor, atau Jalan kaki.',
+                'Belum ada angkot atau bus yang lewat dekat titik asal dan tujuan. Rencana tetap bisa disimpan.',
                 style: sans(
                   size: 14,
                   color: AppColors.ink.withValues(alpha: 0.7),
@@ -496,16 +505,11 @@ class _PilihanModa extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final warna = aktif
-        ? AppColors.white
-        : moda.segera
-        ? AppColors.ink.withValues(alpha: 0.5)
-        : AppColors.inkViolet;
+    final warna = aktif ? AppColors.white : AppColors.inkViolet;
     return Semantics(
       selected: aktif,
       button: true,
-      enabled: !moda.segera,
-      label: moda.segera ? '${moda.label}, segera hadir' : moda.label,
+      label: moda.label,
       excludeSemantics: true,
       child: Stack(
         clipBehavior: Clip.none,
@@ -514,18 +518,12 @@ class _PilihanModa extends StatelessWidget {
             child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: aktif ? AppGradients.pill : null,
-                color: aktif
-                    ? null
-                    : moda.segera
-                    ? AppColors.search
-                    : AppColors.white,
+                color: aktif ? null : AppColors.white,
                 borderRadius: BorderRadius.circular(16),
                 border: aktif
                     ? null
                     : Border.all(
-                        color: moda.segera
-                            ? AppColors.ink.withValues(alpha: 0.2)
-                            : AppColors.inkViolet.withValues(alpha: 0.2),
+                        color: AppColors.inkViolet.withValues(alpha: 0.2),
                       ),
               ),
               child: Material(
@@ -557,22 +555,6 @@ class _PilihanModa extends StatelessWidget {
               ),
             ),
           ),
-          if (moda.segera)
-            Positioned(
-              top: -8,
-              right: 8,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: AppColors.trafficPadat,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  'Segera',
-                  style: sans(size: 11, weight: FontWeight.w700),
-                ),
-              ),
-            ),
         ],
       ),
     );

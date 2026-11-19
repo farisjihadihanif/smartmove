@@ -41,6 +41,31 @@ class PillToggle<T> extends StatelessWidget {
     onChanged(next);
   }
 
+  /// Bobot lebar kapsul: kata terpanjang (lebar minimum tanpa memotong kata)
+  /// + separuh sisa label, ditambah centang (bila aktif) dan padding.
+  double _lebar(BuildContext context, PillOption<T> o) {
+    final on = selected.contains(o.value);
+    final style = sans(
+      size: 14,
+      weight: on ? FontWeight.w600 : FontWeight.w400,
+    );
+    double ukur(String s) {
+      final tp = TextPainter(
+        text: TextSpan(text: s, style: style),
+        textDirection: TextDirection.ltr,
+        textScaler: MediaQuery.textScalerOf(context),
+        maxLines: 1,
+      )..layout();
+      final w = tp.width;
+      tp.dispose();
+      return w;
+    }
+
+    final penuh = ukur(o.label);
+    final kata = o.label.split(' ').map(ukur).reduce((a, b) => a > b ? a : b);
+    return kata + (penuh - kata) / 2 + 12 + (on ? 20 : 0) + 8;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -48,8 +73,10 @@ class PillToggle<T> extends StatelessWidget {
       children: [
         for (final (i, o) in options.indexed) ...[
           if (i > 0) const SizedBox(width: AppSizes.s2),
-          // Lebar sama untuk semua kapsul (seperti mockup), maksimal 152 dp.
+          // Lebar sebanding dengan isi (label panjang + centang tetap satu
+          // kata utuh), maksimal 152 dp; bila sempit, label turun ke baris 2.
           Expanded(
+            flex: (_lebar(context, o) * 10).round(),
             child: Align(
               alignment: switch (i) {
                 0 => Alignment.centerLeft,

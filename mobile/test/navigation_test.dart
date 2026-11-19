@@ -11,6 +11,7 @@ import 'package:smartmove/navigasi.dart';
 import 'package:smartmove/screens/navigation/navigation_screen.dart';
 import 'package:smartmove/state.dart';
 import 'package:smartmove/theme.dart';
+import 'package:smartmove/transit.dart';
 
 import 'font_preload.dart';
 import 'widgets_test.dart' show FakeTiles;
@@ -51,6 +52,126 @@ final _rute = {
   ],
 };
 
+Map<String, Object?> _titik(String nama, double lat, double lng) => {
+  'nama': nama,
+  'lokasi': {'lat': lat, 'lng': lng},
+};
+
+/// Opsi dengan 1 transfer: jalan → angkot (tanpa halte) → angkot → jalan.
+final _transit = {
+  'opsi': [
+    {
+      'totalS': 1980,
+      'jalanM': 271,
+      'transfer': 1,
+      'perkiraan': false,
+      'tarif': null,
+      'tarifTeks': 'Tarif belum tersedia',
+      'bagian': [
+        {
+          'jenis': 'jalan',
+          'jarakM': 105,
+          'durasiS': 76,
+          'perkiraan': false,
+          'dari': _titik('Lokasi asal', 3.5617, 98.6566),
+          'ke': _titik('Jalan Almamater', 3.5625, 98.6571),
+          'garis': [
+            [98.6566, 3.5617],
+            [98.6571, 3.5625],
+          ],
+        },
+        {
+          'jenis': 'naik',
+          'naikDiMana': true,
+          'jumlahHalte': null,
+          'jarakM': 4010,
+          'durasiS': 722,
+          'tarif': null,
+          'koridor': {
+            'kode': 'ANGKOT-KPUM-69',
+            'nama': 'KPUM 69 : Gabion → Term. P. Induk',
+            'jenis': 'angkot',
+            'warna': null,
+            'tarif': null,
+          },
+          'koridorLain': [
+            {
+              'kode': 'ANGKOT-RMC-103',
+              'nama': 'RMC 103 : A → B',
+              'jenis': 'angkot',
+              'tarif': null,
+            },
+          ],
+          'dari': _titik('Jalan Almamater', 3.5625, 98.6571),
+          'ke': _titik('Titik pindah', 3.58, 98.67),
+          'garis': [
+            [98.6571, 3.5625],
+            [98.67, 3.58],
+          ],
+        },
+        {
+          'jenis': 'naik',
+          'naikDiMana': false,
+          'jumlahHalte': 3,
+          'jarakM': 1500,
+          'durasiS': 400,
+          'tarif': 4000,
+          'koridor': {
+            'kode': 'TMD-K2',
+            'nama': 'TMD K2 : Amplas → Lapangan Merdeka',
+            'jenis': 'bus',
+            'warna': null,
+            'tarif': 4000,
+          },
+          'koridorLain': [],
+          'dari': {..._titik('Halte Juanda', 3.58, 98.67), 'halteId': 'h1'},
+          'ke': {..._titik('Halte Balai Kota', 3.59, 98.677), 'halteId': 'h2'},
+          'garis': [
+            [98.67, 3.58],
+            [98.677, 3.59],
+          ],
+        },
+        {
+          'jenis': 'jalan',
+          'jarakM': 166,
+          'durasiS': 120,
+          'perkiraan': false,
+          'dari': _titik('Halte Balai Kota', 3.59, 98.677),
+          'ke': _titik('Tujuan', 3.5913, 98.6776),
+          'garis': [],
+        },
+      ],
+    },
+    {
+      'totalS': 2400,
+      'jalanM': 500,
+      'transfer': 0,
+      'perkiraan': false,
+      'tarif': null,
+      'tarifTeks': 'Tarif belum tersedia',
+      'bagian': [
+        {
+          'jenis': 'naik',
+          'naikDiMana': true,
+          'jarakM': 5000,
+          'durasiS': 2400,
+          'tarif': null,
+          'koridor': {
+            'kode': 'ANGKOT-KPUM-26',
+            'nama': 'KPUM 26 : Tuntungan → Mabar',
+            'jenis': 'angkot',
+            'tarif': null,
+          },
+          'koridorLain': [],
+          'dari': _titik('Lokasi asal', 3.5617, 98.6566),
+          'ke': _titik('Tujuan', 3.5913, 98.6776),
+          'garis': [],
+        },
+      ],
+    },
+  ],
+};
+
 class _Server {
   final List<Uri> calls = [];
   Map<String, dynamic>? foto;
@@ -79,6 +200,8 @@ class _Server {
             'lokasi': {'lat': 3.5855, 'lng': 98.6747},
           },
         });
+      case '/api/routes/transit':
+        return _json(_transit);
       case '/api/routes':
         return _json({..._rute, 'mode': req.url.queryParameters['mode']});
       case '/api/streetview':
@@ -191,6 +314,79 @@ void main() {
       expect(dalamWilayah(_usu), isTrue);
       expect(dalamWilayah(const LatLng(-6.2, 106.8)), isFalse);
     });
+  });
+
+  group('helper transit', () {
+    final bagian = bagianOpsi((_transit['opsi'] as List).first as Map);
+
+    test('angkot: naik di sepanjang jalan, halte: nama halte', () {
+      expect(teksNaik(bagian[1]), 'Naik di sepanjang Jl. Almamater');
+      expect(teksTurun(bagian[1]), 'Turun di titik pindah');
+      expect(teksNaik(bagian[2]), 'Naik di Halte Juanda');
+      expect(teksTurun(bagian[2]), 'Turun di Halte Balai Kota');
+      expect(teksJalan(bagian[0], false), 'Jalan kaki 105 m ke Jl. Almamater');
+      expect(teksJalan(bagian[3], true), 'Jalan kaki 166 m ke tujuan');
+      expect(judulNaik(bagian[1]), 'Naik angkot KPUM 69');
+      expect(
+        namaKoridor(bagian[1]['koridor'] as Map).trayek,
+        'Gabion → Term. P. Induk',
+      );
+    });
+
+    test('tarif null tidak dianggap 0; warna per kendaraan', () {
+      expect(teksTarif(null), 'tarif belum tersedia');
+      expect(teksTarif(4000), 'Rp4.000');
+      expect(indeksNaik(bagian), [null, 0, 1, null]);
+      expect(warnaNaik(0), isNot(warnaNaik(1)));
+      // Bagian tanpa garis → garis lurus dari → ke.
+      expect(garisBagian(bagian[3]).length, 2);
+      final o = (_transit['opsi'] as List).first as Map;
+      expect(ringkasanTrip(o), {'durasiS': 1980, 'jarakM': 5781});
+    });
+  });
+
+  testWidgets('Transportasi umum: opsi, bagian, tarif belum tersedia, Play', (
+    tester,
+  ) async {
+    final (state, server) = await _pump(
+      tester,
+      ke: const LatLng(3.5913, 98.6776),
+    );
+    await _tap(tester, find.text('Transportasi umum'));
+    expect(state.mode, Moda.transit);
+    expect(state.lapisan, isEmpty);
+    expect(
+      server.calls
+          .lastWhere((u) => u.path == '/api/routes/transit')
+          .queryParameters,
+      {'from': '3.5617,98.6566', 'to': '3.5913,98.6776'},
+    );
+    expect(tester.takeException(), isNull);
+    expect(find.text('33 mnt'), findsWidgets);
+    expect(find.text('Tarif belum tersedia'), findsOneWidget);
+    expect(find.text('Naik di sepanjang Jl. Almamater'), findsOneWidget);
+    expect(find.text('KPUM 69'), findsWidgets);
+    expect(find.textContaining('tarif belum tersedia'), findsWidgets);
+    expect(find.textContaining('Rp4.000'), findsOneWidget);
+    expect(find.text('Turun di Halte Balai Kota'), findsOneWidget);
+
+    // Opsi kedua: tanpa jalan kaki, naik di titik asal.
+    await _tap(tester, find.bySemanticsLabel(RegExp('^40 mnt')));
+    expect(find.text('Naik di titik asalmu'), findsOneWidget);
+    expect(find.text('Turun di tujuan'), findsOneWidget);
+    await _tap(tester, find.bySemanticsLabel(RegExp('^33 mnt')));
+
+    await _tap(tester, find.text('Play'));
+    expect(find.text('Bagian 1 dari 4'), findsOneWidget);
+    await _tap(tester, find.text('Berikutnya'));
+    expect(find.text('Naik angkot KPUM 69'), findsOneWidget);
+    await _tap(tester, find.widgetWithText(TextButton, 'Selesai'));
+    expect(state.play, isNull);
+
+    // Kapsul dimatikan → kembali ke moda sebelumnya.
+    await _tap(tester, find.text('Transportasi umum'));
+    expect(state.mode, Moda.driving);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('360 px: cari → pilih tujuan → ringkasan rute & moda', (

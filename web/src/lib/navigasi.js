@@ -1,10 +1,11 @@
 // Helper Smart Navigation (T-107). Sama dengan mobile/lib/navigasi.dart – ubah bersamaan.
 
-/** Pilihan moda di UI (API_SPECS §2: driving | motorcycle | walking). */
+/** Pilihan moda di UI (API_SPECS §2: driving | motorcycle | walking; transit = GET /routes/transit). */
 export const MODA = [
   { value: 'driving', label: 'Mobil' },
   { value: 'motorcycle', label: 'Motor' },
   { value: 'walking', label: 'Jalan kaki' },
+  { value: 'transit', label: 'Umum' },
 ]
 
 /** Durasi detik → "12 mnt", "1 j 5 mnt", "< 1 mnt". */

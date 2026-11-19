@@ -1,31 +1,31 @@
 import 'package:material_ui/material_ui.dart';
 
 import 'navigasi.dart';
+import 'transit.dart';
 import 'wib.dart';
 
 // Helper Trip Planner (T-109). Sama dengan web/src/lib/trip.js – ubah bersamaan.
 
-/// Moda rencana (API: driving | motorcycle | walking | transit). Transit baru di T-203.
+/// Moda rencana (API: driving | motorcycle | walking | transit).
 enum ModaTrip {
   driving('Mobil', Icons.directions_car_rounded),
   motorcycle('Motor', Icons.two_wheeler_rounded),
   walking('Jalan kaki', Icons.directions_walk_rounded),
-  transit('Transportasi umum', Icons.directions_bus_rounded, segera: true);
+  transit('Transportasi umum', Icons.directions_bus_rounded);
 
-  const ModaTrip(this.label, this.icon, {this.segera = false});
+  const ModaTrip(this.label, this.icon);
   final String label;
   final IconData icon;
-  final bool segera;
 
   static ModaTrip dari(Object? v) =>
       ModaTrip.values.firstWhere((m) => m.name == v, orElse: () => driving);
 
-  /// Moda Smart Navigation; null untuk transit (belum ada).
-  Moda? get navigasi => switch (this) {
+  /// Moda Smart Navigation.
+  Moda get navigasi => switch (this) {
     driving => Moda.driving,
     motorcycle => Moda.motorcycle,
     walking => Moda.walking,
-    transit => null,
+    transit => Moda.transit,
   };
 }
 
@@ -73,13 +73,16 @@ Map<String, Object?> tempatJson(Tempat t) => {
 };
 
 /// "12 mnt · 4,9 km" dari ringkasan tersimpan, atau null.
-String? teksRingkasan(Map? r) {
+/// Transit: + tarif ("tarif belum tersedia" bila kosong).
+String? teksRingkasan(Map? r, [ModaTrip? moda]) {
   if (r == null) return null;
   final bagian = [
     if (r['durasiS'] is num) formatDurasi(r['durasiS'] as num),
     if (r['jarakM'] is num) formatJarak(r['jarakM'] as num),
   ];
-  return bagian.isEmpty ? null : bagian.join(' · ');
+  if (bagian.isEmpty) return null;
+  if (moda == ModaTrip.transit) bagian.add(teksTarif(r['tarif']));
+  return bagian.join(' · ');
 }
 
 /// "Berangkat dalam 1 j 5 mnt" / "Waktunya berangkat".

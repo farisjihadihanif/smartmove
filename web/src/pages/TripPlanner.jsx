@@ -13,7 +13,6 @@ import {
   jamTrip,
   kelompokkan,
   labelModa,
-  modaSegera,
   tautanNavigasi,
   teksRingkasan,
 } from '../lib/trip.js'
@@ -22,7 +21,6 @@ import { hariWib } from '../lib/wib.js'
 // Trip Planner (DESIGN §3, gaya kartu Trip Planner mockup hal. 3): rencana berikutnya di kartu
 // gradasi pink → ungu, daftar rencana per hari seperti garis waktu, form asal/tujuan/moda/jam.
 // Ponsel: form di lembar bawah. Desktop: form tetap di kolom kanan.
-// Moda Transportasi umum tampil tapi bertanda "Segera" (T-203).
 
 const DESKTOP = '(min-width: 64rem)'
 const HALAMAN = 50
@@ -282,7 +280,7 @@ function Sorotan({ trip, now, memuat, onBuat, desktop }) {
     )
   }
 
-  const ringkas = teksRingkasan(trip.ringkasan)
+  const ringkas = teksRingkasan(trip.ringkasan, trip.moda)
   const Ikon = IKON_MODA[trip.moda]
   return (
     <section aria-labelledby="judul-berikutnya" className={`${kartu} px-5 pb-5 pt-5 lg:px-8 lg:pb-7 lg:pt-7`}>
@@ -336,13 +334,6 @@ function Lintasan({ trip, terang = false, className = '' }) {
 }
 
 function TombolNavigasi({ trip, terang = false }) {
-  if (modaSegera(trip.moda)) {
-    return (
-      <span className={`flex min-h-touch items-center whitespace-nowrap rounded-full px-4 text-sm font-semibold ${terang ? 'bg-white/20 text-white' : 'bg-search text-ink/55'}`}>
-        Navigasi segera hadir
-      </span>
-    )
-  }
   return (
     <Link
       to={tautanNavigasi(trip)}
@@ -361,7 +352,7 @@ function TombolNavigasi({ trip, terang = false }) {
 function ItemRencana({ trip, onUbah, onHapus, diubah, lewat = false, now }) {
   const [konfirmasi, setKonfirmasi] = useState(false)
   const jam = jamTrip(trip)
-  const ringkas = teksRingkasan(trip.ringkasan)
+  const ringkas = teksRingkasan(trip.ringkasan, trip.moda)
   const Ikon = IKON_MODA[trip.moda]
   return (
     <li

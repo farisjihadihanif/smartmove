@@ -12,10 +12,12 @@ import RouteSheet from '../components/nav/RouteSheet.jsx'
 import { api, latLng } from '../lib/api.js'
 import { MEDAN_CENTER } from '../lib/geo.js'
 import { MODA, formatJarak, teksBagikan, titikFoto } from '../lib/navigasi.js'
+import { teksBagikanTransit } from '../lib/transit.js'
 
 // Smart Navigation (mockup hal. 4, PRD §6.1): cari tujuan, pilih moda, rute di peta,
 // ringkasan & langkah di lembar bawah (desktop: panel samping kiri), Play (panduan langkah), Share, Street view (Mapillary).
 // Lokasi pengguna hanya dipakai selama layar terbuka, tidak disimpan (aturan bisnis #5).
+// Moda Transportasi umum (kapsul atau pilihan "Umum"): GET /routes/transit, opsi + bagian berwarna di peta (T-203).
 // URL: ?q= (dari Beranda), ?dari=lat,lng&ke=lat,lng&mode=&dariNama=&keNama= (dari Trip Planner).
 
 const LAPISAN = [
@@ -25,7 +27,6 @@ const LAPISAN = [
 ]
 const SEGERA = {
   traffic: 'Lapisan Traffic hadir bersama Live Traffic Information.',
-  transit: 'Rute transportasi umum sedang disiapkan.',
 }
 const MEBIDANG = { minLat: 3.25, maxLat: 3.9, minLng: 98.35, maxLng: 99.0 }
 const dalamWilayah = ({ lat, lng }) =>
@@ -56,7 +57,9 @@ export default function Navigasi() {
   const [lokasiStatus, setLokasiStatus] = useState('mencari')
   const [target, setTarget] = useState('ke')
   const [mode, setMode] = useState(() => (MODA.some((m) => m.value === params.get('mode')) ? params.get('mode') : 'driving'))
+  const modaSebelum = useRef(mode === 'transit' ? 'driving' : mode)
   const [ruteState, setRuteState] = useState({ kunci: null, rute: null, galat: null })
+  const [pilihOpsi, setPilihOpsi] = useState({ kunci: null, idx: 0 })
   const [coba, setCoba] = useState(0)
   const [buka, setBuka] = useState(false)
   const [play, setPlay] = useState(null)
@@ -167,8 +170,12 @@ export default function Navigasi() {
   useEffect(() => {
     if (!kunciRute) return
     const ctrl = new AbortController()
+    const umum = mode === 'transit'
     api
-      .get('/routes', { query: { from: latLng(dari.lokasi), to: latLng(ke.lokasi), mode }, signal: ctrl.signal })
+      .get(umum ? '/routes/transit' : '/routes', {
+        query: { from: latLng(dari.lokasi), to: latLng(ke.lokasi), ...(umum ? {} : { mode }) },
+        signal: ctrl.signal,
+      })
       .then(
         (rute) => setRuteState({ kunci: kunciRute, rute, galat: null }),
         (galat) => galat.name !== 'AbortError' && setRuteState({ kunci: kunciRute, rute: null, galat }),
@@ -177,11 +184,20 @@ export default function Navigasi() {
     // dari/ke/mode sudah terwakili kunciRute.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kunciRute])
+  const umum = mode === 'transit'
   const siap = ruteState.kunci === kunciRute
-  const rute = siap ? ruteState.rute : null
+  const hasilRute = siap ? ruteState.rute : null
+  const rute = umum ? null : hasilRute
   const galatRute = siap ? ruteState.galat : null
   const memuatRute = Boolean(kunciRute) && !siap
-  const langkahAktif = play !== null && rute ? rute.langkah[play] : null
+  const idxOpsi = pilihOpsi.kunci === kunciRute ? pilihOpsi.idx : 0
+  const opsi = umum ? (hasilRute?.opsi?.[idxOpsi] ?? null) : null
+  const langkahAktif = useMemo(() => {
+    if (play === null) return null
+    if (rute) return rute.langkah[play] ?? null
+    const b = opsi?.bagian[play]
+    return b ? { lokasi: [b.dari.lokasi.lng, b.dari.lokasi.lat] } : null
+  }, [play, rute, opsi])
 
   // Street view: foto jalan di titik langkah aktif / tujuan / tengah peta.
   const streetAktif = lapisan.includes('street')
@@ -204,15 +220,26 @@ export default function Navigasi() {
     return { status: 'ada', data: fotoState.data, nama: langkahAktif ? null : ke?.nama }
   }, [streetAktif, fotoState, kunciFoto, langkahAktif, ke])
 
+  function gantiModa(m) {
+    if (m === mode) return
+    if (mode !== 'transit') modaSebelum.current = mode
+    setPlay(null)
+    setMode(m)
+  }
+
+  // Kapsul "Transportasi umum" = pintasan moda transit; mematikannya kembali ke moda sebelumnya.
+  const nilaiLapisan = umum ? [...lapisan, 'transit'] : lapisan
   function ubahLapisan(next) {
-    const baru = next.find((v) => !lapisan.includes(v))
+    const baru = next.find((v) => !nilaiLapisan.includes(v))
     if (SEGERA[baru]) return kabari(SEGERA[baru])
-    setLapisan(next.filter((v) => !SEGERA[v]))
+    const transitOn = next.includes('transit')
+    if (transitOn !== umum) gantiModa(transitOn ? 'transit' : modaSebelum.current)
+    setLapisan(next.filter((v) => !SEGERA[v] && v !== 'transit'))
   }
 
   async function bagikan() {
-    if (!rute || !dari || !ke) return
-    const teks = teksBagikan({ dari, ke, mode, rute })
+    if ((!rute && !opsi) || !dari || !ke) return
+    const teks = opsi ? teksBagikanTransit({ dari, ke, opsi }) : teksBagikan({ dari, ke, mode, rute })
     try {
       if (navigator.share) {
         await navigator.share({ title: `Rute ke ${ke.nama}`, text: teks })
@@ -225,7 +252,7 @@ export default function Navigasi() {
     }
   }
 
-  const adaRute = Boolean(rute)
+  const adaRute = Boolean(rute || opsi)
   const aksi = [
     {
       label: 'Rute',
@@ -259,7 +286,7 @@ export default function Navigasi() {
             />
             {hasil && <HasilCari hasil={hasil} onPilih={pilih} onTutup={() => setHasil(null)} />}
           </div>
-          <PillToggle options={LAPISAN} value={lapisan} onChange={ubahLapisan} multiple label="Lapisan peta" fitDesktop className="lg:shrink-0" />
+          <PillToggle options={LAPISAN} value={nilaiLapisan} onChange={ubahLapisan} multiple label="Lapisan peta" fitDesktop className="lg:shrink-0" />
         </>
       }
     >
@@ -271,6 +298,7 @@ export default function Navigasi() {
               dari={dari}
               ke={ke}
               rute={rute}
+              transit={opsi}
               langkahAktif={langkahAktif}
               fitKey={fitKey}
               onPick={ketukPeta}
@@ -305,7 +333,7 @@ export default function Navigasi() {
                 setQuery(t === 'ke' ? (ke?.nama ?? '') : '')
               }}
               mode={mode}
-              onMode={setMode}
+              onMode={gantiModa}
               rute={rute}
               memuat={memuatRute}
               galat={galatRute}
@@ -316,6 +344,17 @@ export default function Navigasi() {
               onPlay={setPlay}
               foto={foto}
               onTutupFoto={() => setLapisan((l) => l.filter((v) => v !== 'street'))}
+              transit={{
+                data: umum ? hasilRute : null,
+                memuat: memuatRute,
+                galat: galatRute,
+                idx: idxOpsi,
+                onIdx: (i) => {
+                  setPilihOpsi({ kunci: kunciRute, idx: i })
+                  setPlay(null)
+                  setFitKey((n) => n + 1)
+                },
+              }}
             />
           </div>
           <BottomActionBar actions={aksi} className="hidden lg:block lg:rounded-t-[1.75rem]" />

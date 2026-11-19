@@ -5,10 +5,11 @@ import TempatField from './TempatField.jsx'
 import { IKON_MODA } from './ikonModa.js'
 import { api, latLng } from '../../lib/api.js'
 import { MODA_TRIP, dariIsian, keIsian, teksRingkasan } from '../../lib/trip.js'
+import { ringkasanTrip } from '../../lib/transit.js'
 
 /**
  * Form rencana perjalanan: asal & tujuan bertumpuk (seperti rute), moda, jam berangkat (WIB, opsional), nama.
- * Estimasi waktu & jarak dihitung dari /routes dan ikut disimpan sebagai `ringkasan`.
+ * Estimasi waktu & jarak dihitung dari /routes (transit: opsi tercepat /routes/transit, + tarif) dan ikut disimpan sebagai `ringkasan`.
  * `awal`: rencana yang diubah, atau null untuk rencana baru.
  */
 export default function TripForm({ awal, onSimpan, onBatal, idJudul }) {
@@ -19,16 +20,20 @@ export default function TripForm({ awal, onSimpan, onBatal, idJudul }) {
   const [judul, setJudul] = useState(awal?.judul ?? '')
   const [estimasi, setEstimasi] = useState({ kunci: null, data: null })
   const [kirim, setKirim] = useState({ status: 'diam', error: null })
-  const [pesanSegera, setPesanSegera] = useState(false)
 
-  const kunci = asal && tujuan && moda !== 'transit' ? `${latLng(asal.lokasi)};${latLng(tujuan.lokasi)};${moda}` : null
+  const kunci = asal && tujuan ? `${latLng(asal.lokasi)};${latLng(tujuan.lokasi)};${moda}` : null
   useEffect(() => {
     if (!kunci) return
     const ctrl = new AbortController()
-    api
-      .get('/routes', { query: { from: latLng(asal.lokasi), to: latLng(tujuan.lokasi), mode: moda }, signal: ctrl.signal })
+    const from = latLng(asal.lokasi)
+    const to = latLng(tujuan.lokasi)
+    const minta =
+      moda === 'transit'
+        ? api.get('/routes/transit', { query: { from, to }, signal: ctrl.signal }).then((r) => (r.opsi[0] ? ringkasanTrip(r.opsi[0]) : null))
+        : api.get('/routes', { query: { from, to, mode: moda }, signal: ctrl.signal }).then((r) => ({ jarakM: r.jarakM, durasiS: r.durasiS }))
+    minta
       .then(
-        (r) => setEstimasi({ kunci, data: { jarakM: r.jarakM, durasiS: r.durasiS } }),
+        (data) => setEstimasi({ kunci, data }),
         (e) => e.name !== 'AbortError' && setEstimasi({ kunci, data: null }),
       )
     return () => ctrl.abort()
@@ -58,7 +63,8 @@ export default function TripForm({ awal, onSimpan, onBatal, idJudul }) {
     }
   }
 
-  const teksEstimasi = memuatEstimasi ? null : teksRingkasan(ringkasan)
+  const teksEstimasi = memuatEstimasi ? null : teksRingkasan(ringkasan, moda)
+  const tanpaRuteUmum = moda === 'transit' && Boolean(kunci) && estimasi.kunci === kunci && !estimasi.data
 
   return (
     <form onSubmit={simpan} noValidate className="flex flex-col gap-5" aria-labelledby={idJudul}>
@@ -99,30 +105,19 @@ export default function TripForm({ awal, onSimpan, onBatal, idJudul }) {
                 key={m.value}
                 type="button"
                 aria-pressed={aktif}
-                aria-disabled={m.segera || undefined}
-                onClick={() => (m.segera ? setPesanSegera(true) : setModa(m.value))}
+                onClick={() => setModa(m.value)}
                 className={`relative flex min-h-[3.5rem] flex-col items-center justify-center gap-0.5 rounded-2xl px-2 py-2 text-[13px] leading-tight transition ${
                   aktif
                     ? 'bg-pill font-semibold text-white shadow-[0_6px_14px_-6px_rgb(114_13_129/0.8)]'
-                    : m.segera
-                      ? 'border border-dashed border-ink/25 bg-search text-ink/50'
-                      : 'bg-white text-ink-violet ring-1 ring-ink-violet/20 hover:bg-ink-violet/[0.05]'
+                    : 'bg-white text-ink-violet ring-1 ring-ink-violet/20 hover:bg-ink-violet/[0.05]'
                 }`}
               >
                 <Ikon size={20} aria-hidden="true" />
                 <span>{m.label}</span>
-                {m.segera && (
-                  <span className="absolute -top-2 right-2 rounded-full bg-traffic-padat px-2 py-0.5 text-[11px] font-bold text-ink">Segera</span>
-                )}
               </button>
             )
           })}
         </div>
-        {pesanSegera && (
-          <p role="status" className="mt-2 text-sm text-ink/70">
-            Rute transportasi umum sedang disiapkan. Untuk sekarang pilih Mobil, Motor, atau Jalan kaki.
-          </p>
-        )}
       </fieldset>
 
       <fieldset>
@@ -180,6 +175,12 @@ export default function TripForm({ awal, onSimpan, onBatal, idJudul }) {
               Estimasi <strong className="font-semibold text-ink">{teksEstimasi}</strong>
             </>
           )}
+        </p>
+      )}
+
+      {tanpaRuteUmum && (
+        <p className="text-sm leading-snug text-ink/70" aria-live="polite">
+          Belum ada angkot atau bus yang lewat dekat titik asal dan tujuan. Rencana tetap bisa disimpan.
         </p>
       )}
 

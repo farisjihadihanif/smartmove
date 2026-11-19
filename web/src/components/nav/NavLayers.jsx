@@ -1,9 +1,12 @@
-import { useEffect, useMemo } from 'react'
+import { Fragment, useEffect, useMemo } from 'react'
 import L from 'leaflet'
 import { CircleMarker, Marker, Polyline, useMap, useMapEvents } from 'react-leaflet'
+import { WARNA_JALAN, garisBagian, indeksNaik, warnaNaik } from '../../lib/transit.js'
 
 // Lapisan peta Smart Navigation: garis rute (warna mockup), titik asal, pin tujuan,
 // titik langkah aktif saat Play, ketukan peta, dan penyesuaian tampilan.
+// Transportasi umum (`transit` = satu opsi GET /routes/transit): jalan kaki titik-titik ink-violet,
+// tiap kendaraan garis berwarna sendiri (warnaNaik, sama dengan rel di lembar rute) + titik naik/turun.
 
 const PIN_TUJUAN = L.divIcon({
   className: 'nav-pin',
@@ -57,8 +60,47 @@ function Penyesuai({ garis, fitKey, fokus, titikTunggal }) {
   return null
 }
 
-export default function NavLayers({ dari, ke, rute, langkahAktif, fitKey, onPick, onMove }) {
-  const garis = useMemo(() => (rute?.garis ?? []).map(keLatLng), [rute])
+function LapisanTransit({ opsi }) {
+  const urut = indeksNaik(opsi.bagian)
+  const bagian = opsi.bagian.map((b, i) => ({ b, garis: garisBagian(b), warna: b.jenis === 'naik' ? warnaNaik(urut[i]) : null }))
+  return (
+    <>
+      {bagian.map(({ b, garis }, i) =>
+        b.jenis === 'jalan' ? (
+          <Polyline
+            key={`j${i}`}
+            positions={garis}
+            pathOptions={{ color: WARNA_JALAN, weight: 5, dashArray: '1 10', lineCap: 'round', lineJoin: 'round' }}
+            interactive={false}
+          />
+        ) : null,
+      )}
+      {bagian.map(({ b, garis, warna }, i) =>
+        b.jenis === 'naik' ? (
+          <Fragment key={`n${i}`}>
+            <Polyline positions={garis} pathOptions={{ color: '#FFFFFF', weight: 10, lineCap: 'round', lineJoin: 'round' }} interactive={false} />
+            <Polyline positions={garis} pathOptions={{ color: warna, weight: 6, lineCap: 'round', lineJoin: 'round' }} interactive={false} />
+            {[b.dari.lokasi, b.ke.lokasi].map((t, k) => (
+              <CircleMarker
+                key={k}
+                center={[t.lat, t.lng]}
+                radius={6}
+                pathOptions={{ color: warna, weight: 4, fillColor: '#FFFFFF', fillOpacity: 1 }}
+                interactive={false}
+              />
+            ))}
+          </Fragment>
+        ) : null,
+      )}
+    </>
+  )
+}
+
+export default function NavLayers({ dari, ke, rute, transit, langkahAktif, fitKey, onPick, onMove }) {
+  const garis = useMemo(
+    () => (transit ? transit.bagian.flatMap(garisBagian) : (rute?.garis ?? []).map(keLatLng)),
+    [rute, transit],
+  )
   const fokus = useMemo(() => (langkahAktif?.lokasi ? keLatLng(langkahAktif.lokasi) : null), [langkahAktif])
   const tunggal = ke?.lokasi ?? dari?.lokasi
   const titikTunggal = useMemo(() => (tunggal ? [tunggal.lat, tunggal.lng] : null), [tunggal])
@@ -67,7 +109,8 @@ export default function NavLayers({ dari, ke, rute, langkahAktif, fitKey, onPick
     <>
       <Peristiwa onPick={onPick} onMove={onMove} />
       <Penyesuai garis={garis} fitKey={fitKey} fokus={fokus} titikTunggal={titikTunggal} />
-      {garis.length > 1 && (
+      {transit && <LapisanTransit opsi={transit} />}
+      {!transit && garis.length > 1 && (
         <>
           <Polyline positions={garis} pathOptions={{ color: '#0A11D8', weight: 9, lineCap: 'round', lineJoin: 'round' }} interactive={false} />
           <Polyline positions={garis} pathOptions={{ color: '#0F53FF', weight: 6, lineCap: 'round', lineJoin: 'round' }} interactive={false} />

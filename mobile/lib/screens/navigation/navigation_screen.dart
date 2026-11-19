@@ -13,7 +13,9 @@ import '../../api.dart';
 import '../../navigasi.dart';
 import '../../state.dart';
 import '../../theme.dart';
+import '../../transit.dart';
 import '../../widgets/widgets.dart';
+import 'transit_sheet.dart';
 
 /// Hasil membaca lokasi perangkat. [status]: ok | ditolak | luar | tidak.
 class LokasiHasil {
@@ -55,7 +57,6 @@ Future<void> bagikanSistem(String teks, String judul) =>
 
 const _segera = {
   'traffic': 'Lapisan Traffic hadir bersama Live Traffic Information.',
-  'transit': 'Rute transportasi umum sedang disiapkan.',
 };
 
 const _teksLokasi = {
@@ -69,6 +70,8 @@ const _teksLokasi = {
 /// Smart Navigation (mockup hal. 4, PRD §6.1): cari tujuan, pilih moda, rute di
 /// peta, ringkasan & langkah di lembar bawah, Play (panduan langkah), Share,
 /// Street view (foto Mapillary). Sama dengan web `pages/Navigasi.jsx`.
+/// Moda Transportasi umum (kapsul atau pilihan "Umum"): GET /routes/transit,
+/// opsi + bagian berwarna di peta, Play per bagian (T-203).
 class NavigationScreen extends StatefulWidget {
   const NavigationScreen({
     super.key,
@@ -120,6 +123,10 @@ class NavigationScreenState extends State<NavigationScreen> {
   String lokasiStatus = 'mencari';
   String target = 'ke';
   late Moda mode = widget.mode;
+  late Moda _modaSebelum = widget.mode == Moda.transit
+      ? Moda.driving
+      : widget.mode;
+  int opsiIdx = 0;
 
   Map? rute;
   Object? _galatRute;
@@ -300,14 +307,16 @@ class NavigationScreenState extends State<NavigationScreen> {
       _memuatRute = true;
       _galatRute = null;
       rute = null;
+      opsiIdx = 0;
     });
     try {
+      final umum = mode == Moda.transit;
       final r = await _api.get(
-        '/routes',
+        umum ? '/routes/transit' : '/routes',
         query: {
           'from': latLngQuery(a.lokasi.latitude, a.lokasi.longitude),
           'to': latLngQuery(b.lokasi.latitude, b.lokasi.longitude),
-          'mode': mode.name,
+          if (!umum) 'mode': mode.name,
         },
       );
       if (req != _ruteReq) return;
@@ -325,13 +334,43 @@ class NavigationScreenState extends State<NavigationScreen> {
     }
   }
 
-  List<LatLng> get _garis => (rute?['garis'] as List? ?? const [])
-      .map(keLatLng)
-      .whereType<LatLng>()
-      .toList();
+  bool get _umum => mode == Moda.transit;
 
-  List<Map> get _langkah =>
-      (rute?['langkah'] as List? ?? const []).whereType<Map>().toList();
+  List<Map> get _opsiList => _umum
+      ? (rute?['opsi'] as List? ?? const []).whereType<Map>().toList()
+      : const [];
+
+  /// Opsi transit yang dipilih (null bila bukan transit / tidak ada rute).
+  Map? get _opsi {
+    final l = _opsiList;
+    return l.isEmpty ? null : l[opsiIdx.clamp(0, l.length - 1)];
+  }
+
+  List<Map> get _bagian => bagianOpsi(_opsi);
+
+  List<LatLng> get _garis => _umum
+      ? [for (final b in _bagian) ...garisBagian(b)]
+      : (rute?['garis'] as List? ?? const [])
+            .map(keLatLng)
+            .whereType<LatLng>()
+            .toList();
+
+  List<Map> get _langkah => _umum
+      ? const []
+      : (rute?['langkah'] as List? ?? const []).whereType<Map>().toList();
+
+  /// Titik fokus Play: belokan (kendaraan pribadi) atau awal bagian (transit).
+  LatLng? _titikPlay(int? i) {
+    if (i == null) return null;
+    if (_umum) {
+      final b = _bagian;
+      return i < b.length ? titikBagian(b[i], 'dari') : null;
+    }
+    final l = _langkah;
+    return i < l.length ? keLatLng(l[i]['lokasi']) : null;
+  }
+
+  bool get _adaRute => _umum ? _opsi != null : rute != null;
 
   void _fitRute() {
     final g = _garis;
@@ -364,20 +403,39 @@ class NavigationScreenState extends State<NavigationScreen> {
 
   void setPlay(int? i) {
     setState(() => play = i);
-    final l = i == null ? null : keLatLng(_langkah[i]['lokasi']);
+    final l = _titikPlay(i);
     if (l != null) {
       _setelahFrame(() => _geserKe(l, math.max(_map.camera.zoom, 17)));
     }
     if (lapisan.contains('street')) _muatFoto();
   }
 
+  void gantiModa(Moda m) {
+    if (m == mode) return;
+    setState(() {
+      if (mode != Moda.transit) _modaSebelum = mode;
+      mode = m;
+      play = null;
+    });
+    _hitungRute();
+  }
+
+  /// Kapsul aktif; "Transportasi umum" = pintasan moda transit.
+  Set<String> get _nilaiLapisan => {...lapisan, if (_umum) 'transit'};
+
   void _ubahLapisan(Set<String> next) {
-    final baru = next.difference(lapisan);
+    final baru = next.difference(_nilaiLapisan);
     for (final v in baru) {
       if (_segera.containsKey(v)) return _kabari(_segera[v]!);
     }
+    final transitOn = next.contains('transit');
+    if (transitOn != _umum) {
+      gantiModa(transitOn ? Moda.transit : _modaSebelum);
+    }
     setState(
-      () => lapisan = next.where((v) => !_segera.containsKey(v)).toSet(),
+      () => lapisan = next
+          .where((v) => !_segera.containsKey(v) && v != 'transit')
+          .toSet(),
     );
     if (lapisan.contains('street')) {
       _muatFoto();
@@ -388,8 +446,7 @@ class NavigationScreenState extends State<NavigationScreen> {
   }
 
   Future<void> _muatFoto() async {
-    final langkah = play == null || rute == null ? null : _langkah[play!];
-    final titik = keLatLng(langkah?['lokasi']) ?? ke?.lokasi ?? _tengah;
+    final titik = _titikPlay(play) ?? ke?.lokasi ?? _tengah;
     final req = ++_fotoReq;
     _set(() => _fotoStatus = 'memuat');
     try {
@@ -416,9 +473,12 @@ class NavigationScreenState extends State<NavigationScreen> {
   }
 
   Future<void> _bagikan() async {
-    final r = rute, a = dari, b = ke;
+    final r = rute, a = dari, b = ke, o = _opsi;
     if (r == null || a == null || b == null) return;
-    final teks = teksBagikan(dari: a, ke: b, mode: mode, rute: r);
+    if (_umum && o == null) return;
+    final teks = o != null
+        ? teksBagikanTransit(dari: a, ke: b, opsi: o)
+        : teksBagikan(dari: a, ke: b, mode: mode, rute: r);
     try {
       await widget.share(teks, 'Rute ke ${b.nama}');
     } catch (_) {
@@ -439,7 +499,7 @@ class NavigationScreenState extends State<NavigationScreen> {
   @override
   Widget build(BuildContext context) {
     final canPop = ModalRoute.of(context)?.canPop ?? false;
-    final adaRute = rute != null;
+    final adaRute = _adaRute;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -521,7 +581,7 @@ class NavigationScreenState extends State<NavigationScreen> {
                 ),
                 PillToggle<String>(
                   multiple: true,
-                  selected: lapisan,
+                  selected: _nilaiLapisan,
                   onChanged: _ubahLapisan,
                   options: const [
                     PillOption('traffic', 'Traffic'),
@@ -548,11 +608,10 @@ class NavigationScreenState extends State<NavigationScreen> {
 
   List<Widget> _lapisanPeta() {
     final g = _garis;
-    final fokus = play == null || rute == null
-        ? null
-        : keLatLng(_langkah[play!]['lokasi']);
+    final fokus = _titikPlay(play);
     return [
-      if (g.length > 1)
+      if (_umum) ..._lapisanTransit(),
+      if (!_umum && g.length > 1)
         PolylineLayer(
           polylines: [
             Polyline(
@@ -612,11 +671,80 @@ class NavigationScreenState extends State<NavigationScreen> {
     ];
   }
 
+  /// Jalan kaki titik-titik ink-violet; tiap kendaraan garis berwarna sendiri
+  /// (warnaNaik, sama dengan rel di lembar) + titik naik/turun.
+  List<Widget> _lapisanTransit() {
+    final bagian = _bagian;
+    if (bagian.isEmpty) return const [];
+    final urut = indeksNaik(bagian);
+    return [
+      PolylineLayer(
+        polylines: [
+          for (final b in bagian)
+            if (b['jenis'] == 'jalan')
+              Polyline(
+                points: garisBagian(b),
+                strokeWidth: 5,
+                color: warnaJalan,
+                pattern: const StrokePattern.dotted(spacingFactor: 2),
+                strokeCap: StrokeCap.round,
+              ),
+          for (final (i, b) in bagian.indexed)
+            if (b['jenis'] == 'naik')
+              Polyline(
+                points: garisBagian(b),
+                strokeWidth: 6,
+                color: warnaNaik(urut[i]!),
+                borderStrokeWidth: 2,
+                borderColor: AppColors.white,
+                strokeCap: StrokeCap.round,
+                strokeJoin: StrokeJoin.round,
+              ),
+        ],
+      ),
+      MarkerLayer(
+        markers: [
+          for (final (i, b) in bagian.indexed)
+            if (b['jenis'] == 'naik')
+              for (final t in [titikBagian(b, 'dari'), titikBagian(b, 'ke')])
+                if (t != null)
+                  Marker(
+                    point: t,
+                    width: 14,
+                    height: 14,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: warnaNaik(urut[i]!),
+                          width: 3.5,
+                        ),
+                      ),
+                    ),
+                  ),
+        ],
+      ),
+    ];
+  }
+
   // ───────────── Lembar bawah ─────────────
 
   Widget _lembar() {
     final r = rute;
-    final isi = play != null && r != null ? _panduan(r) : _ringkasan();
+    final o = _opsi;
+    final isi = play != null && _umum && o != null
+        ? [
+            TransitPanduan(
+              opsi: o,
+              idx: play!.clamp(0, _bagian.length - 1),
+              onPlay: setPlay,
+            ),
+            if (_fotoStatus != 'mati') ...[_gap, _fotoJalan()],
+          ]
+        : play != null && !_umum && r != null
+        ? _panduan(r)
+        : _ringkasan();
     return DecoratedBox(
       key: _lembarKey,
       decoration: BoxDecoration(
@@ -698,7 +826,9 @@ class NavigationScreenState extends State<NavigationScreen> {
           'Cari tempat di kolom atas atau ketuk peta untuk memilih tujuan.',
           style: sans(size: 15, color: _muted, height: 1.45),
         ),
-      ] else if (_galatRute != null)
+      ] else if (_umum)
+        const SizedBox.shrink()
+      else if (_galatRute != null)
         ErrorBanner(error: _galatRute, onRetry: _hitungRute)
       else if (r == null || _memuatRute)
         Semantics(
@@ -739,18 +869,29 @@ class NavigationScreenState extends State<NavigationScreen> {
       ],
       if (ke != null) ...[
         _gap,
-        _PilihModa(
-          mode: mode,
-          onMode: (m) {
-            setState(() => mode = m);
-            _hitungRute();
-          },
-        ),
+        _PilihModa(mode: mode, onMode: gantiModa),
+        if (_umum) ...[
+          _gap,
+          TransitRingkasan(
+            data: rute,
+            memuat: _memuatRute,
+            galat: _galatRute,
+            onRetry: _hitungRute,
+            idx: opsiIdx,
+            onIdx: (i) {
+              setState(() {
+                opsiIdx = i;
+                play = null;
+              });
+              _setelahFrame(_fitRute);
+            },
+          ),
+        ],
       ],
       if (_fotoStatus != 'mati') ...[_gap, _fotoJalan()],
       _gap,
       _rencana(),
-      if (r != null) ...[
+      if (r != null && !_umum) ...[
         _gap,
         InkWell(
           onTap: () => setState(() => buka = !buka),
@@ -1193,7 +1334,8 @@ class _PilihModa extends StatelessWidget {
       padding: const EdgeInsets.all(AppSizes.s1),
       decoration: ShapeDecoration(
         color: AppColors.search,
-        shape: StadiumBorder(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
           side: BorderSide(color: AppColors.ink.withValues(alpha: 0.06)),
         ),
       ),
@@ -1234,19 +1376,19 @@ class _SegmenModa extends StatelessWidget {
     return Material(
       type: MaterialType.transparency,
       child: Ink(
-        height: 44,
-        decoration: ShapeDecoration(
+        height: 52,
+        decoration: BoxDecoration(
           gradient: aktif ? AppGradients.pill : null,
-          shape: const StadiumBorder(),
+          borderRadius: BorderRadius.circular(16),
         ),
         child: InkWell(
           onTap: onTap,
-          customBorder: const StadiumBorder(),
-          child: Row(
+          borderRadius: BorderRadius.circular(16),
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(moda.icon, size: 18, color: fg),
-              const SizedBox(width: 4),
+              const SizedBox(height: 2),
               Flexible(
                 child: Text(
                   moda.label,

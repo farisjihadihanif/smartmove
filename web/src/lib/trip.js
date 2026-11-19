@@ -1,16 +1,16 @@
 // Helper Trip Planner (T-109). Sama dengan mobile/lib/trip.dart – ubah bersamaan.
 import { formatDurasi, formatJarak } from './navigasi.js'
+import { teksTarif } from './transit.js'
 import { hariWib, jamWib } from './wib.js'
 
-/** Moda rencana (API: driving | motorcycle | walking | transit). Transit baru di T-203. */
+/** Moda rencana (API: driving | motorcycle | walking | transit). */
 export const MODA_TRIP = [
   { value: 'driving', label: 'Mobil' },
   { value: 'motorcycle', label: 'Motor' },
   { value: 'walking', label: 'Jalan kaki' },
-  { value: 'transit', label: 'Transportasi umum', segera: true },
+  { value: 'transit', label: 'Transportasi umum' },
 ]
 export const labelModa = (v) => MODA_TRIP.find((m) => m.value === v)?.label ?? v
-export const modaSegera = (v) => Boolean(MODA_TRIP.find((m) => m.value === v)?.segera)
 
 const WIB_MS = 7 * 60 * 60 * 1000
 const dua = (n) => String(n).padStart(2, '0')
@@ -40,12 +40,13 @@ export function hitungMundur(iso, now) {
   return `Berangkat dalam ${formatDurasi(s)}`
 }
 
-/** "12 mnt · 4,9 km" dari ringkasan tersimpan, atau null. */
-export function teksRingkasan(r) {
+/** "12 mnt · 4,9 km" dari ringkasan tersimpan, atau null. Transit: + tarif ("tarif belum tersedia" bila kosong). */
+export function teksRingkasan(r, moda) {
   if (!r || (r.durasiS === undefined && r.jarakM === undefined)) return null
   const bagian = []
   if (r.durasiS !== undefined) bagian.push(formatDurasi(r.durasiS))
   if (r.jarakM !== undefined) bagian.push(formatJarak(r.jarakM))
+  if (moda === 'transit') bagian.push(teksTarif(r.tarif ?? null))
   return bagian.join(' · ')
 }
 

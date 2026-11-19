@@ -14,7 +14,6 @@ import 'trip_form.dart';
 /// Trip Planner (DESIGN §3, gaya kartu Trip Planner mockup hal. 3): rencana
 /// berikutnya di kartu gradasi pink → ungu, daftar per hari seperti garis
 /// waktu, form di lembar bawah. Sama dengan web `TripPlanner.jsx`.
-/// Moda Transportasi umum tampil dengan tanda "Segera" (T-203).
 class TripPlannerScreen extends StatefulWidget {
   const TripPlannerScreen({
     super.key,
@@ -174,7 +173,7 @@ class TripPlannerScreenState extends State<TripPlannerScreen> {
           ke: trip.tujuan.lokasi,
           dariNama: trip.asal.nama,
           keNama: trip.tujuan.nama,
-          mode: trip.moda.navigasi!,
+          mode: trip.moda.navigasi,
         ),
       ),
     );
@@ -408,7 +407,7 @@ class _Sorotan extends StatelessWidget {
       );
     }
 
-    final ringkas = teksRingkasan(t.ringkasan);
+    final ringkas = teksRingkasan(t.ringkasan, t.moda);
     final hari = hariWib(t.berangkatPada!, now);
     return Semantics(
       container: true,
@@ -465,14 +464,11 @@ class _Sorotan extends StatelessWidget {
               runSpacing: AppSizes.s3,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                if (t.moda.segera)
-                  const _SegeraHadir(terang: true)
-                else
-                  _TombolPutih(
-                    icon: Icons.navigation_rounded,
-                    label: 'Mulai navigasi',
-                    onPressed: () => onMulai(t),
-                  ),
+                _TombolPutih(
+                  icon: Icons.navigation_rounded,
+                  label: 'Mulai navigasi',
+                  onPressed: () => onMulai(t),
+                ),
                 if (ringkas != null)
                   Text(
                     'Estimasi $ringkas',
@@ -517,31 +513,6 @@ class _TombolPutih extends StatelessWidget {
     label: Text(
       label,
       style: sans(size: 15, weight: FontWeight.w600, color: AppColors.trip4),
-    ),
-  );
-}
-
-class _SegeraHadir extends StatelessWidget {
-  const _SegeraHadir({this.terang = false});
-  final bool terang;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    constraints: const BoxConstraints(minHeight: AppSizes.touch),
-    alignment: Alignment.center,
-    padding: const EdgeInsets.symmetric(horizontal: AppSizes.s4),
-    decoration: BoxDecoration(
-      color: terang ? AppColors.white.withValues(alpha: 0.2) : AppColors.search,
-      borderRadius: BorderRadius.circular(999),
-    ),
-    child: Text(
-      'Navigasi segera hadir',
-      textAlign: TextAlign.center,
-      style: sans(
-        size: 14,
-        weight: FontWeight.w600,
-        color: terang ? AppColors.white : AppColors.ink.withValues(alpha: 0.55),
-      ),
     ),
   );
 }
@@ -702,7 +673,7 @@ class _ItemRencana extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final b = trip.berangkatPada;
-    final ringkas = teksRingkasan(trip.ringkasan);
+    final ringkas = teksRingkasan(trip.ringkasan, trip.moda);
     return Container(
       padding: const EdgeInsets.symmetric(vertical: AppSizes.s4),
       decoration: BoxDecoration(
@@ -783,11 +754,7 @@ class _ItemRencana extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Flexible(
-                      child: trip.moda.segera
-                          ? const _SegeraHadir()
-                          : _TombolMulai(onPressed: onMulai),
-                    ),
+                    Flexible(child: _TombolMulai(onPressed: onMulai)),
                     const SizedBox(width: AppSizes.s2),
                     Row(
                       mainAxisSize: MainAxisSize.min,

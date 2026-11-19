@@ -90,6 +90,29 @@ class _Server {
         },
       });
     }
+    if (path == '/api/routes/transit') {
+      return _json({
+        'opsi': [
+          {
+            'totalS': 1500,
+            'jalanM': 300,
+            'transfer': 0,
+            'perkiraan': false,
+            'tarif': null,
+            'tarifTeks': 'Tarif belum tersedia',
+            'bagian': [
+              {
+                'jenis': 'naik',
+                'jarakM': 5200,
+                'durasiS': 1200,
+                'dari': _tempat('Jalan Setia Budi', 3.5732, 98.6355),
+                'ke': _tempat('Tujuan', 3.5913, 98.6776),
+              },
+            ],
+          },
+        ],
+      });
+    }
     if (path == '/api/routes') {
       return _json({
         'jarakM': 4100,
@@ -194,12 +217,24 @@ void main() {
         'Berangkat dalam 1 j 35 mnt',
       );
       expect(hitungMundur(_now, _now), 'Waktunya berangkat');
-      expect(ModaTrip.transit.navigasi, isNull);
+      expect(ModaTrip.transit.navigasi, Moda.transit);
+      expect(
+        teksRingkasan({'durasiS': 1500, 'jarakM': 5200}, ModaTrip.transit),
+        '25 mnt · 5,2 km · tarif belum tersedia',
+      );
+      expect(
+        teksRingkasan({
+          'durasiS': 1500,
+          'jarakM': 5200,
+          'tarif': 4000,
+        }, ModaTrip.transit),
+        '25 mnt · 5,2 km · Rp4.000',
+      );
       expect(ModaTrip.motorcycle.navigasi, Moda.motorcycle);
     });
   });
 
-  testWidgets('daftar: kartu berikutnya, grup hari, transit bertanda segera', (
+  testWidgets('daftar: kartu berikutnya, grup hari, transit bisa dinavigasi', (
     tester,
   ) async {
     await _pump(tester, [
@@ -216,6 +251,7 @@ void main() {
         tujuan: 'Stasiun Medan',
         moda: 'transit',
         berangkat: _now.add(const Duration(hours: 27)),
+        ringkasan: {'durasiS': 1500, 'jarakM': 5200},
       ),
       _trip('c', tujuan: 'Lapangan Merdeka'),
     ]);
@@ -228,8 +264,12 @@ void main() {
     expect(find.text('Estimasi 7 mnt · 4,1 km'), findsOneWidget);
     expect(find.text('Hari ini'), findsOneWidget);
     expect(find.text('Kapan saja'), findsOneWidget);
-    await tester.scrollUntilVisible(find.text('Navigasi segera hadir'), 200);
-    expect(find.text('Navigasi segera hadir'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.textContaining('tarif belum tersedia'),
+      200,
+    );
+    expect(find.text('Navigasi segera hadir'), findsNothing);
+    expect(find.text('Mulai navigasi'), findsNWidgets(4));
   });
 
   testWidgets('kosong: ajakan membuat rencana', (tester) async {
@@ -274,7 +314,7 @@ void main() {
     expect(find.text('Belum ada rencana'), findsOneWidget);
   });
 
-  testWidgets('buat rencana: pilih tempat, transit belum bisa, simpan', (
+  testWidgets('buat rencana: pilih tempat, estimasi transit, simpan', (
     tester,
   ) async {
     final server = await _pump(tester, []);
@@ -293,12 +333,12 @@ void main() {
     await _settle(tester);
     await _tap(tester, find.text('Lapangan Merdeka'));
 
-    // Transit masih "Segera": moda tidak berubah.
-    await _tap(
-      tester,
-      find.bySemanticsLabel('Transportasi umum, segera hadir'),
+    // Transit: estimasi opsi tercepat + tarif belum tersedia.
+    await _tap(tester, find.bySemanticsLabel('Transportasi umum'));
+    expect(
+      find.text('Estimasi 25 mnt · 5,2 km · tarif belum tersedia'),
+      findsOneWidget,
     );
-    expect(find.textContaining('sedang disiapkan'), findsOneWidget);
     await _tap(tester, find.bySemanticsLabel('Motor'));
     expect(find.text('Estimasi 7 mnt · 4,1 km'), findsOneWidget);
 

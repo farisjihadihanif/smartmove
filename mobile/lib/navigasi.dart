@@ -3,11 +3,13 @@ import 'package:material_ui/material_ui.dart';
 
 // Helper Smart Navigation (T-107). Sama dengan web/src/lib/navigasi.js – ubah bersamaan.
 
-/// Pilihan moda di UI (API_SPECS §2: driving | motorcycle | walking).
+/// Pilihan moda di UI (API_SPECS §2: driving | motorcycle | walking;
+/// transit = GET /routes/transit).
 enum Moda {
   driving('Mobil', Icons.directions_car_rounded),
   motorcycle('Motor', Icons.two_wheeler_rounded),
-  walking('Jalan kaki', Icons.directions_walk_rounded);
+  walking('Jalan kaki', Icons.directions_walk_rounded),
+  transit('Umum', Icons.directions_bus_rounded);
 
   const Moda(this.label, this.icon);
   final String label;

@@ -1,9 +1,10 @@
-import { Bike, Car, ChevronLeft, ChevronRight, ExternalLink, Footprints, ImageOff, Motorbike, X } from 'lucide-react'
+import { Bike, Bus, Car, ChevronLeft, ChevronRight, ExternalLink, Footprints, ImageOff, Motorbike, X } from 'lucide-react'
 import ErrorBanner from '../ErrorBanner.jsx'
 import IkonLangkah from './IkonLangkah.jsx'
+import { TransitPanduan, TransitRingkasan } from './TransitSheet.jsx'
 import { MODA, formatDurasi, formatJarak, tanggalFoto } from '../../lib/navigasi.js'
 
-const IKON_MODA = { driving: Car, motorcycle: Motorbike, walking: Footprints }
+const IKON_MODA = { driving: Car, motorcycle: Motorbike, walking: Footprints, transit: Bus }
 
 const TEKS_LOKASI = {
   mencari: 'Mencari lokasimu…',
@@ -15,6 +16,7 @@ const TEKS_LOKASI = {
 /**
  * Isi lembar bawah Smart Navigation: ajakan memilih tujuan, ringkasan rute + pilihan moda,
  * daftar langkah, panduan langkah (Play), dan foto jalan (Street view).
+ * Moda `transit`: `transit` = { data, memuat, galat, idx, onIdx } dari GET /routes/transit; Play per bagian.
  */
 export default function RouteSheet({
   dari,
@@ -34,8 +36,18 @@ export default function RouteSheet({
   onPlay,
   foto,
   onTutupFoto,
+  transit,
 }) {
-  if (play !== null && rute) {
+  const umum = mode === 'transit'
+  const opsiAktif = umum ? (transit?.data?.opsi?.[transit.idx] ?? null) : null
+  if (umum && play !== null && opsiAktif) {
+    return (
+      <TransitPanduan opsi={opsiAktif} idx={play} onPlay={onPlay}>
+        {foto.status !== 'mati' && <FotoJalan foto={foto} onTutup={onTutupFoto} />}
+      </TransitPanduan>
+    )
+  }
+  if (!umum && play !== null && rute) {
     return <Panduan rute={rute} idx={play} onPlay={onPlay} foto={foto} onTutupFoto={onTutupFoto} />
   }
 
@@ -61,17 +73,19 @@ export default function RouteSheet({
             Cari tempat di kolom atas atau ketuk peta untuk memilih tujuan.
           </p>
         </div>
-      ) : (
+      ) : umum ? null : (
         <Ringkasan rute={rute} memuat={memuat} galat={galat} onRetry={onRetry} />
       )}
 
       {ke && <PilihModa mode={mode} onMode={onMode} />}
 
+      {ke && umum && <TransitRingkasan {...transit} onRetry={onRetry} />}
+
       {foto.status !== 'mati' && <FotoJalan foto={foto} onTutup={onTutupFoto} />}
 
       <Rencana dari={dari} ke={ke} lokasiStatus={lokasiStatus} target={target} onTarget={onTarget} />
 
-      {rute && (
+      {rute && !umum && (
         <section aria-labelledby="langkah-judul">
           <button
             type="button"
@@ -114,7 +128,7 @@ function Ringkasan({ rute, memuat, galat, onRetry }) {
 
 function PilihModa({ mode, onMode }) {
   return (
-    <div role="radiogroup" aria-label="Moda" className="grid grid-cols-3 gap-1 rounded-full bg-search p-1 ring-1 ring-ink/[0.06]">
+    <div role="radiogroup" aria-label="Moda" className="grid grid-cols-4 gap-1 rounded-[1.25rem] bg-search p-1 ring-1 ring-ink/[0.06]">
       {MODA.map((m) => {
         const Icon = IKON_MODA[m.value] ?? Bike
         const on = m.value === mode
@@ -125,7 +139,7 @@ function PilihModa({ mode, onMode }) {
             role="radio"
             aria-checked={on}
             onClick={() => onMode(m.value)}
-            className={`flex min-h-11 items-center justify-center gap-1 whitespace-nowrap rounded-full px-1.5 text-[0.8125rem] transition lg:gap-1.5 lg:text-sm ${
+            className={`flex min-h-[3.25rem] flex-col items-center justify-center gap-0.5 whitespace-nowrap rounded-2xl px-1 text-[0.8125rem] leading-tight transition ${
               on ? 'bg-pill font-bold text-white shadow-[0_4px_12px_-4px_rgb(114_13_129/0.8)]' : 'font-medium text-ink-violet hover:bg-white'
             }`}
           >
