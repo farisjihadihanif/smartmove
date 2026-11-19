@@ -20,12 +20,12 @@ let app;
 let midtrans;
 // Midtrans palsu: setiap panggilan dicatat; jawaban bisa diganti per tes.
 let panggilan;
-let jawabSnap;
+let jawabCharge;
 let jawabStatus;
 
 async function fetchPalsu(url, opts = {}) {
   panggilan.push({ url, opts, body: opts.body ? JSON.parse(opts.body) : null });
-  const isi = url.includes('/snap/') ? jawabSnap(url, opts) : jawabStatus(url, opts);
+  const isi = url.endsWith('/charge') ? jawabCharge(url, opts) : jawabStatus(url, opts);
   if (isi instanceof Error) throw isi;
   return { ok: isi.status < 400, status: isi.status, json: async () => isi.body };
 }
@@ -54,7 +54,25 @@ after(async () => {
 beforeEach(async () => {
   await Promise.all([User, BookableService, Payment, PointLedger].map((m) => m.deleteMany({})));
   panggilan = [];
-  jawabSnap = () => ({ status: 201, body: { token: 'snap-token-1', redirect_url: 'https://app.sandbox.midtrans.com/snap/v4/redirection/snap-token-1' } });
+  jawabCharge = (url, opts) => {
+    const b = JSON.parse(opts.body);
+    const dasar = {
+      status_code: '201',
+      transaction_status: 'pending',
+      order_id: b.transaction_details.order_id,
+      gross_amount: `${b.transaction_details.gross_amount}.00`,
+      payment_type: b.payment_type,
+      expiry_time: '2026-11-20 10:15:00',
+    };
+    if (b.payment_type === 'qris') {
+      return { status: 200, body: { ...dasar, qr_string: '00020101021226QRIS-PALSU', actions: [{ name: 'generate-qr-code', url: 'https://api.sandbox.midtrans.com/v2/qris/x/qr-code' }] } };
+    }
+    if (b.payment_type === 'gopay') {
+      return { status: 200, body: { ...dasar, actions: [{ name: 'generate-qr-code', url: 'https://q' }, { name: 'deeplink-redirect', url: 'gojek://gopay/merchanttransfer?x' }] } };
+    }
+    if (b.payment_type === 'echannel') return { status: 200, body: { ...dasar, biller_code: '70012', bill_key: '123456789' } };
+    return { status: 200, body: { ...dasar, va_numbers: [{ bank: b.bank_transfer.bank, va_number: '12345678901' }] } };
+  };
   jawabStatus = () => ({ status: 200, body: { status_code: '404', status_message: "Transaction doesn't exist." } });
   await BookableService.create([
     {
@@ -102,7 +120,7 @@ async function pesan(auth, body = {}) {
   return request(app)
     .post('/api/payments')
     .set('Authorization', auth)
-    .send({ layanan: 'RAILINK-KNO', jadwal: besok(), penumpang: 2, ...body });
+    .send({ layanan: 'RAILINK-KNO', jadwal: besok(), penumpang: 2, metode: 'qris', ...body });
 }
 
 describe('signature & status Midtrans', () => {
@@ -158,37 +176,56 @@ describe('POST /payments', () => {
     assert.equal((await request(app).post('/api/payments').send({ layanan: 'RAILINK-KNO' })).status, 401);
   });
 
-  test('membuat Payment menunggu + Snap sandbox dengan Basic auth server key', async () => {
+  test('Core API charge QRIS: Basic auth, instruksi QR + batas bayar, tanpa data Snap', async () => {
     const u = await daftar('rina');
     const res = await pesan(u.auth);
     assert.equal(res.status, 201);
     assert.match(res.body.orderId, /^SM-\d{8}-[A-Z2-9]{6}$/);
-    assert.equal(res.body.snapToken, 'snap-token-1');
-    assert.match(res.body.redirectUrl, /sandbox\.midtrans\.com/);
-    assert.equal(res.body.payment.status, 'menunggu');
-    assert.equal(res.body.payment.jumlah, 70000);
-    assert.equal(res.body.payment.eTiket, null);
-    assert.equal(res.body.payment.simulasi, true);
-    assert.match(res.body.payment.label, /Simulasi/);
+    const pay = res.body.payment;
+    assert.equal(pay.status, 'menunggu');
+    assert.equal(pay.jumlah, 70000);
+    assert.equal(pay.metode, 'qris');
+    assert.deepEqual(
+      { grup: pay.instruksi.grup, qrString: pay.instruksi.qrString },
+      { grup: 'qris', qrString: '00020101021226QRIS-PALSU' },
+    );
+    assert.equal(pay.batasBayar, '2026-11-20T03:15:00.000Z');
+    assert.equal(pay.eTiket, null);
+    assert.equal(pay.simulasi, true);
+    assert.equal(res.body.snapToken, undefined);
 
-    const [snap] = panggilan;
-    assert.equal(snap.url, 'https://app.sandbox.midtrans.com/snap/v1/transactions');
-    assert.equal(snap.opts.headers.Authorization, `Basic ${Buffer.from(`${SERVER_KEY}:`).toString('base64')}`);
-    assert.equal(snap.body.transaction_details.gross_amount, 70000);
-    assert.equal(snap.body.item_details[0].quantity, 2);
-    assert.match(snap.body.item_details[0].name, /^\[SIMULASI\]/);
-    assert.equal(snap.body.callbacks.finish, `http://localhost:5173/pembayaran/${res.body.orderId}`);
-
-    const p = await Payment.findOne({ orderId: res.body.orderId });
-    assert.equal(String(p.user), u.id);
-    assert.equal(p.layanan.asal, 'Stasiun Medan');
+    const [c] = panggilan;
+    assert.equal(c.url, 'https://api.sandbox.midtrans.com/v2/charge');
+    assert.equal(c.opts.headers.Authorization, `Basic ${Buffer.from(`${SERVER_KEY}:`).toString('base64')}`);
+    assert.equal(c.body.payment_type, 'qris');
+    assert.equal(c.body.transaction_details.gross_amount, 70000);
+    assert.deepEqual(c.body.custom_expiry, { expiry_duration: 15, unit: 'minute' });
+    assert.match(c.body.item_details[0].name, /^\[SIMULASI\]/);
   });
 
-  test('metode dipilih → enabled_payments; metode tak dikenal 400', async () => {
+  test('virtual account, Mandiri bill, e-wallet: instruksi sesuai metode', async () => {
     const u = await daftar('rina');
-    assert.equal((await pesan(u.auth, { metode: 'qris' })).status, 201);
-    assert.deepEqual(panggilan[0].body.enabled_payments, ['other_qris']);
-    assert.equal((await pesan(u.auth, { metode: 'tunai' })).status, 400);
+    const va = (await pesan(u.auth, { metode: 'bni' })).body.payment.instruksi;
+    assert.deepEqual({ grup: va.grup, bank: va.bank, nomorVa: va.nomorVa }, { grup: 'va', bank: 'bni', nomorVa: '12345678901' });
+    assert.deepEqual(panggilan.at(-1).body.bank_transfer, { bank: 'bni' });
+    assert.equal(panggilan.at(-1).body.custom_expiry.expiry_duration, 24 * 60);
+
+    const m = (await pesan(u.auth, { metode: 'mandiri' })).body.payment.instruksi;
+    assert.deepEqual({ kodePerusahaan: m.kodePerusahaan, kodeBayar: m.kodeBayar }, { kodePerusahaan: '70012', kodeBayar: '123456789' });
+    assert.equal(panggilan.at(-1).body.payment_type, 'echannel');
+
+    const g = (await pesan(u.auth, { metode: 'gopay' })).body.payment.instruksi;
+    assert.equal(g.grup, 'ewallet');
+    assert.match(g.deeplink, /^gojek:/);
+    assert.match(panggilan.at(-1).body.gopay.callback_url, /\/pembayaran\/SM-/);
+  });
+
+  test('metode wajib; kartu kredit & metode tak dikenal ditolak', async () => {
+    const u = await daftar('rina');
+    assert.equal((await pesan(u.auth, { metode: undefined })).status, 400);
+    assert.equal((await pesan(u.auth, { metode: 'credit_card' })).status, 400);
+    assert.equal((await pesan(u.auth, { metode: 'kartu' })).status, 400);
+    assert.equal(panggilan.length, 0);
   });
 
   test('validasi: jam di luar jadwal, sudah lewat, penumpang, layanan nonaktif', async () => {
@@ -209,9 +246,9 @@ describe('POST /payments', () => {
     assert.equal(res.body.payment.jumlah, 15000);
   });
 
-  test('Snap gagal → 502 PEMBAYARAN_GAGAL dan Payment tidak tertinggal', async () => {
+  test('charge ditolak Midtrans → 502 PEMBAYARAN_GAGAL dan Payment tidak tertinggal', async () => {
     const u = await daftar('rina');
-    jawabSnap = () => ({ status: 401, body: { error_messages: ['Access denied'] } });
+    jawabCharge = () => ({ status: 200, body: { status_code: '402', status_message: 'Payment channel is not activated.' } });
     const res = await pesan(u.auth);
     assert.equal(res.status, 502);
     assert.equal(res.body.code, 'PEMBAYARAN_GAGAL');
@@ -273,7 +310,7 @@ describe('POST /payments/notification', () => {
     const detail = await request(app).get(`/api/payments/${orderId}`).set('Authorization', u.auth);
     assert.equal(detail.body.payment.eTiket.kode, kode);
     assert.equal(detail.body.payment.poin, 70);
-    assert.equal(detail.body.payment.redirectUrl, null);
+    assert.equal(detail.body.payment.instruksi, null);
   });
 
   test('pending tidak mengubah status; status final tidak bisa dibalik', async () => {
@@ -304,7 +341,7 @@ describe('riwayat & cek status', () => {
     const list = await request(app).get('/api/payments').set('Authorization', a.auth);
     assert.equal(list.body.total, 1);
     assert.equal(list.body.items[0].orderId, body.orderId);
-    assert.equal(list.body.items[0].redirectUrl, body.redirectUrl);
+    assert.equal(list.body.items[0].instruksi.grup, 'qris');
     assert.equal((await request(app).get(`/api/payments/${body.orderId}`).set('Authorization', b.auth)).status, 404);
     assert.equal((await request(app).get('/api/payments')).status, 401);
   });

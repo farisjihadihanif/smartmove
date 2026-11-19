@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:material_ui/material_ui.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -7,18 +9,27 @@ import '../../pembayaran.dart';
 import '../../state.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
+import 'instruksi_bayar.dart';
 import 'payment_widgets.dart';
 
-/// Status & e-tiket satu pesanan. [cekSaatKembali]: dibuka setelah Snap diluncurkan di
-/// browser — status dicek ke server (POST …/cek) tiap kali aplikasi kembali ke depan.
+/// Status, instruksi bayar, dan e-tiket satu pesanan (T-113). Selama menunggu: QR / nomor VA /
+/// tombol e-wallet + hitung mundur; status diperbarui otomatis (tiap 5 dtk dari server SmartMove,
+/// tiap 15 dtk server menanyakan Midtrans, dan saat aplikasi kembali ke depan). Sama dengan web.
 class PaymentStatusScreen extends StatefulWidget {
   const PaymentStatusScreen({
     super.key,
     required this.orderId,
-    this.cekSaatKembali = false,
+    this.selang = const Duration(seconds: 5),
+    this.clock = DateTime.now,
+    this.bukaTautan = _bukaTautan,
   });
   final String orderId;
-  final bool cekSaatKembali;
+  final Duration selang;
+  final DateTime Function() clock;
+  final Future<bool> Function(Uri) bukaTautan;
+
+  static Future<bool> _bukaTautan(Uri u) =>
+      launchUrl(u, mode: LaunchMode.externalApplication);
 
   @override
   State<PaymentStatusScreen> createState() => PaymentStatusScreenState();
@@ -26,12 +37,20 @@ class PaymentStatusScreen extends StatefulWidget {
 
 class PaymentStatusScreenState extends State<PaymentStatusScreen>
     with WidgetsBindingObserver {
+  static const _cekTiap = 3;
   Map? payment;
   Object? galat;
   bool memeriksa = false;
+  bool baruLunas = false;
+  Timer? _poll;
+  Timer? _detik;
+  int _ke = 0;
+  bool _depan = true;
+  bool _habisDicek = false;
 
   ApiClient get _api => AppScope.read(context).api;
   String get _path => '/payments/${Uri.encodeComponent(widget.orderId)}';
+  bool get _menunggu => payment?['status'] == 'menunggu';
 
   @override
   void initState() {
@@ -43,46 +62,88 @@ class PaymentStatusScreenState extends State<PaymentStatusScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _poll?.cancel();
+    _detik?.cancel();
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed &&
-        payment?['status'] == 'menunggu') {
-      cek();
+    _depan = state == AppLifecycleState.resumed;
+    if (_depan && _menunggu) cek(diam: true);
+  }
+
+  void _terima(Map p) {
+    if (!mounted) return;
+    setState(() {
+      if (payment?['status'] == 'menunggu' && p['status'] == 'lunas') {
+        baruLunas = true;
+      }
+      payment = p;
+      galat = null;
+    });
+    _aturTimer();
+  }
+
+  void _aturTimer() {
+    if (_menunggu) {
+      _poll ??= Timer.periodic(widget.selang, (_) => _putaran());
+      _detik ??= Timer.periodic(const Duration(seconds: 1), (_) {
+        if (!mounted) return;
+        setState(() {});
+        final batas = DateTime.tryParse('${payment?['batasBayar']}');
+        if (batas != null && !widget.clock().isBefore(batas) && !_habisDicek) {
+          _habisDicek = true;
+          cek(diam: true);
+        }
+      });
+    } else {
+      _poll?.cancel();
+      _detik?.cancel();
+      _poll = null;
+      _detik = null;
+    }
+  }
+
+  Future<void> _putaran() async {
+    if (!_depan || !_menunggu) return;
+    _ke++;
+    try {
+      if (_ke % _cekTiap == 0) {
+        await cek(diam: true);
+      } else {
+        _terima((await _api.get(_path) as Map)['payment'] as Map);
+      }
+    } on ApiException {
+      // Diam: dicoba lagi di putaran berikutnya.
     }
   }
 
   Future<void> _muat() async {
     try {
       final res = await _api.get(_path) as Map;
-      if (!mounted) return;
-      setState(() {
-        payment = res['payment'] as Map;
-        galat = null;
-      });
-      if (payment!['status'] == 'menunggu' && !widget.cekSaatKembali) {
-        await cek();
-      }
+      _terima(res['payment'] as Map);
+      if (_menunggu) await cek(diam: true);
     } on ApiException catch (e) {
       if (mounted) setState(() => galat = e);
     }
   }
 
-  Future<void> cek() async {
+  Future<void> cek({bool diam = false}) async {
     if (memeriksa) return;
-    setState(() {
-      memeriksa = true;
-      galat = null;
-    });
+    if (!diam) {
+      setState(() {
+        memeriksa = true;
+        galat = null;
+      });
+    }
     try {
       final res = await _api.post('$_path/cek') as Map;
-      if (mounted) setState(() => payment = res['payment'] as Map);
+      _terima(res['payment'] as Map);
     } on ApiException catch (e) {
-      if (mounted) setState(() => galat = e);
+      if (mounted && !diam) setState(() => galat = e);
     } finally {
-      if (mounted) setState(() => memeriksa = false);
+      if (mounted && !diam) setState(() => memeriksa = false);
     }
   }
 
@@ -95,7 +156,7 @@ class PaymentStatusScreenState extends State<PaymentStatusScreen>
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           NebulaHeader(
-            title: lunas ? 'E-tiket' : 'Status pembayaran',
+            title: lunas ? 'E-tiket' : 'Pembayaran',
             leading: IconButton(
               tooltip: 'Kembali',
               onPressed: () => Navigator.of(context).maybePop(),
@@ -116,7 +177,8 @@ class PaymentStatusScreenState extends State<PaymentStatusScreen>
                 if (p == null && galat != null)
                   ErrorBanner(error: galat, onRetry: _muat),
                 if (lunas) ..._lunas(p!),
-                if (p != null && !lunas) _belumLunas(p),
+                if (_menunggu) ..._instruksi(p!),
+                if (p != null && !lunas && !_menunggu) _belumLunas(p),
               ],
             ),
           ),
@@ -126,6 +188,18 @@ class PaymentStatusScreenState extends State<PaymentStatusScreen>
   }
 
   List<Widget> _lunas(Map p) => [
+    if (baruLunas)
+      Padding(
+        padding: const EdgeInsets.only(bottom: AppSizes.s4),
+        child: Semantics(
+          liveRegion: true,
+          child: Text(
+            'Pembayaran diterima. Ini e-tiketmu.',
+            textAlign: TextAlign.center,
+            style: titleSerif(size: 20, color: AppColors.teksHijau),
+          ),
+        ),
+      ),
     ETiket(payment: p),
     if ((p['poin'] as num? ?? 0) > 0) ...[
       const SizedBox(height: AppSizes.s4),
@@ -160,6 +234,42 @@ class PaymentStatusScreenState extends State<PaymentStatusScreen>
           backgroundColor: AppColors.pillVia,
           minimumSize: const Size(160, AppSizes.touch),
         ),
+      ),
+    ),
+  ];
+
+  List<Widget> _instruksi(Map p) => [
+    if (galat != null) ...[
+      ErrorBanner(error: galat, onDismiss: () => setState(() => galat = null)),
+      const SizedBox(height: AppSizes.s3),
+    ],
+    InstruksiBayar(
+      payment: p,
+      sekarang: widget.clock(),
+      memeriksa: memeriksa,
+      onCek: () => cek(),
+      bukaTautan: (u) => widget.bukaTautan(u),
+    ),
+    const SizedBox(height: AppSizes.s4),
+    Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${(p['layanan'] as Map?)?['nama'] ?? ''}',
+            style: titleSerif(size: 20),
+          ),
+          Text(
+            ruteLayanan((p['layanan'] as Map?) ?? const {}),
+            style: sans(size: 13, color: AppColors.ink.withValues(alpha: 0.6)),
+          ),
+          const SizedBox(height: AppSizes.s2),
+          Text(
+            'No. pesanan ${p['orderId']}',
+            style: sans(size: 13, color: AppColors.ink.withValues(alpha: 0.6)),
+          ),
+        ],
       ),
     ),
   ];

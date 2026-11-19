@@ -13,21 +13,41 @@ export const JENIS = [
 ]
 export const labelJenis = (v) => JENIS.find((j) => j.value === v)?.label ?? v
 
-// Metode di mockup hal. 5. "Pay for parking" bukan metode, melainkan pintasan ke layanan parkir.
-export const METODE = [
-  { value: 'kartu', label: 'Kartu kredit', ket: 'Visa, Mastercard, JCB' },
-  { value: 'ewallet', label: 'E-Wallet', ket: 'GoPay, ShopeePay' },
-  {
-    value: 'transfer',
-    label: 'Transfer bank',
-    ket: 'Virtual account BCA, BNI, BRI, dan lainnya',
-  },
+// Metode bayar (Midtrans Core API, TASK Keputusan #19; tanpa kartu kredit). Dikelompokkan seperti
+// mockup hal. 5; "Pay for parking" bukan metode, melainkan pintasan ke layanan parkir.
+export const GRUP_METODE = [
   {
     value: 'qris',
     label: 'QRIS',
-    ket: 'Pindai dari aplikasi bank atau e-wallet',
+    ket: 'Pindai kode QR dari aplikasi bank atau e-wallet mana pun',
+    pilihan: [{ value: 'qris', label: 'QRIS' }],
+  },
+  {
+    value: 'va',
+    label: 'Virtual account',
+    ket: 'Transfer dari m-banking, internet banking, atau ATM',
+    pilihan: [
+      { value: 'bca', label: 'BCA' },
+      { value: 'bni', label: 'BNI' },
+      { value: 'bri', label: 'BRI' },
+      { value: 'mandiri', label: 'Mandiri' },
+      { value: 'permata', label: 'Permata' },
+    ],
+  },
+  {
+    value: 'ewallet',
+    label: 'E-wallet',
+    ket: 'Bayar langsung di aplikasi GoPay atau ShopeePay',
+    pilihan: [
+      { value: 'gopay', label: 'GoPay' },
+      { value: 'shopeepay', label: 'ShopeePay' },
+    ],
   },
 ]
+export const grupDari = (metode) => GRUP_METODE.find((g) => g.pilihan.some((p) => p.value === metode))?.value ?? null
+
+/** Simulator sandbox Midtrans: dipakai untuk "membayar" transaksi simulasi saat uji coba. */
+export const SIMULATOR_MIDTRANS = 'https://simulator.sandbox.midtrans.com/'
 
 export const STATUS = {
   menunggu: { label: 'Menunggu pembayaran', nada: 'padat' },
@@ -39,16 +59,19 @@ export const STATUS = {
 
 // Nama metode dari Midtrans (`payment_type`) untuk riwayat & e-tiket.
 const NAMA_METODE = {
-  kartu: 'Kartu kredit',
+  qris: 'QRIS',
+  bca: 'Virtual account BCA',
+  bni: 'Virtual account BNI',
+  bri: 'Virtual account BRI',
+  mandiri: 'Mandiri Bill',
+  permata: 'Virtual account Permata',
   ewallet: 'E-Wallet',
   transfer: 'Transfer bank',
-  qris: 'QRIS',
   credit_card: 'Kartu kredit',
   gopay: 'GoPay',
   shopeepay: 'ShopeePay',
   bank_transfer: 'Transfer bank',
   echannel: 'Transfer bank (Mandiri)',
-  permata: 'Transfer bank (Permata)',
   cstore: 'Gerai ritel',
 }
 export const namaMetode = (m) => (m ? (NAMA_METODE[m] ?? m.replace(/_/g, ' ')) : null)
@@ -131,4 +154,15 @@ export async function bagikan(teks) {
   } catch {
     return null
   }
+}
+
+const dua = (n) => String(n).padStart(2, '0')
+/** Sisa waktu bayar → "14:52" (di bawah 1 jam) atau "23 j 05 m". */
+export function sisaWaktu(ms) {
+  if (ms <= 0) return '00:00'
+  const d = Math.floor(ms / 1000)
+  const j = Math.floor(d / 3600)
+  const m = Math.floor((d % 3600) / 60)
+  const s = d % 60
+  return j > 0 ? `${j} j ${dua(m)} m` : `${dua(m)}:${dua(s)}`
 }

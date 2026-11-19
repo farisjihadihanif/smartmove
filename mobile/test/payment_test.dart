@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:smartmove/api.dart';
 import 'package:smartmove/pembayaran.dart';
 import 'package:smartmove/screens/payment/payment_screen.dart';
@@ -54,6 +55,21 @@ Map<String, Object?> _parkir() => {
   'slot': <Object>[],
 };
 
+/// Batas bayar contoh (null = 25 menit dari jam asli).
+String? batasUji;
+
+var _instruksi = <String, Object?>{
+  'grup': 'qris',
+  'metode': 'qris',
+  'qrString': '00020101021226QRIS-PALSU',
+  'qrUrl': null,
+  'deeplink': null,
+  'bank': null,
+  'nomorVa': null,
+  'kodePerusahaan': null,
+  'kodeBayar': null,
+};
+
 Map<String, Object?> _bayar(String status) => {
   'orderId': 'SM-20261119-ABCDEF',
   'layanan': {
@@ -72,9 +88,10 @@ Map<String, Object?> _bayar(String status) => {
   'metode': status == 'lunas' ? 'qris' : null,
   'eTiket': status == 'lunas' ? {'kode': 'SIM-ABCD-EFGH'} : null,
   'poin': status == 'lunas' ? 70 : 0,
-  'redirectUrl': status == 'menunggu'
-      ? 'https://app.sandbox.midtrans.com/snap/x'
-      : null,
+  'instruksi': status == 'menunggu' ? _instruksi : null,
+  'batasBayar':
+      batasUji ??
+      DateTime.now().toUtc().add(const Duration(minutes: 25)).toIso8601String(),
   'simulasi': true,
   'label': labelSimulasi,
 };
@@ -98,8 +115,6 @@ class Server {
       posts[path] = jsonDecode(req.body) as Map;
       return _json({
         'orderId': 'SM-20261119-ABCDEF',
-        'snapToken': 't',
-        'redirectUrl': 'https://app.sandbox.midtrans.com/snap/v4/redirection/t',
         'payment': _bayar('menunggu'),
       }, 201);
     }
@@ -204,19 +219,9 @@ void main() {
   });
 
   testWidgets(
-    'pilih layanan + jam → estimasi biaya → Bayar membuka Snap & layar status',
+    'pilih layanan + jam → estimasi biaya → metode → layar instruksi bayar',
     (tester) async {
-      Uri? dibuka;
-      final s = await _pump(
-        tester,
-        PaymentScreen(
-          clock: () => now,
-          bukaSnap: (u) async {
-            dibuka = u;
-            return true;
-          },
-        ),
-      );
+      final s = await _pump(tester, PaymentScreen(clock: () => now));
       expect(find.textContaining(labelSimulasi), findsWidgets);
       expect(find.text('Kereta Bandara Medan → Kualanamu'), findsOneWidget);
       expect(find.text('Rp35.000'), findsOneWidget);
@@ -230,7 +235,10 @@ void main() {
       expect(find.text('Kam, 19 Nov 2026, 18.30 WIB'), findsOneWidget);
       await _tap(tester, find.byTooltip('Tambah orang'));
       expect(find.text('Rp70.000'), findsOneWidget);
+      await _tap(tester, find.text('Virtual account'));
+      expect(find.text('BCA'), findsOneWidget);
       await _tap(tester, find.text('QRIS'));
+      expect(find.text('BCA'), findsNothing);
 
       await _tap(tester, find.bySemanticsLabel('Bayar Rp70.000'));
       expect(s.posts['/api/payments'], {
@@ -239,13 +247,22 @@ void main() {
         'penumpang': 2,
         'metode': 'qris',
       });
-      expect(
-        dibuka.toString(),
-        'https://app.sandbox.midtrans.com/snap/v4/redirection/t',
-      );
       expect(find.byType(PaymentStatusScreen), findsOneWidget);
       expect(find.text('Menunggu pembayaran'), findsOneWidget);
-      expect(find.text('Cek status'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('QRIS, bisa dipindai semua aplikasi pembayaran'),
+        200,
+        scrollable: find
+            .descendant(
+              of: find.byType(PaymentStatusScreen),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      expect(find.byType(QrImageView), findsOneWidget);
+      expect(find.text('Cek sekarang'), findsOneWidget);
+      // Bersihkan timer pembaruan otomatis.
+      await tester.pumpWidget(const SizedBox());
     },
   );
 
@@ -307,6 +324,60 @@ void main() {
         200,
       );
       expect(find.text('+70 poin masuk ke Rewards'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'virtual account: nomor VA, hitung mundur, Salin; waktu habis memicu cek',
+    (tester) async {
+      final server = Server();
+      _instruksi = {
+        ..._instruksi,
+        'grup': 'va',
+        'metode': 'bni',
+        'qrString': null,
+        'bank': 'bni',
+        'nomorVa': '9881234567890',
+      };
+      addTearDown(
+        () => _instruksi = {
+          ..._instruksi,
+          'grup': 'qris',
+          'metode': 'qris',
+          'qrString': '00020101021226QRIS-PALSU',
+        },
+      );
+      batasUji = '2026-11-19T11:15:00.000Z';
+      addTearDown(() => batasUji = null);
+      var jam = DateTime.utc(
+        2026,
+        11,
+        19,
+        10,
+        50,
+      ); // 25 menit sebelum batas 11.15Z
+      await _pump(
+        tester,
+        PaymentStatusScreen(orderId: 'SM-20261119-ABCDEF', clock: () => jam),
+        server: server,
+      );
+      expect(find.text('Virtual account BNI'), findsOneWidget);
+      expect(find.text('9881234567890'), findsOneWidget);
+      expect(find.text('25:00'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel('Salin nomor virtual account'),
+        findsOneWidget,
+      );
+      final cekAwal = server.posts.length;
+
+      jam = DateTime.utc(2026, 11, 19, 11, 16);
+      await tester.pump(const Duration(seconds: 1));
+      await _settle(tester);
+      expect(find.text('00:00'), findsOneWidget);
+      expect(find.text('Batas bayar sudah lewat'), findsOneWidget);
+      expect(find.text('9881234567890'), findsNothing);
+      expect(server.posts.length, greaterThanOrEqualTo(cekAwal));
+      await tester.pumpWidget(const SizedBox());
     },
   );
 }

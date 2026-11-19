@@ -13,7 +13,7 @@ import { IKON_JENIS, IKON_METODE } from '../components/pembayaran/ikon.js'
 import { api } from '../lib/api.js'
 import {
   JENIS,
-  METODE,
+  GRUP_METODE,
   bagikan,
   maksJumlah,
   pecahTanggal,
@@ -60,6 +60,7 @@ export default function Pembayaran() {
   const [langkah, setLangkah] = useState('pilih')
   const [pilihan, setPilihan] = useState(null) // { kode, jam, waktu }
   const [jumlah, setJumlah] = useState(1)
+  const [grupMetode, setGrupMetode] = useState(null)
   const [metode, setMetode] = useState(null)
   const [kirim, setKirim] = useState({ jalan: false, error: null })
   const [pesan, setPesan] = useState(null)
@@ -81,7 +82,8 @@ export default function Pembayaran() {
 
   const layanan = data?.items.find((s) => s.kode === pilihan?.kode) ?? null
   const total = layanan ? layanan.harga * jumlah : 0
-  const siapBayar = Boolean(layanan && pilihan?.waktu)
+  const adaJadwal = Boolean(layanan && pilihan?.waktu)
+  const siapBayar = adaJadwal && Boolean(metode)
 
   function pilihLayanan(s) {
     if (pilihan?.kode === s.kode) return
@@ -95,8 +97,13 @@ export default function Pembayaran() {
   }
 
   async function bayar() {
-    if (!siapBayar) {
+    if (!adaJadwal) {
       setLangkah('pilih')
+      return
+    }
+    if (!metode) {
+      setLangkah('biaya')
+      setKirim({ jalan: false, error: { message: 'Pilih cara bayar dulu: QRIS, virtual account, atau e-wallet.' } })
       return
     }
     if (!user) {
@@ -109,9 +116,9 @@ export default function Pembayaran() {
         layanan: layanan.kode,
         jadwal: pilihan.waktu,
         penumpang: jumlah,
-        metode: metode ?? undefined,
+        metode,
       })
-      window.location.assign(res.redirectUrl)
+      navigate(`/pembayaran/${res.orderId}`)
     } catch (err) {
       setKirim({ jalan: false, error: err })
     }
@@ -229,12 +236,44 @@ export default function Pembayaran() {
         <Ringkasan layanan={layanan} waktu={pilihan.waktu} jumlah={jumlah} setJumlah={setJumlah} total={total} />
       )}
 
-      <fieldset className="mt-7">
+      <fieldset className="mt-7 min-w-0">
         <legend className="text-sm font-semibold">Metode pembayaran</legend>
         <ul className="mt-1">
-          {METODE.map((m) => (
-            <li key={m.value}>
-              <BarisMetode metode={m} on={metode === m.value} onPilih={() => setMetode(metode === m.value ? null : m.value)} />
+          {GRUP_METODE.map((g) => (
+            <li key={g.value}>
+              <BarisMetode
+                grup={g}
+                on={grupMetode === g.value}
+                onPilih={() => {
+                  setGrupMetode(g.value)
+                  setMetode(g.pilihan.length === 1 ? g.pilihan[0].value : null)
+                }}
+              />
+              {grupMetode === g.value && g.pilihan.length > 1 && (
+                <div
+                  role="radiogroup"
+                  aria-label={`Pilih ${g.label.toLowerCase()}`}
+                  className="sheet-fade flex flex-wrap gap-2 pb-3 pl-[3.75rem]"
+                >
+                  {g.pilihan.map((p) => (
+                    <button
+                      key={p.value}
+                      type="button"
+                      role="radio"
+                      aria-checked={metode === p.value}
+                      onClick={() => setMetode(p.value)}
+                      className={`flex min-h-touch items-center gap-1 rounded-full px-4 text-sm font-semibold transition ${
+                        metode === p.value
+                          ? 'bg-ink-violet text-white'
+                          : 'bg-card text-ink/80 ring-1 ring-ink/15 hover:bg-ink/[0.04]'
+                      }`}
+                    >
+                      {metode === p.value && <Check size={15} strokeWidth={3} aria-hidden="true" />}
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </li>
           ))}
           <li>
@@ -257,7 +296,7 @@ export default function Pembayaran() {
             </button>
           </li>
         </ul>
-        <p className="mt-2 text-[13px] text-ink/55">Tidak memilih = semua metode tersedia di halaman Midtrans.</p>
+        {!metode && <p className="mt-2 text-[13px] text-ink/55">Pilih cara bayar dulu. Kartu kredit tidak tersedia.</p>}
       </fieldset>
 
       {kirim.error && <ErrorBanner error={kirim.error} className="mt-4" />}
@@ -522,7 +561,7 @@ function Ringkasan({ layanan, waktu, jumlah, setJumlah, total }) {
   )
 }
 
-function BarisMetode({ metode, on, onPilih }) {
+function BarisMetode({ grup: metode, on, onPilih }) {
   const Ikon = IKON_METODE[metode.value]
   return (
     <button

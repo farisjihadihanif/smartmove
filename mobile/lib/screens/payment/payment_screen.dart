@@ -1,6 +1,5 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../api.dart';
 import '../../pembayaran.dart';
@@ -11,12 +10,6 @@ import '../auth/login_screen.dart';
 import 'payment_history_screen.dart';
 import 'payment_status_screen.dart';
 import 'payment_widgets.dart';
-
-/// Membuka halaman Snap Midtrans (sandbox). Tes menggantinya.
-typedef BukaSnap = Future<bool> Function(Uri url);
-
-Future<bool> bukaSnapDiBrowser(Uri url) =>
-    launchUrl(url, mode: LaunchMode.externalApplication);
 
 /// Digital Payment (mockup hal. 5, PRD §6.3, T-302) — SELALU simulasi (Midtrans sandbox).
 /// Pilih transportasi (jenis, tanggal, layanan, jam) → Estimasi biaya (jumlah, metode)
@@ -30,7 +23,6 @@ class PaymentScreen extends StatefulWidget {
     this.tujuan,
     this.tanggal,
     this.jenis,
-    this.bukaSnap = bukaSnapDiBrowser,
     this.clock = DateTime.now,
   });
 
@@ -38,7 +30,6 @@ class PaymentScreen extends StatefulWidget {
   final String? tujuan;
   final String? tanggal;
   final String? jenis;
-  final BukaSnap bukaSnap;
   final DateTime Function() clock;
 
   @override
@@ -71,6 +62,7 @@ class PaymentScreenState extends State<PaymentScreen> {
   String? kode;
   ({String jam, DateTime waktu})? slot;
   int jumlah = 1;
+  String? grup;
   String? metode;
   bool kirim = false;
   Object? galatBayar;
@@ -171,6 +163,16 @@ class PaymentScreenState extends State<PaymentScreen> {
       setState(() => langkah = 'pilih');
       return;
     }
+    if (metode == null) {
+      setState(() {
+        langkah = 'biaya';
+        galatBayar = ApiException(
+          400,
+          'Pilih cara bayar dulu: QRIS, virtual account, atau e-wallet.',
+        );
+      });
+      return;
+    }
     final app = AppScope.read(context);
     if (app.user == null) {
       await pushLogin(context);
@@ -185,16 +187,14 @@ class PaymentScreenState extends State<PaymentScreen> {
         'layanan': kode,
         'jadwal': slot!.waktu.toUtc().toIso8601String(),
         'penumpang': jumlah,
-        'metode': ?metode,
+        'metode': metode,
       }) as Map;
       final orderId = '${res['orderId']}';
-      await widget.bukaSnap(Uri.parse('${res['redirectUrl']}'));
       if (!mounted) return;
       setState(() => kirim = false);
       await Navigator.of(context).push(
         MaterialPageRoute<void>(
-          builder: (_) =>
-              PaymentStatusScreen(orderId: orderId, cekSaatKembali: true),
+          builder: (_) => PaymentStatusScreen(orderId: orderId),
         ),
       );
     } on ApiException catch (e) {
@@ -405,6 +405,31 @@ class PaymentScreenState extends State<PaymentScreen> {
     ),
   );
 
+  Widget _chipPilihan(String v, String l) {
+    final on = metode == v;
+    return ChoiceChip(
+      label: Text(l),
+      selected: on,
+      onSelected: (_) => setState(() => metode = v),
+      showCheckmark: true,
+      checkmarkColor: AppColors.white,
+      materialTapTargetSize: MaterialTapTargetSize.padded,
+      labelStyle: sans(
+        size: 14,
+        weight: FontWeight.w600,
+        color: on ? AppColors.white : AppColors.ink.withValues(alpha: 0.8),
+      ),
+      selectedColor: AppColors.inkVioletIsi,
+      backgroundColor: AppColors.card,
+      side: BorderSide(
+        color: on
+            ? AppColors.inkVioletIsi
+            : AppColors.ink.withValues(alpha: 0.15),
+      ),
+      shape: const StadiumBorder(),
+    );
+  }
+
   Widget _chipJenis(String? v, String l, IconData? ikon) {
     final on = jenis == v;
     return Padding(
@@ -517,14 +542,27 @@ class PaymentScreenState extends State<PaymentScreen> {
       ],
       const SizedBox(height: AppSizes.s6),
       Text('Metode pembayaran', style: sans(size: 14, weight: FontWeight.w600)),
-      for (final (v, label, ket, ikon) in metodeBayar)
+      for (final g in grupMetode) ...[
         BarisMetode(
-          label: label,
-          keterangan: ket,
-          ikon: ikon,
-          aktif: metode == v,
-          onTap: () => setState(() => metode = metode == v ? null : v),
+          label: g.label,
+          keterangan: g.ket,
+          ikon: g.ikon,
+          aktif: grup == g.value,
+          onTap: () => setState(() {
+            grup = g.value;
+            metode = g.pilihan.length == 1 ? g.pilihan.first.$1 : null;
+          }),
         ),
+        if (grup == g.value && g.pilihan.length > 1)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(60, AppSizes.s2, 0, AppSizes.s3),
+            child: Wrap(
+              spacing: AppSizes.s2,
+              runSpacing: AppSizes.s2,
+              children: [for (final (v, l) in g.pilihan) _chipPilihan(v, l)],
+            ),
+          ),
+      ],
       BarisMetode(
         label: 'Bayar parkir',
         keterangan: 'Pesan tempat parkir per jam',
@@ -537,10 +575,11 @@ class PaymentScreenState extends State<PaymentScreen> {
         }),
       ),
       const SizedBox(height: AppSizes.s2),
-      Text(
-        'Tidak memilih = semua metode tersedia di halaman Midtrans.',
-        style: sans(size: 13, color: AppColors.ink.withValues(alpha: 0.55)),
-      ),
+      if (metode == null)
+        Text(
+          'Pilih cara bayar dulu. Kartu kredit tidak tersedia.',
+          style: sans(size: 13, color: AppColors.ink.withValues(alpha: 0.55)),
+        ),
       if (galatBayar != null) ...[
         const SizedBox(height: AppSizes.s3),
         ErrorBanner(error: galatBayar),

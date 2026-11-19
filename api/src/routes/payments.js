@@ -33,6 +33,17 @@ export function paymentsRouter(cfg, { midtrans }) {
     message: { message: 'Terlalu banyak permintaan pembayaran, coba lagi nanti' },
   });
 
+  // Layar pembayaran memperbarui status otomatis (cek berkala): kuota lebih longgar.
+  const batasCek = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: cfg.paymentRateLimit?.cek ?? 150,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    keyGenerator: (req) => (req.user ? `u:${req.user.id}` : `ip:${req.ip}`),
+    validate: { keyGeneratorIpFallback: false },
+    message: { message: 'Terlalu banyak permintaan, coba lagi nanti' },
+  });
+
   // GET /payments/services?asal=&tujuan=&jenis=&tanggal=YYYY-MM-DD (WIB, bawaan hari ini).
   r.get('/services', async (req, res) => {
     const { asal, tujuan, jenis } = req.query;
@@ -58,16 +69,11 @@ export function paymentsRouter(cfg, { midtrans }) {
     res.json({ ok: true });
   });
 
-  // POST /payments → { orderId, snapToken, redirectUrl, payment }.
+  // POST /payments → { orderId, payment } (payment.instruksi = QR / nomor VA / tautan e-wallet).
   r.post('/', requireAuth, batasMidtrans, async (req, res) => {
     const pesanan = await bacaPesanan(req.body || {});
     const p = await buatPembayaran(req.user, pesanan, { midtrans, appUrl: cfg.appUrl });
-    res.status(201).json({
-      orderId: p.orderId,
-      snapToken: p.snapToken,
-      redirectUrl: p.redirectUrl,
-      payment: pembayaranPublik(p),
-    });
+    res.status(201).json({ orderId: p.orderId, payment: pembayaranPublik(p) });
   });
 
   // GET /payments → riwayat milik sendiri, terbaru dulu.
@@ -94,7 +100,7 @@ export function paymentsRouter(cfg, { midtrans }) {
 
   // POST /payments/:orderId/cek — tombol "Cek status" (DESIGN §5). Server menanyakan status ke
   // Midtrans; jawabannya bertanda tangan dan diproses sama persis seperti webhook.
-  r.post('/:orderId/cek', requireAuth, batasMidtrans, async (req, res) => {
+  r.post('/:orderId/cek', requireAuth, batasCek, async (req, res) => {
     let p = await milikSendiri(req);
     if (p.status === 'menunggu') {
       const st = await midtrans.cekStatus(p.orderId);

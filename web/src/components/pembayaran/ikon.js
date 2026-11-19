@@ -1,4 +1,4 @@
-import { Bus, BusFront, Car, CreditCard, Landmark, QrCode, TrainFront, Wallet } from 'lucide-react'
+import { Bus, BusFront, Car, Landmark, QrCode, TrainFront, Wallet } from 'lucide-react'
 import ParkirIcon from './ParkirIcon.jsx'
 
 export const IKON_JENIS = {
@@ -10,8 +10,7 @@ export const IKON_JENIS = {
 }
 
 export const IKON_METODE = {
-  kartu: CreditCard,
+  va: Landmark,
   ewallet: Wallet,
-  transfer: Landmark,
   qris: QrCode,
 }

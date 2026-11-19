@@ -27,8 +27,10 @@ const paymentSchema = new mongoose.Schema(
     // Hanya diubah oleh notifikasi Midtrans valid / cron (DATABASE §4.2).
     status: { type: String, enum: PAYMENT_STATUS, default: 'menunggu' },
     metode: String,
-    snapToken: String,
-    redirectUrl: String, // halaman Snap untuk melanjutkan pembayaran yang masih menunggu
+    // Instruksi bayar dari Midtrans Core API (TASK Keputusan #19): grup qris|va|ewallet,
+    // qrString/qrUrl, deeplink e-wallet, bank + nomorVa, kodePerusahaan/kodeBayar (Mandiri).
+    instruksi: { type: mongoose.Schema.Types.Mixed },
+    batasBayar: Date, // expiry_time Midtrans
     midtransRaw: { type: mongoose.Schema.Types.Mixed, select: false }, // tanpa data kartu
     dibayarPada: Date,
   },

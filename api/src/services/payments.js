@@ -86,7 +86,9 @@ export function pembayaranPublik(p) {
     metode: p.metode ?? null,
     eTiket: lunas && p.eTiket?.kode ? { kode: p.eTiket.kode } : null,
     poin: lunas ? poinPembayaran(p.jumlah) : 0,
-    redirectUrl: p.status === 'menunggu' ? (p.redirectUrl ?? null) : null,
+    // Instruksi bayar (QR / nomor VA / tautan e-wallet) hanya selama masih menunggu.
+    instruksi: p.status === 'menunggu' ? (p.instruksi ?? null) : null,
+    batasBayar: p.batasBayar ?? null,
     dibayarPada: p.dibayarPada ?? null,
     createdAt: p.createdAt,
     simulasi: true,
@@ -131,14 +133,14 @@ export async function bacaPesanan(body, now = Date.now()) {
     throw httpError(400, 'Pilih salah satu jam keberangkatan yang tersedia');
   }
 
-  const metode = body.metode ?? null;
-  if (metode !== null && !METODE.includes(metode)) {
-    throw httpError(400, `Metode harus salah satu dari: ${METODE.join(', ')}`);
+  const metode = body.metode;
+  if (!METODE.includes(metode)) {
+    throw httpError(400, `Pilih metode pembayaran: ${METODE.join(', ')}`);
   }
   return { layanan, jadwal, penumpang, metode };
 }
 
-/** Buat Payment `menunggu` + transaksi Snap. Snap gagal → Payment dihapus lagi. */
+/** Buat Payment `menunggu` + transaksi Core API. Midtrans gagal → Payment dihapus lagi. */
 export async function buatPembayaran(user, pesanan, { midtrans, appUrl }) {
   const { layanan, jadwal, penumpang, metode } = pesanan;
   const jumlah = layanan.harga * penumpang;
@@ -162,7 +164,7 @@ export async function buatPembayaran(user, pesanan, { midtrans, appUrl }) {
         jadwal,
         penumpang,
         jumlah,
-        ...(metode ? { metode } : {}),
+        metode,
       });
     } catch (err) {
       if (err.code !== 11000 || i >= 4) throw err;
@@ -170,7 +172,7 @@ export async function buatPembayaran(user, pesanan, { midtrans, appUrl }) {
   }
 
   try {
-    const snap = await midtrans.buatTransaksi({
+    const hasil = await midtrans.charge({
       orderId: p.orderId,
       jumlah,
       item: {
@@ -184,10 +186,10 @@ export async function buatPembayaran(user, pesanan, { midtrans, appUrl }) {
         email: user.email,
       },
       metode,
-      finishUrl: `${appUrl.replace(/\/$/, '')}/pembayaran/${p.orderId}`,
+      kembaliUrl: `${appUrl.replace(/\/$/, '')}/pembayaran/${p.orderId}`,
     });
-    p.snapToken = snap.token;
-    p.redirectUrl = snap.redirectUrl;
+    p.instruksi = hasil.instruksi;
+    p.batasBayar = hasil.batasBayar;
     await p.save();
   } catch (err) {
     await Payment.deleteOne({ _id: p._id });
@@ -231,7 +233,8 @@ export async function terapkanNotifikasi(body, { serverKey }) {
 
   const status = statusDariMidtrans(body);
   const set = { midtransRaw: ringkasRaw(body) };
-  if (body.payment_type) set.metode = body.payment_type;
+  // Metode pilihan pengguna (qris, bca, gopay, …) dipertahankan; payment_type hanya cadangan.
+  if (body.payment_type && !p.metode) set.metode = body.payment_type;
   if (status === 'lunas') {
     set.dibayarPada = body.settlement_time ? new Date(`${body.settlement_time.replace(' ', 'T')}+07:00`) : new Date();
     if (Number.isNaN(set.dibayarPada.getTime())) set.dibayarPada = new Date();

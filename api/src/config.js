@@ -53,7 +53,7 @@ const config = {
   // Foto jalan (Street view). Token hanya di server.
   mapillaryToken: env.MAPILLARY_TOKEN,
   mapillaryUrl: env.MAPILLARY_URL,
-  // Midtrans Snap — selalu sandbox (TASK Keputusan #7). Server key hanya di API.
+  // Midtrans Core API — selalu sandbox (TASK Keputusan #7). Server key hanya di API.
   midtrans: {
     serverKey: env.MIDTRANS_SERVER_KEY,
     clientKey: env.MIDTRANS_CLIENT_KEY,

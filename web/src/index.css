@@ -210,6 +210,10 @@
     @apply bg-surface font-sans text-ink antialiased;
     min-width: 360px;
   }
+  /* <fieldset> bawaan browser: min-width min-content → isi panjang meluberkan layout ponsel. */
+  fieldset {
+    min-width: 0;
+  }
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-pill-via;
   }

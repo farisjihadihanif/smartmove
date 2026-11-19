@@ -171,7 +171,10 @@ void main() {
       await _tap(tester, find.text('Tukar 150 poin?'));
       expect(s.posts, ['/api/rewards/vouchers/v1/redeem']);
       expect(find.text('SMV-ABCD-EFGH'), findsOneWidget);
-      expect(tester.state<RewardsScreenState>(find.byType(RewardsScreen)).saldo, 100);
+      expect(
+        tester.state<RewardsScreenState>(find.byType(RewardsScreen)).saldo,
+        100,
+      );
       expect(find.text('Sisa 2, berlaku sampai 19 Des 2026'), findsOneWidget);
     },
   );

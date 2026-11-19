@@ -22,44 +22,79 @@ IconData ikonJenis(String? v) =>
     jenisLayanan.where((j) => j.$1 == v).firstOrNull?.$3 ??
     Icons.confirmation_number_outlined;
 
-/// Metode di mockup hal. 5. "Pay for parking" = pintasan ke layanan parkir.
-const metodeBayar = <(String, String, String, IconData)>[
-  ('kartu', 'Kartu kredit', 'Visa, Mastercard, JCB', Icons.credit_card_rounded),
-  (
-    'ewallet',
-    'E-Wallet',
-    'GoPay, ShopeePay',
-    Icons.account_balance_wallet_rounded,
-  ),
-  (
-    'transfer',
-    'Transfer bank',
-    'Virtual account BCA, BNI, BRI, dan lainnya',
-    Icons.account_balance_rounded,
-  ),
-  (
+/// Metode bayar (Midtrans Core API, Keputusan #19; tanpa kartu kredit), dikelompokkan seperti
+/// mockup hal. 5. "Pay for parking" = pintasan ke layanan parkir. Sama dengan web GRUP_METODE.
+class GrupMetode {
+  const GrupMetode(this.value, this.label, this.ket, this.ikon, this.pilihan);
+  final String value;
+  final String label;
+  final String ket;
+  final IconData ikon;
+  final List<(String, String)> pilihan;
+}
+
+const grupMetode = <GrupMetode>[
+  GrupMetode(
     'qris',
     'QRIS',
-    'Pindai dari aplikasi bank atau e-wallet',
+    'Pindai kode QR dari aplikasi bank atau e-wallet mana pun',
     Icons.qr_code_2_rounded,
+    [('qris', 'QRIS')],
+  ),
+  GrupMetode(
+    'va',
+    'Virtual account',
+    'Transfer dari m-banking, internet banking, atau ATM',
+    Icons.account_balance_rounded,
+    [
+      ('bca', 'BCA'),
+      ('bni', 'BNI'),
+      ('bri', 'BRI'),
+      ('mandiri', 'Mandiri'),
+      ('permata', 'Permata'),
+    ],
+  ),
+  GrupMetode(
+    'ewallet',
+    'E-wallet',
+    'Bayar langsung di aplikasi GoPay atau ShopeePay',
+    Icons.account_balance_wallet_rounded,
+    [('gopay', 'GoPay'), ('shopeepay', 'ShopeePay')],
   ),
 ];
 
+/// Simulator sandbox Midtrans untuk "membayar" transaksi simulasi saat uji coba.
+const simulatorMidtrans = 'https://simulator.sandbox.midtrans.com/';
+
 const _namaMetode = {
-  'kartu': 'Kartu kredit',
+  'qris': 'QRIS',
+  'bca': 'Virtual account BCA',
+  'bni': 'Virtual account BNI',
+  'bri': 'Virtual account BRI',
+  'mandiri': 'Mandiri Bill',
+  'permata': 'Virtual account Permata',
   'ewallet': 'E-Wallet',
   'transfer': 'Transfer bank',
-  'qris': 'QRIS',
   'credit_card': 'Kartu kredit',
   'gopay': 'GoPay',
   'shopeepay': 'ShopeePay',
   'bank_transfer': 'Transfer bank',
   'echannel': 'Transfer bank (Mandiri)',
-  'permata': 'Transfer bank (Permata)',
   'cstore': 'Gerai ritel',
 };
 String? namaMetode(String? m) =>
     m == null ? null : (_namaMetode[m] ?? m.replaceAll('_', ' '));
+
+String _dua2(int n) => n.toString().padLeft(2, '0');
+
+/// Sisa waktu bayar → "14:52" (di bawah 1 jam) atau "23 j 05 m". Sama dengan web.
+String sisaWaktu(Duration d) {
+  if (d <= Duration.zero) return '00:00';
+  final j = d.inHours;
+  final m = d.inMinutes % 60;
+  final s = d.inSeconds % 60;
+  return j > 0 ? '$j j ${_dua2(m)} m' : '${_dua2(m)}:${_dua2(s)}';
+}
 
 /// Label + warna status (warna selalu disertai teks).
 (String, Color) statusPembayaran(String? s) => switch (s) {
