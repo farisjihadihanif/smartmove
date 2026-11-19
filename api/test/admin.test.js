@@ -16,6 +16,10 @@ import Content from '../src/models/Content.js';
 import Feedback from '../src/models/Feedback.js';
 import TrafficReport from '../src/models/TrafficReport.js';
 import Trip from '../src/models/Trip.js';
+import Payment from '../src/models/Payment.js';
+import PointLedger from '../src/models/PointLedger.js';
+import Redemption from '../src/models/Redemption.js';
+import { pemilikPembayaran } from '../src/services/payments.js';
 
 process.env.NODE_ENV = 'test';
 let mongod;
@@ -50,7 +54,7 @@ after(async () => {
 
 beforeEach(async () => {
   await Promise.all(
-    [User, TransitLine, TransitStop, RoadCorridor, Event, Content, Feedback, TrafficReport, Trip].map((m) => m.deleteMany({})),
+    [User, TransitLine, TransitStop, RoadCorridor, Event, Content, Feedback, TrafficReport, Trip, Payment, PointLedger, Redemption].map((m) => m.deleteMany({})),
   );
 });
 
@@ -314,6 +318,47 @@ describe('pengguna & moderasi', () => {
     assert.equal(await User.countDocuments({ username: 'budi' }), 0);
     assert.equal(await Trip.countDocuments({ user: u.id }), 0);
     assert.equal(await Feedback.countDocuments({ user: u.id }), 0);
+  });
+
+  test('hapus pengguna: data pribadi, laporan, poin, voucher hilang; pembayaran simulasi tetap, dianonimkan', async () => {
+    const a = await daftar('admin9', { admin: true });
+    const u = await daftar('dewi');
+    const lain = await daftar('eko');
+    const uid = new mongoose.Types.ObjectId(u.id);
+    await TrafficReport.create({ user: uid, lokasi: { type: 'Point', coordinates: [98.6, 3.59] }, tingkat: 'macet' });
+    // Laporan orang lain yang pernah dikonfirmasi dewi: konfirmasinya dilepas.
+    const lapLain = await TrafficReport.create({
+      user: lain.id,
+      lokasi: { type: 'Point', coordinates: [98.6, 3.59] },
+      tingkat: 'padat',
+      konfirmasi: 1,
+      konfirmasiOleh: [{ user: uid }],
+    });
+    await PointLedger.create({ user: uid, jumlah: 40, alasan: 'pembayaran', ref: 'SM-1' });
+    await Redemption.create({ user: uid, voucher: new mongoose.Types.ObjectId(), kode: 'VC-1' });
+    const bayar = { layanan: { kode: 'BUS', nama: 'Bus' }, jumlah: 40000, status: 'lunas' };
+    await Payment.create({ ...bayar, user: uid, orderId: 'SM-1' });
+    await Payment.create({ ...bayar, user: lain.id, orderId: 'SM-2' });
+
+    await request(app).delete(`/api/admin/users/${u.id}`).set('Authorization', a.auth).expect(204);
+
+    assert.equal(await TrafficReport.countDocuments({ user: uid }), 0);
+    assert.equal((await TrafficReport.findById(lapLain._id).select('+konfirmasiOleh')).konfirmasiOleh.length, 0);
+    assert.equal(await PointLedger.countDocuments({ user: uid }), 0);
+    assert.equal(await Redemption.countDocuments({ user: uid }), 0);
+
+    const p = await Payment.findOne({ orderId: 'SM-1' }).lean();
+    assert.ok(p, 'pembayaran tetap disimpan');
+    assert.equal(p.user, undefined);
+    assert.equal(p.penggunaDihapus, true);
+    assert.equal(p.jumlah, 40000);
+    assert.equal(p.status, 'lunas');
+    assert.deepEqual(pemilikPembayaran(p), { id: null, username: null, label: 'Pengguna dihapus' });
+
+    // Transaksi pengguna lain tidak tersentuh.
+    const p2 = await Payment.findOne({ orderId: 'SM-2' }).populate('user', 'username').lean();
+    assert.equal(p2.penggunaDihapus, false);
+    assert.equal(pemilikPembayaran(p2).label, 'eko');
   });
 
   test('moderasi laporan & umpan balik menampilkan pelapor dan bisa dihapus', async () => {

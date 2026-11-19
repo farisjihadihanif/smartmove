@@ -82,7 +82,7 @@ export default function Pengguna() {
       {data && data.items.length === 0 && <p className="mt-4 text-sm text-ink/60">Tidak ada pengguna yang cocok.</p>}
       {data && <Halaman page={data.page} total={data.total} onPage={setPage} />}
       <p className="mt-6 max-w-[60ch] text-xs leading-relaxed text-ink/55">
-        Menghapus akun juga menghapus rencana perjalanan, laporan, umpan balik, poin, dan riwayat pembayaran simulasinya.
+        Menghapus akun juga menghapus rencana perjalanan, laporan, umpan balik, poin, dan vouchernya. Riwayat pembayaran simulasi tetap disimpan atas nama “Pengguna dihapus”.
       </p>
     </>
   )

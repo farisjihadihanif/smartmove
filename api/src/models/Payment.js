@@ -5,7 +5,10 @@ export const PAYMENT_STATUS = ['menunggu', 'lunas', 'gagal', 'kedaluwarsa', 'dib
 
 const paymentSchema = new mongoose.Schema(
   {
-    user: ref('User'),
+    // Kosong bila akun pemiliknya dihapus admin: transaksi tetap disimpan, dianonimkan
+    // (`penggunaDihapus: true`, tampil "Pengguna dihapus") agar riwayat transaksi utuh.
+    user: ref('User', false),
+    penggunaDihapus: { type: Boolean, default: false },
     orderId: { type: String, required: true, unique: true },
     layanan: {
       kode: { type: String, required: true },

@@ -101,7 +101,9 @@ export function adminPenggunaRouter() {
     res.json({ user: penggunaAdmin(u.toObject()) });
   });
 
-  // DELETE /admin/users/:id — hapus akun beserta data pribadinya (pembayaran selalu simulasi).
+  // DELETE /admin/users/:id — hapus akun beserta data pribadinya (trip, laporan, umpan balik,
+  // poin, voucher). Pembayaran simulasi tetap disimpan tapi dianonimkan (tanpa `user`,
+  // `penggunaDihapus: true`) supaya riwayat transaksi admin utuh.
   r.delete('/users/:id', async (req, res) => {
     const id = wajibId(req.params.id, 'Pengguna');
     if (String(req.user._id) === id) throw httpError(400, 'Kamu tidak bisa menghapus akunmu sendiri');
@@ -114,7 +116,7 @@ export function adminPenggunaRouter() {
       TrafficReport.updateMany({ 'konfirmasiOleh.user': u._id }, { $pull: { konfirmasiOleh: { user: u._id } } }),
       PointLedger.deleteMany({ user: u._id }),
       Redemption.deleteMany({ user: u._id }),
-      Payment.deleteMany({ user: u._id }),
+      Payment.updateMany({ user: u._id }, { $unset: { user: 1 }, $set: { penggunaDihapus: true } }),
     ]);
     await u.deleteOne();
     res.status(204).end();
