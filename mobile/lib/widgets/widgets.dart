@@ -1,6 +1,7 @@
 /// Komponen bersama (DESIGN §4).
 library;
 
+export 'baris_dropdown.dart';
 export 'bottom_action_bar.dart';
 export 'empty_state.dart';
 export 'error_banner.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:smartmove/api.dart';
-import 'package:smartmove/screens/coming_soon_screen.dart';
+import 'package:smartmove/screens/account/account_screen.dart';
 import 'package:smartmove/state.dart';
 import 'package:smartmove/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -65,14 +65,20 @@ void main() {
       ),
     );
     await state.muatTema();
+    await state.setSession({
+      'token': 't',
+      'user': {
+        'id': 'u1',
+        'username': 'uji',
+        'role': 'user',
+        'email': 'uji@contoh.id',
+      },
+    });
     expect(state.tema, 'sistem');
     await tester.pumpWidget(
       AppScope(
         state: state,
-        child: MaterialApp(
-          theme: buildTheme(),
-          home: const ComingSoonScreen(title: 'Akun', account: true),
-        ),
+        child: MaterialApp(theme: buildTheme(), home: const AccountScreen()),
       ),
     );
     await tester.pump();

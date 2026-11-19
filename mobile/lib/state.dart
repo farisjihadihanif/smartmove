@@ -101,6 +101,21 @@ class AppState extends ChangeNotifier {
     _set(AuthStatus.signedIn, user);
   }
 
+  /// Setelah ganti password (`{user, token}`): token baru disimpan di tempat yang sama
+  /// dengan token lama (secure storage, atau memori bila "Ingat saya" tidak dicentang).
+  Future<void> perbaruiSesi(Map res) async {
+    final token = res['token'];
+    if (token is String && token.isNotEmpty) {
+      if (api.sessionToken != null) {
+        api.sessionToken = token;
+      } else {
+        await api.tokens.write(token);
+      }
+    }
+    final user = _extractUser(res);
+    if (user != null) updateUser(user);
+  }
+
   void updateUser(Map<String, dynamic> user) {
     _user = user;
     notifyListeners();

@@ -35,6 +35,8 @@ export function AuthProvider({ children }) {
       status,
       /** Simpan sesi dari respons login/register `{user, token}`. */
       signIn: (res) => applyUser(res?.user),
+      /** Ganti data pengguna setelah ubah profil / foto / password (`{user}`). */
+      updateUser: (u) => applyUser(u),
       signOut: async () => {
         try {
           await api.post('/auth/logout')

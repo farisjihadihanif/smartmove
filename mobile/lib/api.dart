@@ -154,16 +154,37 @@ class ApiClient {
     bool auth = true,
   }) async {
     final req = http.Request(method, uri(path, query));
+    if (body != null) {
+      req.headers['Content-Type'] = 'application/json; charset=utf-8';
+      req.body = jsonEncode(body);
+    }
+    return _kirim(req, auth: auth);
+  }
+
+  /// Unggah berkas (multipart/form-data), mis. foto profil `PATCH /users/me`.
+  Future<dynamic> multipart(
+    String method,
+    String path, {
+    Map<String, String> fields = const {},
+    required String fileField,
+    required List<int> bytes,
+    required String filename,
+  }) {
+    final req = http.MultipartRequest(method, uri(path))
+      ..fields.addAll(fields)
+      ..files.add(
+        http.MultipartFile.fromBytes(fileField, bytes, filename: filename),
+      );
+    return _kirim(req);
+  }
+
+  Future<dynamic> _kirim(http.BaseRequest req, {bool auth = true}) async {
     req.headers['Accept'] = 'application/json';
     if (auth) {
       final token = sessionToken ?? await tokens.read();
       if (token != null && token.isNotEmpty) {
         req.headers['Authorization'] = 'Bearer $token';
       }
-    }
-    if (body != null) {
-      req.headers['Content-Type'] = 'application/json; charset=utf-8';
-      req.body = jsonEncode(body);
     }
 
     final http.Response res;

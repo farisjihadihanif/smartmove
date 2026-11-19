@@ -3,7 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../state.dart';
 import '../../theme.dart';
 import '../auth/login_screen.dart';
-import '../coming_soon_screen.dart';
+import '../account/account_screen.dart';
 import '../rewards/rewards_screen.dart';
 import 'home_screen.dart';
 
@@ -32,7 +32,7 @@ class _HomeShellState extends State<HomeShell> {
             const SizedBox.shrink()
           else
             RewardsScreen(key: ValueKey(_kunjunganRewards)),
-          const ComingSoonScreen(title: 'Akun', account: true),
+          const AccountScreen(),
         ],
       ),
       bottomNavigationBar: NavigationBar(

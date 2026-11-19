@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom'
 import AppLayout from './components/AppLayout.jsx'
 import { GuestOnly, RequireAdmin, RequireAuth } from './lib/auth.jsx'
 import AdminShell from './components/admin/AdminShell.jsx'
+import Akun from './pages/Akun.jsx'
 import Index from './pages/Index.jsx'
 import Kampanye from './pages/Kampanye.jsx'
 import EventAlert from './pages/kampanye/EventAlert.jsx'
@@ -15,7 +16,6 @@ import Pembayaran from './pages/Pembayaran.jsx'
 import RiwayatPembayaran from './pages/pembayaran/Riwayat.jsx'
 import StatusPembayaran from './pages/pembayaran/Status.jsx'
 import Rewards from './pages/Rewards.jsx'
-import Segera from './pages/Segera.jsx'
 import Splash from './pages/Splash.jsx'
 import TripPlanner from './pages/TripPlanner.jsx'
 import Daftar from './pages/auth/Daftar.jsx'
@@ -36,7 +36,7 @@ export const router = createBrowserRouter([
   { path: 'reset-password', element: <ResetPassword /> },
   // Splash sambutan, otomatis sekali untuk tamu baru (lihat Index.jsx).
   { path: 'selamat-datang', element: <Splash /> },
-  // Tujuan menu Beranda; yang belum jadi memakai Segera.
+  // Tujuan menu Beranda.
   // Terbuka untuk tamu (ARCHITECTURE §4) …
   { path: 'navigasi', element: <Navigasi />, errorElement: <NotFound /> },
   { path: 'lalu-lintas', element: <LaluLintas />, errorElement: <NotFound /> },
@@ -56,7 +56,7 @@ export const router = createBrowserRouter([
       { path: 'pembayaran/riwayat', element: <RiwayatPembayaran /> },
       { path: 'pembayaran/:orderId', element: <StatusPembayaran /> },
       { path: 'rewards', element: <Rewards /> },
-      { path: 'akun', element: <Segera title="Akun" account /> },
+      { path: 'akun', element: <Akun /> },
     ],
   },
   {
