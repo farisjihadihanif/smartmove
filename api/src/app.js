@@ -21,6 +21,7 @@ import { trafficRouter } from './routes/traffic.js';
 import { campaignRouter } from './routes/campaign.js';
 import { adminRouter } from './routes/admin/index.js';
 import { paymentsRouter } from './routes/payments.js';
+import { rewardsRouter } from './routes/rewards.js';
 
 export function createApp(opts = {}) {
   const cfg = { ...config, ...opts };
@@ -68,6 +69,7 @@ export function createApp(opts = {}) {
   api.use('/transit', transitRouter(cfg));
   api.use('/campaign', campaignRouter());
   api.use('/payments', paymentsRouter(cfg, { midtrans }));
+  api.use('/rewards', rewardsRouter());
   api.use('/admin', adminRouter(cfg));
   // Satu kuota bersama untuk semua endpoint yang memanggil layanan peta.
   const mapLimit = rateLimit({

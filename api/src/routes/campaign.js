@@ -3,6 +3,7 @@ import Content from '../models/Content.js';
 import Event from '../models/Event.js';
 import { httpError } from '../lib/httpError.js';
 import { requireAuth } from '../middleware/auth.js';
+import { beriPoinUmpanBalik } from '../services/rewards.js';
 import {
   JENDELA_EVENT_MS,
   JENIS_KONTEN,
@@ -47,7 +48,9 @@ export function campaignRouter() {
   r.post('/feedback', requireAuth, async (req, res) => {
     const input = bacaUmpanBalik(req.body || {});
     const fb = await kirimUmpanBalik(req.user, input);
-    res.status(201).json({ feedback: umpanBalikPublik(fb) });
+    // 5 poin, maks. 1× per minggu (Keputusan #6 & #14); umpan balik tetap tersimpan walau poin gagal.
+    const poin = await beriPoinUmpanBalik(req.user._id).catch(() => 0);
+    res.status(201).json({ feedback: umpanBalikPublik(fb), poin });
   });
 
   return r;

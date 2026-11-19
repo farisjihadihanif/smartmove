@@ -9,6 +9,37 @@ import User from '../models/User.js';
 export const POIN_PER_RUPIAH = 1 / 1000; // Keputusan #6: 1 poin per Rp1.000
 
 export const poinPembayaran = (jumlah) => Math.floor(jumlah * POIN_PER_RUPIAH);
+export const POIN_UMPAN_BALIK = 5; // Keputusan #6: maks. 1×/minggu
+
+export const LABEL_ALASAN = {
+  pembayaran: 'Pemesanan lunas',
+  perjalanan: 'Perjalanan transportasi umum',
+  umpan_balik: 'Umpan balik',
+  tukar_voucher: 'Tukar voucher',
+  admin: 'Penyesuaian admin',
+};
+
+export const entriPublik = (l) => ({
+  id: String(l._id),
+  jumlah: l.jumlah,
+  alasan: l.alasan,
+  label: LABEL_ALASAN[l.alasan] ?? l.alasan,
+  ref: l.ref,
+  createdAt: l.createdAt,
+});
+
+const WIB_MS = 7 * 60 * 60 * 1000;
+/**
+ * Kunci minggu WIB (Senin–Minggu), mis. "2026-11-16" = Senin awal minggu.
+ * Dipakai sebagai `ref` poin umpan balik: index unik (alasan, ref) menjamin
+ * maks. 1×/minggu per pengguna walau permintaan datang bersamaan.
+ */
+export function mingguWib(now = Date.now()) {
+  const w = new Date(new Date(now).getTime() + WIB_MS);
+  const hari = (w.getUTCDay() + 6) % 7; // Senin = 0
+  w.setUTCDate(w.getUTCDate() - hari);
+  return w.toISOString().slice(0, 10);
+}
 
 const duplikat = (err) => err?.code === 11000;
 
