@@ -53,7 +53,7 @@ class TripFormState extends State<TripForm> {
   TimeOfDay? _jam;
   late final _judul = TextEditingController(text: widget.awal?.judul ?? '');
 
-  Map<String, num>? _estimasi;
+  Map<String, Object>? _estimasi;
   bool _tanpaRuteUmum = false;
   String? _kunciEstimasi;
   bool _memuatEstimasi = false;
@@ -101,9 +101,9 @@ class TripFormState extends State<TripForm> {
         'from': latLngQuery(asal!.lokasi.latitude, asal!.lokasi.longitude),
         'to': latLngQuery(tujuan!.lokasi.latitude, tujuan!.lokasi.longitude),
       };
-      Map<String, num>? hasil;
+      Map<String, Object>? hasil;
       if (moda == ModaTrip.transit) {
-        // Opsi tercepat GET /routes/transit (+ tarif bila sudah diisi admin).
+        // Opsi tercepat GET /routes/transit (+ tarif; bawaan ditandai perkiraan).
         final r = await _api.get('/routes/transit', query: query) as Map;
         final opsi = (r['opsi'] as List? ?? const []).whereType<Map>();
         hasil = opsi.isEmpty ? null : ringkasanTrip(opsi.first);

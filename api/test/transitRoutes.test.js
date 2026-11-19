@@ -127,12 +127,15 @@ describe('GET /routes/transit – angkot (naik-turun di mana saja)', () => {
     assert.ok(panggilan.every((p) => p.url.pathname.startsWith('/kaki/route/v1/foot/')));
   });
 
-  test('tarif null → "Tarif belum tersedia", tidak dihitung 0', async () => {
+  test('tarif kosong → tarif bawaan angkot, ditandai perkiraan', async () => {
     await seed();
     const o = (await cari('3.593,98.62', '3.587,98.68')).body.opsi[0];
-    assert.equal(o.tarif, null);
-    assert.equal(o.tarifTeks, 'Tarif belum tersedia');
-    assert.equal(naik(o)[0].tarif, null);
+    assert.equal(o.tarif, 5000);
+    assert.equal(o.tarifTeks, 'Rp 5.000');
+    assert.equal(o.tarifPerkiraan, true);
+    assert.equal(naik(o)[0].tarif, 5000);
+    assert.equal(naik(o)[0].tarifPerkiraan, true);
+    assert.equal(naik(o)[0].koridor.tarifPerkiraan, true);
   });
 
   test('arah trayek dihormati: perjalanan berlawanan tidak memakai koridor satu arah', async () => {
@@ -240,13 +243,24 @@ describe('GET /routes/transit – transfer', () => {
     assert.equal(o.tarifTeks, 'Rp 8.000');
   });
 
-  test('satu koridor tarifnya null → total tarif null', async () => {
+  test('satu koridor tarifnya kosong → pakai bawaan, total ditandai perkiraan', async () => {
     await seed({ tarifA: 3000 });
+    await TransitLine.updateOne({ kode: 'ANG-A' }, { tarifSumber: 'admin' });
+    lupakanIndeksTransit();
     const o = (await cari('3.593,98.62', '3.64,98.703')).body.opsi[0];
     assert.equal(o.transfer, 1);
-    assert.equal(o.tarif, null);
-    assert.equal(o.tarifTeks, 'Tarif belum tersedia');
-    assert.deepEqual(naik(o).map((n) => n.tarif), [3000, null]);
+    assert.equal(o.tarif, 8000);
+    assert.equal(o.tarifPerkiraan, true);
+    assert.deepEqual(naik(o).map((n) => [n.tarif, n.tarifPerkiraan]), [[3000, false], [5000, true]]);
+  });
+
+  test('semua tarif dari admin → bukan perkiraan', async () => {
+    await seed({ tarifA: 3000, tarifB: 4000 });
+    await TransitLine.updateMany({}, { tarifSumber: 'admin' });
+    lupakanIndeksTransit();
+    const o = (await cari('3.593,98.62', '3.64,98.703')).body.opsi[0];
+    assert.equal(o.tarif, 7000);
+    assert.equal(o.tarifPerkiraan, false);
   });
 
   test('butuh 2 transfer → tidak ada opsi', async () => {

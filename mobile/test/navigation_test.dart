@@ -344,6 +344,21 @@ void main() {
       final o = (_transit['opsi'] as List).first as Map;
       expect(ringkasanTrip(o), {'durasiS': 1980, 'jarakM': 5781});
     });
+
+    test('tarif bawaan/OSM ditandai perkiraan, isian admin tidak', () {
+      final bawaan = {'tarif': 5000, 'tarifPerkiraan': true};
+      expect(tarifPerkiraan(bawaan), isTrue);
+      expect(teksTarifRingkas(bawaan), 'Rp5.000 (perkiraan)');
+      expect(
+        teksTarifRingkas({'tarif': 5000, 'tarifPerkiraan': false}),
+        'Rp5.000',
+      );
+      expect(teksTarifRingkas({'tarif': null}), 'tarif belum tersedia');
+      expect(
+        ringkasanTrip({'totalS': 600, 'tarif': 5000, 'tarifPerkiraan': true}),
+        {'durasiS': 600, 'jarakM': 0, 'tarif': 5000, 'tarifPerkiraan': true},
+      );
+    });
   });
 
   testWidgets('Transportasi umum: opsi, bagian, tarif belum tersedia, Play', (

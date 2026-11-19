@@ -1,5 +1,6 @@
 import TransitLine from '../models/TransitLine.js';
 import TransitStop from '../models/TransitStop.js';
+import { tarifKoridor } from './tarif.js';
 
 // Perencana rute transportasi umum (ARCHITECTURE §5.2).
 //
@@ -132,7 +133,7 @@ export function bangunIndeks(lines, stops) {
       nama: l.nama,
       jenis: l.jenis,
       warna: l.warna ?? null,
-      tarif: l.tarif ?? null,
+      ...tarifKoridor(l),
       v: (l.kecepatanRataKmj || 20) / 3.6,
       bebas,
       pts,
@@ -316,7 +317,14 @@ function kelompokkan(opsi) {
   return grup;
 }
 
-const ringkasKoridor = (L) => ({ kode: L.kode, nama: L.nama, jenis: L.jenis, warna: L.warna, tarif: L.tarif });
+const ringkasKoridor = (L) => ({
+  kode: L.kode,
+  nama: L.nama,
+  jenis: L.jenis,
+  warna: L.warna,
+  tarif: L.tarif,
+  tarifPerkiraan: L.tarifPerkiraan,
+});
 
 export const lokasiTitik = (t) => {
   const [lng, lat] = keLngLat(t.x, t.y);
@@ -342,6 +350,7 @@ export function bagianNaik({ L, dari, ke, lain = [] }) {
     jarakM: Math.round(ds),
     durasiS: Math.round(naikS(L, ds)),
     tarif: L.tarif,
+    tarifPerkiraan: L.tarifPerkiraan, // true = bukan dari admin; klien menulis "Tarif perkiraan"
     garis: irisan(L, dari.s, ke.s),
   };
 }
@@ -367,7 +376,7 @@ export async function muatIndeks() {
   const versi = `${nl}:${ul?.updatedAt?.getTime()}:${ns}:${us?.updatedAt?.getTime()}`;
   if (simpanan.versi === versi) return simpanan.indeks;
   const [lines, stops] = await Promise.all([
-    TransitLine.find({ aktif: { $ne: false } }, 'kode nama jenis warna tarif kecepatanRataKmj jalur').lean(),
+    TransitLine.find({ aktif: { $ne: false } }, 'kode nama jenis operator warna tarif tarifSumber kecepatanRataKmj jalur').lean(),
     TransitStop.find({}, 'nama lokasi lines').lean(),
   ]);
   const indeks = bangunIndeks(lines, stops);

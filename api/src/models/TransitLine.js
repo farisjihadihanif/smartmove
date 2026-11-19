@@ -8,8 +8,10 @@ const transitLineSchema = new mongoose.Schema(
     jenis: { type: String, enum: ['bus', 'kereta', 'angkot'], required: true },
     operator: { type: String, trim: true },
     warna: { type: String, match: /^#[0-9a-fA-F]{6}$/ },
-    // null = belum diisi admin (data OSM jarang punya tarif).
+    // null = belum diisi admin (data OSM jarang punya tarif) → tarif bawaan (services/tarif.js).
     tarif: { type: Number, min: 0, default: null },
+    // Asal `tarif`: admin = pasti; osm (tag `charge`) = perkiraan. Admin wajib mengisi 'admin' (T-208).
+    tarifSumber: { type: String, enum: ['admin', 'osm', null], default: null },
     kecepatanRataKmj: { type: Number, min: 1, default: 20 },
     jamOperasi: { type: String, trim: true }, // mis. "05.30–21.00"
     jalur: { type: lineStringSchema },

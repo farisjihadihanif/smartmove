@@ -81,7 +81,7 @@ String? teksRingkasan(Map? r, [ModaTrip? moda]) {
     if (r['jarakM'] is num) formatJarak(r['jarakM'] as num),
   ];
   if (bagian.isEmpty) return null;
-  if (moda == ModaTrip.transit) bagian.add(teksTarif(r['tarif']));
+  if (moda == ModaTrip.transit) bagian.add(teksTarifRingkas(r));
   return bagian.join(' · ');
 }
 

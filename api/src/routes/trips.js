@@ -54,6 +54,10 @@ function bacaRingkasan(v) {
     if (!angka(v[k]) || v[k] < 0) throw httpError(400, `Ringkasan ${k} harus angka ≥ 0`);
     out[k] = k === 'tarif' ? Math.round(v[k]) : v[k];
   }
+  if (v.tarifPerkiraan !== undefined && v.tarifPerkiraan !== null) {
+    if (typeof v.tarifPerkiraan !== 'boolean') throw httpError(400, 'Ringkasan tarifPerkiraan harus true/false');
+    if (out.tarif !== undefined) out.tarifPerkiraan = v.tarifPerkiraan;
+  }
   return Object.keys(out).length ? out : undefined;
 }
 
@@ -65,7 +69,7 @@ const tampilTempat = (t) => ({
 export function publicTrip(t) {
   const r = t.ringkasan || {};
   const ringkasan = {};
-  for (const k of ['jarakM', 'durasiS', 'tarif']) if (r[k] !== undefined && r[k] !== null) ringkasan[k] = r[k];
+  for (const k of ['jarakM', 'durasiS', 'tarif', 'tarifPerkiraan']) if (r[k] !== undefined && r[k] !== null) ringkasan[k] = r[k];
   return {
     id: t.id,
     judul: t.judul ?? null,

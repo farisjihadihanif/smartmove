@@ -21,6 +21,7 @@ const tripSchema = new mongoose.Schema(
       jarakM: { type: Number, min: 0 },
       durasiS: { type: Number, min: 0 },
       tarif: { type: Number, min: 0 },
+      tarifPerkiraan: { type: Boolean }, // true = tarif bukan dari admin (bawaan/OSM)
     },
   },
   { timestamps: true },

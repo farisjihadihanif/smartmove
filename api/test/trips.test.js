@@ -98,6 +98,7 @@ describe('/trips', () => {
       [{ ...BARU, judul: 'a'.repeat(101) }, 400],
       [{ ...BARU, berangkatPada: 'besok' }, 400],
       [{ ...BARU, ringkasan: { jarakM: -1 } }, 400],
+      [{ ...BARU, ringkasan: { tarif: 5000, tarifPerkiraan: 'ya' } }, 400],
     ];
     for (const [body, status] of kasus) {
       const res = await buat(auth, body);
@@ -139,12 +140,12 @@ describe('/trips', () => {
     const res = await request(app)
       .patch(`/api/trips/${trip.id}`)
       .set('Authorization', auth)
-      .send({ moda: 'transit', judul: '  Pulang  ', berangkatPada: null, ringkasan: { tarif: 4000 } });
+      .send({ moda: 'transit', judul: '  Pulang  ', berangkatPada: null, ringkasan: { tarif: 4000, tarifPerkiraan: true } });
     assert.equal(res.status, 200);
     assert.equal(res.body.trip.moda, 'transit');
     assert.equal(res.body.trip.judul, 'Pulang');
     assert.equal(res.body.trip.berangkatPada, null);
-    assert.deepEqual(res.body.trip.ringkasan, { tarif: 4000 });
+    assert.deepEqual(res.body.trip.ringkasan, { tarif: 4000, tarifPerkiraan: true });
     assert.deepEqual(res.body.trip.asal, ASAL);
 
     const salah = await request(app).patch(`/api/trips/${trip.id}`).set('Authorization', auth).send({ moda: 'x' });

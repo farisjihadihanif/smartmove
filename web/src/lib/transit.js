@@ -24,6 +24,12 @@ const adaNamaJalan = (nama) => Boolean(nama) && !CADANGAN.test(nama)
 export const teksTarif = (n) =>
   n === null || n === undefined ? 'tarif belum tersedia' : `Rp${Math.round(n).toLocaleString('id-ID')}`
 
+/** true bila tarif ada tapi bukan isian admin (tarif bawaan/OSM) → tampilkan "Tarif perkiraan". */
+export const tarifPerkiraan = (x) => x?.tarif !== null && x?.tarif !== undefined && x?.tarifPerkiraan === true
+
+/** Tarif satu baris teks: "Rp5.000 (perkiraan)" / "Rp5.000" / "tarif belum tersedia". */
+export const teksTarifRingkas = (x) => `${teksTarif(x?.tarif ?? null)}${tarifPerkiraan(x) ? ' (perkiraan)' : ''}`
+
 /** Kalimat naik/turun satu bagian `naik`. Angkot tidak punya halte: naik di sepanjang jalan. */
 export function teksNaik(b) {
   if (b.dari.nama === 'Lokasi asal') return 'Naik di titik asalmu'
@@ -83,18 +89,23 @@ export function ringkasOpsi(o) {
   return [
     o.transfer ? `${o.transfer}× pindah` : 'Tanpa pindah',
     `jalan ${formatJarak(o.jalanM)}`,
-    o.tarif === null ? 'tarif belum tersedia' : teksTarif(o.tarif),
+    teksTarifRingkas(o),
   ].join(' · ')
 }
 
 /** Ringkasan untuk Trip Planner (`ringkasan` rencana). */
-export const ringkasanTrip = (o) => ({ durasiS: o.totalS, jarakM: jarakOpsi(o), tarif: o.tarif })
+export const ringkasanTrip = (o) => ({
+  durasiS: o.totalS,
+  jarakM: jarakOpsi(o),
+  tarif: o.tarif,
+  ...(tarifPerkiraan(o) ? { tarifPerkiraan: true } : {}),
+})
 
 /** Teks tombol Share untuk rute transportasi umum. */
 export function teksBagikanTransit({ dari, ke, opsi }) {
   const baris = opsi.bagian.map((b, i) => `${i + 1}. ${teksBagian(b, i, opsi.bagian)}`)
   return [
-    `Rute transportasi umum ke ${ke.nama}: ${formatDurasi(opsi.totalS)}, ${opsi.tarif === null ? 'tarif belum tersedia' : teksTarif(opsi.tarif)}`,
+    `Rute transportasi umum ke ${ke.nama}: ${formatDurasi(opsi.totalS)}, ${teksTarifRingkas(opsi)}`,
     `Dari ${dari.nama}`,
     ...baris,
   ].join('\n')

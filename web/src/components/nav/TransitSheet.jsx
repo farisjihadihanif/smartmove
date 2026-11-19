@@ -11,13 +11,25 @@ import {
   teksBagian,
   teksJalan,
   teksNaik,
+  tarifPerkiraan,
   teksTarif,
+  teksTarifRingkas,
   teksTurun,
   warnaNaik,
 } from '../../lib/transit.js'
 
 // Rute transportasi umum (T-203): ringkasan, pilihan opsi, dan garis perjalanan per bagian.
 // Warna rel di sini = warna garis di peta (NavLayers), jadi pengguna bisa mencocokkan keduanya.
+
+/** Penanda tarif yang bukan isian admin (tarif bawaan per jenis angkutan atau dari OSM). */
+const LabelPerkiraan = () => (
+  <span
+    className="inline-flex items-center whitespace-nowrap rounded-full border border-ink/20 px-2 py-0.5 text-xs font-semibold text-ink/65"
+    title="Tarif bawaan sesuai jenis angkutan, belum dikonfirmasi admin"
+  >
+    Tarif perkiraan
+  </span>
+)
 
 const IKON_JENIS = { kereta: TrainFront }
 const IkonJenis = ({ jenis, ...p }) => {
@@ -50,11 +62,12 @@ export function TransitRingkasan({ data, memuat, galat, onRetry, idx, onIdx }) {
   return (
     <div className="flex flex-col gap-4">
       <div aria-live="polite">
-        <p className="flex items-baseline gap-3">
+        <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <span className="font-serif text-[2.25rem] leading-none">{formatDurasi(opsi.totalS)}</span>
           <span className={`text-[15px] font-semibold ${opsi.tarif === null ? 'text-ink/55' : 'text-ink/75'}`}>
             {opsi.tarif === null ? 'Tarif belum tersedia' : teksTarif(opsi.tarif)}
           </span>
+          {tarifPerkiraan(opsi) && <LabelPerkiraan />}
         </p>
         <p className="mt-1.5 text-sm text-ink/65">
           {opsi.transfer ? `${opsi.transfer}× pindah` : 'Tanpa pindah'}, jalan kaki {formatJarak(opsi.jalanM)}
@@ -174,6 +187,12 @@ function BarisNaik({ b, warna }) {
           <p className="mt-1.5 text-sm text-ink/65">
             {meta.join(', ')},{' '}
             <span className={b.tarif === null ? 'italic text-ink/55' : 'font-semibold text-ink/80'}>{teksTarif(b.tarif)}</span>
+            {tarifPerkiraan(b) && (
+              <>
+                {' '}
+                <LabelPerkiraan />
+              </>
+            )}
           </p>
           {lain.length > 0 && (
             <p className="mt-1.5 text-sm leading-snug text-ink/65">
@@ -229,7 +248,7 @@ export function TransitPanduan({ opsi, idx, onPlay, children }) {
               <p className="mt-1 text-[15px] leading-snug text-ink/75">{teksNaik(b)}</p>
               <p className="mt-0.5 text-[15px] leading-snug text-ink/75">{teksTurun(b)}</p>
               <p className="mt-1 text-sm text-ink/60">
-                {formatDurasi(b.durasiS)}, <span className={b.tarif === null ? 'italic' : ''}>{teksTarif(b.tarif)}</span>
+                {formatDurasi(b.durasiS)}, <span className={b.tarif === null ? 'italic' : ''}>{teksTarifRingkas(b)}</span>
               </p>
             </>
           )}

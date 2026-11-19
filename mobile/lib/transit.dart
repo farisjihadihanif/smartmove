@@ -51,6 +51,14 @@ String teksTarif(Object? n) {
   return 'Rp$s';
 }
 
+/// true bila tarif ada tapi bukan isian admin (tarif bawaan/OSM) → tampilkan "Tarif perkiraan".
+bool tarifPerkiraan(Map? x) =>
+    x?['tarif'] is num && x?['tarifPerkiraan'] == true;
+
+/// Tarif satu baris teks: "Rp5.000 (perkiraan)" / "Rp5.000" / "tarif belum tersedia".
+String teksTarifRingkas(Map? x) =>
+    '${teksTarif(x?['tarif'])}${tarifPerkiraan(x) ? ' (perkiraan)' : ''}';
+
 /// Kalimat naik. Angkot tidak punya halte: naik di sepanjang jalan.
 String teksNaik(Map b) {
   final dari = _nama(b, 'dari');
@@ -138,15 +146,16 @@ String ringkasOpsi(Map o) {
   return [
     t > 0 ? '$t× pindah' : 'Tanpa pindah',
     'jalan ${formatJarak(o['jalanM'] as num? ?? 0)}',
-    teksTarif(o['tarif']),
+    teksTarifRingkas(o),
   ].join(' · ');
 }
 
 /// Ringkasan untuk Trip Planner (`ringkasan` rencana).
-Map<String, num> ringkasanTrip(Map o) => {
+Map<String, Object> ringkasanTrip(Map o) => {
   'durasiS': o['totalS'] as num? ?? 0,
   'jarakM': jarakOpsi(o),
   if (o['tarif'] is num) 'tarif': o['tarif'] as num,
+  if (tarifPerkiraan(o)) 'tarifPerkiraan': true,
 };
 
 /// Teks tombol Share untuk rute transportasi umum.
@@ -157,7 +166,7 @@ String teksBagikanTransit({
 }) {
   final bagian = bagianOpsi(opsi);
   return [
-    'Rute transportasi umum ke ${ke.nama}: ${formatDurasi(opsi['totalS'] as num? ?? 0)}, ${teksTarif(opsi['tarif'])}',
+    'Rute transportasi umum ke ${ke.nama}: ${formatDurasi(opsi['totalS'] as num? ?? 0)}, ${teksTarifRingkas(opsi)}',
     'Dari ${dari.nama}',
     for (final (i, b) in bagian.indexed)
       '${i + 1}. ${teksBagian(b, i, bagian)}',

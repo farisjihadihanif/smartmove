@@ -66,6 +66,7 @@ async function imporKoridor(daftar, statistik, sekarang) {
         sumber: 'osm',
         osmId: k.osmId,
         tarif: k.tarif ?? null,
+        tarifSumber: k.tarif ? 'osm' : null,
         diperbaruiPada: sekarang,
       };
       for (const f of KOLOM_OSM) if (nilai[f] !== undefined) doc[f] = nilai[f];
@@ -85,7 +86,10 @@ async function imporKoridor(daftar, statistik, sekarang) {
       if (nilai[f] === undefined) $unset[f] = '';
       else $set[f] = nilai[f];
     }
-    if ((e.tarif === null || e.tarif === undefined) && k.tarif) $set.tarif = k.tarif;
+    if ((e.tarif === null || e.tarif === undefined) && k.tarif) {
+      $set.tarif = k.tarif;
+      $set.tarifSumber = 'osm';
+    }
     if (Object.keys($set).length || Object.keys($unset).length) {
       $set.diperbaruiPada = sekarang;
       const update = { $set };

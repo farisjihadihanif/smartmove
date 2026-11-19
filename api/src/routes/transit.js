@@ -3,6 +3,7 @@ import TransitLine from '../models/TransitLine.js';
 import TransitStop from '../models/TransitStop.js';
 import { httpError } from '../lib/httpError.js';
 import { parseLatLng, wajibDalamWilayah } from '../lib/wilayah.js';
+import { tarifKoridor } from '../services/tarif.js';
 
 const RADIUS_BAWAAN = 800; // jarak jalan kaki ke halte (ARCHITECTURE §5.2)
 const RADIUS_MAKS = 3000;
@@ -16,13 +17,13 @@ const ringkasKoridor = (l) => ({
   jenis: l.jenis,
   operator: l.operator ?? null,
   warna: l.warna ?? null,
-  tarif: l.tarif ?? null, // null = tarif belum diisi admin
+  ...tarifKoridor(l), // tarif null = belum ada; tarifPerkiraan = bukan dari admin
   jamOperasi: l.jamOperasi ?? null,
   kecepatanRataKmj: l.kecepatanRataKmj,
   diperbaruiPada: l.diperbaruiPada,
 });
 
-const PILIH_KORIDOR = 'kode nama jenis operator warna tarif jamOperasi kecepatanRataKmj diperbaruiPada';
+const PILIH_KORIDOR = 'kode nama jenis operator warna tarif tarifSumber jamOperasi kecepatanRataKmj diperbaruiPada';
 
 function bacaRadius(v) {
   if (v === undefined || v === '') return RADIUS_BAWAAN;
@@ -92,7 +93,7 @@ export function transitRouter() {
     ]);
 
     const ids = [...new Set(stops.flatMap((s) => (s.lines || []).map((l) => String(l.line))))];
-    const lines = await TransitLine.find({ _id: { $in: ids }, aktif: { $ne: false } }, 'kode nama jenis warna tarif').lean();
+    const lines = await TransitLine.find({ _id: { $in: ids }, aktif: { $ne: false } }, 'kode nama jenis operator warna tarif tarifSumber').lean();
     const per = new Map(lines.map((l) => [String(l._id), l]));
 
     res.json({
@@ -101,7 +102,7 @@ export function transitRouter() {
         for (const l of s.lines || []) {
           const k = per.get(String(l.line));
           if (k && !koridor.some((x) => x.kode === k.kode)) {
-            koridor.push({ kode: k.kode, nama: k.nama, jenis: k.jenis, warna: k.warna ?? null, tarif: k.tarif ?? null });
+            koridor.push({ kode: k.kode, nama: k.nama, jenis: k.jenis, warna: k.warna ?? null, ...tarifKoridor(k) });
           }
         }
         return { id: String(s._id), nama: s.nama, lokasi: keLatLng(s.lokasi), jarakM: Math.round(s.jarakM), koridor };

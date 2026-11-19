@@ -95,6 +95,7 @@ class TransitRingkasan extends StatelessWidget {
                   ),
                 ),
               ),
+              if (tarifPerkiraan(o)) const _LabelPerkiraan(),
             ],
           ),
         ),
@@ -493,6 +494,13 @@ class _BarisNaik extends StatelessWidget {
                                         ),
                                       ),
                               ),
+                              if (tarifPerkiraan(b)) ...[
+                                const TextSpan(text: ' '),
+                                const WidgetSpan(
+                                  alignment: PlaceholderAlignment.middle,
+                                  child: _LabelPerkiraan(),
+                                ),
+                              ],
                             ],
                           ),
                           style: sans(size: 14, color: _muted, height: 1.35),
@@ -649,7 +657,7 @@ class TransitPanduan extends StatelessWidget {
                         ),
                         const SizedBox(height: AppSizes.s1),
                         Text(
-                          '${formatDurasi(b['durasiS'] as num? ?? 0)}, ${teksTarif(b['tarif'])}',
+                          '${formatDurasi(b['durasiS'] as num? ?? 0)}, ${teksTarifRingkas(b)}',
                           style: sans(
                             size: 14,
                             color: AppColors.ink.withValues(alpha: 0.6),
@@ -722,6 +730,33 @@ class TransitPanduan extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+/// Penanda tarif yang bukan isian admin (tarif bawaan per jenis angkutan atau dari OSM).
+class _LabelPerkiraan extends StatelessWidget {
+  const _LabelPerkiraan();
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'Tarif bawaan sesuai jenis angkutan, belum dikonfirmasi admin',
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: AppColors.ink.withValues(alpha: 0.2)),
+        ),
+        child: Text(
+          'Tarif perkiraan',
+          style: sans(
+            size: 12,
+            weight: FontWeight.w600,
+            color: AppColors.ink.withValues(alpha: 0.65),
+          ),
+        ),
+      ),
     );
   }
 }

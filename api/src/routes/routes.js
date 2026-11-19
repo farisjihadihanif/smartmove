@@ -147,6 +147,7 @@ export function routesRouter(cfg) {
       transfer: naik.length - 1,
       tarif, // null = ada koridor yang tarifnya belum diisi; jangan dianggap 0
       tarifTeks: formatTarif(tarif),
+      tarifPerkiraan: tarif !== null && naik.some((n) => n.tarifPerkiraan),
       perkiraan: jalan.some((b) => b.perkiraan),
       bagian,
     };

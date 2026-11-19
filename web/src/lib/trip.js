@@ -1,6 +1,6 @@
 // Helper Trip Planner (T-109). Sama dengan mobile/lib/trip.dart – ubah bersamaan.
 import { formatDurasi, formatJarak } from './navigasi.js'
-import { teksTarif } from './transit.js'
+import { teksTarifRingkas } from './transit.js'
 import { hariWib, jamWib } from './wib.js'
 
 /** Moda rencana (API: driving | motorcycle | walking | transit). */
@@ -46,7 +46,7 @@ export function teksRingkasan(r, moda) {
   const bagian = []
   if (r.durasiS !== undefined) bagian.push(formatDurasi(r.durasiS))
   if (r.jarakM !== undefined) bagian.push(formatJarak(r.jarakM))
-  if (moda === 'transit') bagian.push(teksTarif(r.tarif ?? null))
+  if (moda === 'transit') bagian.push(teksTarifRingkas(r))
   return bagian.join(' · ')
 }
 

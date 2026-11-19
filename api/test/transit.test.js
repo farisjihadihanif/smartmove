@@ -343,6 +343,7 @@ describe('imporTransit', () => {
     assert.equal(k1.osmId, 'relation/100');
     assert.equal(k1.tarif, null);
     assert.equal((await TransitLine.findOne({ kode: 'ANGKOT-64' })).tarif, 6000);
+    assert.equal((await TransitLine.findOne({ kode: 'ANGKOT-64' })).tarifSumber, 'osm');
     const glugur = await TransitStop.findOne({ osmId: 'node/2' }).lean();
     assert.equal(glugur.sumber, 'osm');
     assert.equal(glugur.lines.length, 2); // dilewati K1 pergi & pulang
@@ -431,7 +432,9 @@ describe('GET /transit', () => {
         ['TMD-K1-2', 'bus', 3],
       ],
     );
-    assert.equal(res.body.items[1].tarif, null);
+    // Tarif kosong → bawaan bus listrik (Kepwal 550/16.K), ditandai perkiraan.
+    assert.equal(res.body.items[1].tarif, 5000);
+    assert.equal(res.body.items[1].tarifPerkiraan, true);
     assert.ok(res.body.items[1].diperbaruiPada);
     assert.equal(res.body.items[1].osmId, undefined);
 
