@@ -2,6 +2,7 @@ import express from 'express';
 import Event from '../models/Event.js';
 import PointLedger from '../models/PointLedger.js';
 import Trip from '../models/Trip.js';
+import { eventPublik } from '../services/campaign.js';
 
 // WIB = UTC+7, tanpa musim panas.
 const WIB_MS = 7 * 60 * 60 * 1000;
@@ -35,16 +36,6 @@ function awalBulanWib(now) {
   const { tahun, bulan } = jamWib(now);
   return new Date(Date.UTC(tahun, bulan, 1) - WIB_MS);
 }
-
-const eventPublik = (e) => ({
-  id: e.id,
-  judul: e.judul,
-  isi: e.isi,
-  jenis: e.jenis,
-  mulai: e.mulai,
-  selesai: e.selesai,
-  lokasi: e.lokasi ?? null,
-});
 
 const LABEL_POIN = {
   pembayaran: 'pembayaran',
@@ -141,7 +132,7 @@ export function homeRouter(cfg) {
         waktuServer: now.toISOString(),
       },
       poin,
-      events: aktif.map(eventPublik),
+      events: aktif.map((e) => eventPublik(e)),
       notifikasi: [...depan, ...lalu].slice(0, MAKS_NOTIF),
     });
   });
