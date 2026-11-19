@@ -54,6 +54,7 @@ async function main() {
   if (r.koridorTanpaHalte) console.log(`Koridor tanpa halte di OSM (perlu dilengkapi admin): ${r.koridorTanpaHalte}`);
   if (r.hilangDariOsm) console.log(`Koridor OSM lama yang tidak ada lagi di OSM (tidak dihapus): ${r.hilangDariOsm}`);
   for (const d of r.dilewati) console.log(`Dilewati ${d.osmId} "${d.nama}": ${d.alasan}`);
+  for (const c of hasil.catatan) console.log(`Catatan ${c.osmId} "${c.nama}": ${c.pesan}`);
 
   const [koridor, halte] = await Promise.all([
     TransitLine.countDocuments({ sumber: 'osm' }),

@@ -43,34 +43,127 @@ export function bacaTarif(v) {
   return n > 0 && n <= 1_000_000 ? n : undefined;
 }
 
+// Jarak kira-kira (meter) dua titik [lng, lat] di sekitar Medan.
+const meter = (a, b) => Math.hypot((a[0] - b[0]) * 111130, (a[1] - b[1]) * 110574);
+const panjang = (g) => g.reduce((t, p, i) => (i ? t + meter(g[i - 1], p) : 0), 0);
+
+export const CELAH_MAKS = 1500; // celah antar-potongan yang masih disambung garis lurus
+const UJUNG_SAMA = 300; // garis dianggap kembali ke awal / dua halte dianggap sama tempat
+
 // Rangkai geometri way anggota relasi menjadi satu garis [lng, lat].
-// Arah tiap way disesuaikan dengan ujung garis sebelumnya.
-export function rangkaiJalur(segmen) {
-  let out = [];
-  let jumlahWay = 0;
+// 1. Way berurutan yang ujungnya bersambung → satu rantai (arah way disesuaikan;
+//    rantai berisi satu way boleh dibalik).
+// 2. Rantai yang ujungnya persis bertemu digabung, termasuk potongan yang di OSM
+//    tercatat di urutan lain (mis. way penutup celah yang ditaruh di akhir relasi).
+// 3. Sisa rantai disambung berurutan bila celahnya ≤ CELAH_MAKS; potongan yang butuh
+//    lompatan lebih jauh dibuang (yang dipertahankan: kelompok terpanjang).
+// Hasil `{ garis, dibuangM, celahM }`: panjang potongan dibuang & total celah disambung.
+export function susunJalur(segmen) {
+  const rantai = [];
   for (const seg of segmen) {
     if (seg.length < 2) continue;
-    jumlahWay++;
-    if (!out.length) {
-      out = seg.slice();
-      continue;
+    const cur = rantai.at(-1);
+    if (cur) {
+      const akhir = cur.g.at(-1);
+      const balik = seg.slice().reverse();
+      if (sama(akhir, seg[0]) || sama(akhir, balik[0])) {
+        cur.g.push(...(sama(akhir, seg[0]) ? seg : balik).slice(1));
+        cur.way++;
+        continue;
+      }
+      if (cur.way === 1 && (sama(cur.g[0], seg[0]) || sama(cur.g[0], balik[0]))) {
+        cur.g.reverse(); // way pertama ternyata terbalik
+        cur.g.push(...(sama(cur.g.at(-1), seg[0]) ? seg : balik).slice(1));
+        cur.way++;
+        continue;
+      }
     }
-    const awal = out[0];
-    const akhir = out[out.length - 1];
-    const balik = seg.slice().reverse();
-    if (sama(akhir, seg[0])) out.push(...seg.slice(1));
-    else if (sama(akhir, balik[0])) out.push(...balik.slice(1));
-    else if (jumlahWay === 2 && (sama(awal, seg[0]) || sama(awal, balik[0]))) {
-      // way pertama ternyata terbalik
-      out.reverse();
-      out.push(...(sama(awal, seg[0]) ? seg : balik).slice(1));
-    } else {
-      // ada celah: pilih arah yang ujungnya paling dekat
-      const d = (p) => (p[0] - akhir[0]) ** 2 + (p[1] - akhir[1]) ** 2;
-      out.push(...(d(seg[0]) <= d(balik[0]) ? seg : balik));
+    rantai.push({ g: seg.slice(), way: 1, urut: rantai.length });
+  }
+  if (!rantai.length) return { garis: [], dibuangM: 0, celahM: 0 };
+
+  // Gabung rantai yang ujungnya persis bertemu. Rantai hanya ditempel ke rantai yang
+  // muncul lebih awal di relasi, supaya rute melingkar (ujung = awal) tidak berputar.
+  for (let ubah = true; ubah; ) {
+    ubah = false;
+    for (let i = 0; i < rantai.length && !ubah; i++) {
+      for (let j = 0; j < rantai.length && !ubah; j++) {
+        const A = rantai[i];
+        const B = rantai[j];
+        if (B.urut <= A.urut) continue;
+        let tempel = null;
+        if (sama(A.g.at(-1), B.g[0])) tempel = B.g;
+        else if (B.way === 1 && sama(A.g.at(-1), B.g.at(-1))) tempel = B.g.slice().reverse();
+        if (!tempel) continue;
+        A.g.push(...tempel.slice(1));
+        A.way += B.way;
+        rantai.splice(j, 1);
+        ubah = true;
+      }
     }
   }
-  return out.filter((p, i) => i === 0 || !sama(p, out[i - 1]));
+
+  // Sambung sisa rantai berurutan selama celahnya wajar.
+  const kelompok = [];
+  let cur = null;
+  for (const r of rantai) {
+    if (!cur) {
+      cur = { g: r.g.slice(), celah: 0 };
+      continue;
+    }
+    const akhir = cur.g.at(-1);
+    // Rantai satu way: pilih ujung terdekat. Rantai panjang hanya dibalik bila arah
+    // aslinya tak tersambung tapi arah baliknya tersambung (way tercatat terbalik).
+    const maju = meter(akhir, r.g[0]);
+    const mundur = meter(akhir, r.g.at(-1));
+    const balik = r.way === 1 ? mundur < maju : maju > CELAH_MAKS && mundur <= CELAH_MAKS;
+    const g = balik ? r.g.slice().reverse() : r.g;
+    const d = meter(akhir, g[0]);
+    if (d <= CELAH_MAKS) {
+      cur.g.push(...g);
+      cur.celah += d;
+    } else {
+      kelompok.push(cur);
+      cur = { g: g.slice(), celah: 0 };
+    }
+  }
+  kelompok.push(cur);
+  for (const k of kelompok) k.panjang = panjang(k.g);
+  const utama = kelompok.reduce((a, b) => (b.panjang > a.panjang ? b : a));
+  const garis = utama.g.filter((p, i) => i === 0 || !sama(p, utama.g[i - 1]));
+  const dibuangM = kelompok.reduce((t, k) => (k === utama ? t : t + k.panjang), 0);
+  return { garis, dibuangM: Math.round(dibuangM), celahM: Math.round(utama.celah) };
+}
+
+export const rangkaiJalur = (segmen) => susunJalur(segmen).garis;
+
+// "K1M : Pinang Baris → Lapangan Merdeka" → "K1M : Lapangan Merdeka → Pinang Baris".
+export function namaBalik(nama) {
+  const m = nama.match(/^(?:(.*?:)\s*)?(.+?)\s*(→|–|-)\s*(.+)$/);
+  if (!m) return `${nama} (arah pulang)`;
+  const [, awalan, dari, panah, ke] = m;
+  return `${awalan ? `${awalan} ` : ''}${ke} ${panah} ${dari}`;
+}
+
+// Relasi pulang-pergi dalam satu garis (kembali ke titik awal) yang haltenya hanya
+// sampai tujuan → dipisah di halte terakhir jadi arah pergi dan arah pulang, supaya
+// perjalanan balik tetap bisa naik di halte tujuan. `null` bila tidak perlu dipisah.
+export function pisahPulangPergi(garis, lokasiHalte) {
+  if (garis.length < 4 || lokasiHalte.length < 2) return null;
+  const pertama = lokasiHalte[0];
+  const terakhir = lokasiHalte.at(-1);
+  if (meter(garis[0], garis.at(-1)) > UJUNG_SAMA) return null; // bukan pulang-pergi
+  if (meter(pertama, terakhir) <= UJUNG_SAMA) return null; // halte sudah mencakup jalan pulang
+  // Titik putar = titik terdekat ke halte terakhir di lintasan PERTAMA yang lewat ≤ 200 m.
+  let k = -1;
+  for (let i = 0; i < garis.length; i++) {
+    const d = meter(garis[i], terakhir);
+    if (d <= 200) {
+      if (k < 0 || d < meter(garis[k], terakhir)) k = i;
+    } else if (k >= 0) break;
+  }
+  if (k <= 0 || k >= garis.length - 1) return null;
+  return { pergi: garis.slice(0, k + 1), pulang: garis.slice(k) };
 }
 
 function namaHalte(tags = {}) {
@@ -105,8 +198,10 @@ function namaKoridor(t, id) {
 }
 
 /**
- * @returns {{ koridor: object[], halte: Map<string, {osmId, nama, lokasi}>, dilewati: {osmId, nama, alasan}[] }}
- * `koridor[].halte` = daftar osmId halte berurutan.
+ * @returns {{ koridor: object[], halte: Map<string, {osmId, nama, lokasi}>,
+ *   dilewati: {osmId, nama, alasan}[], catatan: {osmId, nama, pesan}[] }}
+ * `koridor[].halte` = daftar osmId halte berurutan. Relasi pulang-pergi yang dipisah
+ * menghasilkan dua koridor: `relation/<id>` (pergi) dan `relation/<id>#pulang`.
  */
 export function olahOverpass(data) {
   const elements = Array.isArray(data?.elements) ? data.elements : [];
@@ -117,6 +212,7 @@ export function olahOverpass(data) {
   const koridor = [];
   const halte = new Map();
   const dilewati = [];
+  const catatan = []; // peringatan kualitas data (bukan alasan melewati relasi)
 
   for (const rel of relasi) {
     const t = rel.tags || {};
@@ -132,7 +228,9 @@ export function olahOverpass(data) {
     const segmen = (rel.members || [])
       .filter((m) => m.type === 'way' && Array.isArray(m.geometry) && !/platform/.test(m.role || ''))
       .map((m) => m.geometry.filter((g) => g && Number.isFinite(g.lat)).map((g) => titik(g.lon, g.lat)));
-    const garis = rangkaiJalur(segmen);
+    const { garis, dibuangM, celahM } = susunJalur(segmen);
+    if (dibuangM) catatan.push({ osmId, nama, pesan: `potongan jalur ${dibuangM} m tidak tersambung, dibuang` });
+    if (celahM > 200) catatan.push({ osmId, nama, pesan: `celah jalur ${celahM} m disambung garis lurus` });
 
     const idHalte = anggotaHalte(rel, nodes);
     const lokasiHalte = idHalte.map((id) => {
@@ -164,22 +262,35 @@ export function olahOverpass(data) {
       urutHalte.push(sid);
     });
 
-    koridor.push({
-      osmId,
+    const dasar = {
       ref: bersih(t.ref, 30),
-      nama,
       jenis,
       operator: bersih(t.operator) || bersih(t.network),
       warna: warna(t.colour),
       jamOperasi: bersih(t.opening_hours, 100),
       tarif: bacaTarif(t.charge),
-      jalur: garis.length >= 2 ? { type: 'LineString', coordinates: garis } : undefined,
       jaringan: [t.network, t.operator, t.name].filter(Boolean).join(' '),
-      halte: urutHalte,
-    });
+    };
+    const jalur = (g) => (g.length >= 2 ? { type: 'LineString', coordinates: g } : undefined);
+    const lokasiUrut = urutHalte.map((sid) => halte.get(sid).lokasi.coordinates);
+    const pisah = pisahPulangPergi(garis, lokasiUrut);
+    if (pisah) {
+      koridor.push({ ...dasar, osmId, nama, jalur: jalur(pisah.pergi), halte: urutHalte });
+      const awalDekat = meter(pisah.pulang.at(-1), lokasiUrut[0]) <= UJUNG_SAMA;
+      koridor.push({
+        ...dasar,
+        osmId: `${osmId}#pulang`,
+        nama: namaBalik(nama),
+        jalur: jalur(pisah.pulang),
+        halte: awalDekat ? [urutHalte.at(-1), urutHalte[0]] : [urutHalte.at(-1)],
+      });
+      catatan.push({ osmId, nama, pesan: 'relasi pulang-pergi dipisah jadi arah pergi dan pulang' });
+    } else {
+      koridor.push({ ...dasar, osmId, nama, jalur: jalur(garis), halte: urutHalte });
+    }
   }
 
-  return { koridor, halte, dilewati };
+  return { koridor, halte, dilewati, catatan };
 }
 
 // Kode koridor yang mudah dibaca: TMD-K1, RAILINK-…, BUS-12, ANGKOT-64.
@@ -192,7 +303,8 @@ export function buatKode(k, terpakai) {
   let awalan = { bus: 'BUS', kereta: 'KA', angkot: 'ANGKOT' }[k.jenis];
   if (/trans\s*metro\s*deli/i.test(k.jaringan || '')) awalan = 'TMD';
   else if (/railink/i.test(k.jaringan || '')) awalan = 'RAILINK';
-  const dasar = ref ? `${awalan}-${ref}` : `OSM-${k.osmId.split('/')[1]}`;
+  const id = k.osmId.split('/')[1].replace('#pulang', '-P');
+  const dasar = ref ? `${awalan}-${ref}` : `OSM-${id}`;
   let kode = dasar;
   for (let i = 2; terpakai.has(kode); i++) kode = `${dasar}-${i}`;
   terpakai.add(kode);

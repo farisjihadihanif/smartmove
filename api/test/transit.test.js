@@ -7,7 +7,15 @@ import { createApp } from '../src/app.js';
 import TransitLine from '../src/models/TransitLine.js';
 import TransitStop from '../src/models/TransitStop.js';
 import { createOverpass, kueriTransit } from '../src/services/overpass.js';
-import { olahOverpass, rangkaiJalur, buatKode, bacaTarif } from '../src/services/osmTransit.js';
+import {
+  olahOverpass,
+  rangkaiJalur,
+  susunJalur,
+  pisahPulangPergi,
+  namaBalik,
+  buatKode,
+  bacaTarif,
+} from '../src/services/osmTransit.js';
 import { imporTransit } from '../src/services/transitImport.js';
 
 process.env.NODE_ENV = 'test';
@@ -134,6 +142,93 @@ describe('olahOverpass', () => {
         [3, 3],
       ],
     );
+  });
+
+  // Relasi TMD-K1M bergaya data asli: pergi (w1, w2) + pulang (w3) dalam satu relasi,
+  // way penutup celah w1–w2 tercatat paling akhir. Koordinat [lng, lat].
+  const W1 = [[98.6, 3.59], [98.62, 3.59]];
+  const W2 = [[98.63, 3.59], [98.65, 3.59]];
+  const W3 = [[98.65, 3.59], [98.65, 3.592], [98.6, 3.592], [98.6, 3.59]];
+  const PENUTUP = [[98.62, 3.59], [98.63, 3.59]];
+
+  test('susunJalur: way penutup celah di akhir relasi disisipkan, rute melingkar tidak berputar', () => {
+    const r = susunJalur([W1, W2, W3, PENUTUP]);
+    assert.deepEqual(r.garis, [
+      [98.6, 3.59], [98.62, 3.59], [98.63, 3.59], [98.65, 3.59],
+      [98.65, 3.592], [98.6, 3.592], [98.6, 3.59],
+    ]);
+    assert.equal(r.dibuangM, 0);
+    assert.equal(r.celahM, 0);
+  });
+
+  test('susunJalur: celah ≤ 1,5 km disambung, potongan yang butuh lompatan jauh dibuang', () => {
+    const celah = susunJalur([W1, W2]); // celah ±1,1 km
+    assert.equal(celah.garis.length, 4);
+    assert.ok(Math.abs(celah.celahM - 1111) < 5, `celah ${celah.celahM}`);
+
+    const jauh = susunJalur([W1, [[98.7, 3.59], [98.701, 3.59]]]); // lompatan ±8,9 km
+    assert.deepEqual(jauh.garis, W1);
+    assert.ok(Math.abs(jauh.dibuangM - 111) < 5, `dibuang ${jauh.dibuangM}`);
+  });
+
+  test('susunJalur: rantai yang tercatat terbalik dibalik bila hanya itu yang tersambung', () => {
+    const r = susunJalur([
+      [[98.6, 3.59], [98.61, 3.59]],
+      [[98.64, 3.59], [98.63, 3.59]],
+      [[98.63, 3.59], [98.62, 3.59]],
+    ]);
+    assert.deepEqual(r.garis.map((p) => p[0]), [98.6, 98.61, 98.62, 98.63, 98.64]);
+  });
+
+  test('pisahPulangPergi & namaBalik', () => {
+    const garis = susunJalur([W1, PENUTUP, W2, W3]).garis;
+    const p = pisahPulangPergi(garis, [[98.6, 3.59], [98.65, 3.59]]);
+    assert.deepEqual(p.pergi.at(-1), [98.65, 3.59]);
+    assert.deepEqual(p.pulang[0], [98.65, 3.59]);
+    assert.deepEqual(p.pulang.at(-1), [98.6, 3.59]);
+    // halte sudah sampai awal lagi / garis tidak kembali → tidak dipisah
+    assert.equal(pisahPulangPergi(garis, [[98.6, 3.59], [98.65, 3.59], [98.6, 3.5901]]), null);
+    assert.equal(pisahPulangPergi([...W1, ...W2], [[98.6, 3.59], [98.65, 3.59]]), null);
+
+    assert.equal(namaBalik('K1M : Pinang Baris → Lapangan Merdeka'), 'K1M : Lapangan Merdeka → Pinang Baris');
+    assert.equal(namaBalik('Amplas – Belawan'), 'Belawan – Amplas');
+    assert.equal(namaBalik('Rute 9'), 'Rute 9 (arah pulang)');
+  });
+
+  test('relasi pulang-pergi dengan halte hanya sampai tujuan → koridor pergi & pulang', () => {
+    const way = (ref, pts) => ({ type: 'way', ref, role: '', geometry: pts.map(([lon, lat]) => ({ lat, lon })) });
+    const h = olahOverpass({
+      elements: [
+        {
+          type: 'relation',
+          id: 77,
+          tags: { type: 'route', route: 'bus', ref: 'K1M', name: 'K1M : Pinang Baris → Lapangan Merdeka', network: 'Trans Metro Deli' },
+          members: [
+            { type: 'node', ref: 1, role: 'stop' },
+            { type: 'node', ref: 2, role: 'stop' },
+            way(1, W1),
+            way(2, W2),
+            way(3, W3),
+            way(4, PENUTUP),
+          ],
+        },
+        node(1, 3.59, 98.6, { name: 'Pinang Baris', public_transport: 'stop_position' }),
+        node(2, 3.59, 98.65, { name: 'Lapangan Merdeka', public_transport: 'stop_position' }),
+      ],
+    });
+    assert.deepEqual(
+      h.koridor.map((k) => [k.osmId, k.nama, k.halte]),
+      [
+        ['relation/77', 'K1M : Pinang Baris → Lapangan Merdeka', ['node/1', 'node/2']],
+        ['relation/77#pulang', 'K1M : Lapangan Merdeka → Pinang Baris', ['node/2', 'node/1']],
+      ],
+    );
+    assert.deepEqual(h.koridor[0].jalur.coordinates.at(-1), [98.65, 3.59]);
+    assert.deepEqual(h.koridor[1].jalur.coordinates.at(-1), [98.6, 3.59]);
+    assert.ok(h.catatan.some((c) => c.osmId === 'relation/77' && /dipisah/.test(c.pesan)));
+    const pakai = new Set();
+    assert.deepEqual(h.koridor.map((k) => buatKode(k, pakai)), ['TMD-K1M', 'TMD-K1M-2']);
+    assert.equal(buatKode({ jenis: 'bus', osmId: 'relation/77#pulang' }, pakai), 'OSM-77-P');
   });
 
   test('route=bus dengan network "Angkot Kota Medan" → jenis angkot', () => {
