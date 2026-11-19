@@ -3,12 +3,14 @@ import 'dart:async';
 import 'package:material_ui/material_ui.dart';
 
 import '../../api.dart';
+import '../../pembayaran.dart';
 import '../../state.dart';
 import '../../theme.dart';
 import '../../trip.dart';
 import '../../widgets/widgets.dart';
 import '../../wib.dart';
 import '../navigation/navigation_screen.dart';
+import '../payment/payment_screen.dart';
 import 'trip_form.dart';
 
 /// Trip Planner (DESIGN §3, gaya kartu Trip Planner mockup hal. 3): rencana
@@ -357,6 +359,25 @@ class _KartuMemuat extends StatelessWidget {
   );
 }
 
+/// Digital Payment untuk rencana ini (T-302): tiket (umum) atau parkir (mobil/motor).
+void _pesan(BuildContext context, Trip t) {
+  final q = pesananDariTrip(t);
+  if (q == null) return;
+  Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => PaymentScreen(
+        asal: q.asal,
+        tujuan: q.tujuan,
+        tanggal: q.tanggal,
+        jenis: q.jenis,
+      ),
+    ),
+  );
+}
+
+String _labelPesan(Trip t) =>
+    t.moda == ModaTrip.transit ? 'Pesan tiket' : 'Pesan parkir';
+
 /// Kartu gradasi: rencana terdekat, atau ajakan membuat rencana.
 class _Sorotan extends StatelessWidget {
   const _Sorotan({
@@ -469,6 +490,23 @@ class _Sorotan extends StatelessWidget {
                   label: 'Mulai navigasi',
                   onPressed: () => onMulai(t),
                 ),
+                if (pesananDariTrip(t) != null)
+                  OutlinedButton.icon(
+                    onPressed: () => _pesan(context, t),
+                    icon: const Icon(
+                      Icons.confirmation_number_outlined,
+                      size: 18,
+                    ),
+                    label: Text(_labelPesan(t)),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.white,
+                      side: BorderSide(
+                        color: AppColors.white.withValues(alpha: 0.6),
+                      ),
+                      minimumSize: const Size(0, AppSizes.touch),
+                      textStyle: sans(size: 15, weight: FontWeight.w600),
+                    ),
+                  ),
                 if (ringkas != null)
                   Text(
                     'Estimasi $ringkas',
@@ -746,6 +784,20 @@ class _ItemRencana extends StatelessWidget {
                         style: sans(
                           size: 13,
                           color: AppColors.ink.withValues(alpha: 0.65),
+                        ),
+                      ),
+                    if (pesananDariTrip(trip) != null)
+                      TextButton.icon(
+                        onPressed: () => _pesan(context, trip),
+                        icon: const Icon(
+                          Icons.confirmation_number_outlined,
+                          size: 18,
+                        ),
+                        label: Text(_labelPesan(trip)),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.inkViolet,
+                          minimumSize: const Size(0, AppSizes.touch),
+                          textStyle: sans(size: 13, weight: FontWeight.w600),
                         ),
                       ),
                   ],

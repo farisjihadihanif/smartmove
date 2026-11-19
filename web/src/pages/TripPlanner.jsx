@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
-import { CalendarClock, Navigation, Pencil, Plus, Trash2, X } from 'lucide-react'
+import { CalendarClock, Navigation, Pencil, Plus, Ticket, Trash2, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import EmptyState from '../components/EmptyState.jsx'
 import ErrorBanner from '../components/ErrorBanner.jsx'
@@ -9,6 +9,8 @@ import { IKON_MODA } from '../components/trip/ikonModa.js'
 import { api } from '../lib/api.js'
 import { useMediaQuery } from '../lib/useNotifications.js'
 import {
+  bisaDipesan,
+  tautanPesan,
   hitungMundur,
   jamTrip,
   kelompokkan,
@@ -306,6 +308,7 @@ function Sorotan({ trip, now, memuat, onBuat, desktop }) {
 
       <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3">
         <TombolNavigasi trip={trip} terang />
+        {bisaDipesan(trip) && <TombolPesan trip={trip} terang />}
         {ringkas && <span className={`text-sm font-semibold text-white/95 ${bayang}`}>Estimasi {ringkas}</span>}
       </div>
     </section>
@@ -345,6 +348,25 @@ function TombolNavigasi({ trip, terang = false }) {
     >
       <Navigation size={terang ? 18 : 16} aria-hidden="true" />
       Mulai navigasi
+    </Link>
+  )
+}
+
+/** Pesan tiket (umum) / parkir (mobil, motor) di Digital Payment. */
+function TombolPesan({ trip, terang = false }) {
+  const label = trip.moda === 'transit' ? 'Pesan tiket' : 'Pesan parkir'
+  return (
+    <Link
+      to={tautanPesan(trip)}
+      aria-label={terang ? undefined : `${label} ke ${trip.tujuan.nama}`}
+      className={
+        terang
+          ? 'flex min-h-touch items-center gap-2 rounded-full bg-white/20 px-4 text-[15px] font-semibold text-white ring-1 ring-white/50 transition hover:bg-white/30'
+          : 'flex min-h-touch items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-sm font-semibold text-ink-violet ring-1 ring-ink-violet/25 transition hover:bg-ink-violet/[0.06]'
+      }
+    >
+      <Ticket size={terang ? 18 : 16} aria-hidden="true" />
+      {label}
     </Link>
   )
 }
@@ -399,6 +421,7 @@ function ItemRencana({ trip, onUbah, onHapus, diubah, lewat = false, now }) {
         ) : (
           <div className="mt-3 flex items-center gap-1">
             <TombolNavigasi trip={trip} />
+            {!lewat && bisaDipesan(trip) && <TombolPesan trip={trip} />}
             <span className="flex-1" />
             <button
               type="button"

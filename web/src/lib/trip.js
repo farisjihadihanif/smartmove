@@ -81,6 +81,22 @@ export function kelompokkan(trips, now) {
 
 export const jamTrip = (t) => (t.berangkatPada ? jamWib(t.berangkatPada) : null)
 
+/** Moda yang bisa dipesankan: tiket (umum) atau parkir (mobil/motor). */
+export const bisaDipesan = (trip) => trip.moda !== 'walking'
+
+/** Tautan Digital Payment untuk memesan tiket/parkir rencana ini (T-302). */
+export function tautanPesan(trip) {
+  // Transportasi umum → tiket rute asal–tujuan; mobil/motor → parkir di tujuan.
+  const q =
+    trip.moda === 'transit'
+      ? new URLSearchParams({ asal: trip.asal.nama, tujuan: trip.tujuan.nama })
+      : new URLSearchParams({ asal: trip.tujuan.nama, jenis: 'parkir' })
+  if (trip.berangkatPada) {
+    q.set('tanggal', new Date(new Date(trip.berangkatPada).getTime() + 7 * 3600_000).toISOString().slice(0, 10))
+  }
+  return `/pembayaran?${q}`
+}
+
 /** Tautan Smart Navigation dengan asal, tujuan, dan moda rencana. */
 export function tautanNavigasi(trip) {
   const p = (l) => `${l.lat},${l.lng}`

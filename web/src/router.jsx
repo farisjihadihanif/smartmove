@@ -11,6 +11,9 @@ import UmpanBalik from './pages/kampanye/UmpanBalik.jsx'
 import LaluLintas from './pages/LaluLintas.jsx'
 import Navigasi from './pages/Navigasi.jsx'
 import NotFound from './pages/NotFound.jsx'
+import Pembayaran from './pages/Pembayaran.jsx'
+import RiwayatPembayaran from './pages/pembayaran/Riwayat.jsx'
+import StatusPembayaran from './pages/pembayaran/Status.jsx'
 import Segera from './pages/Segera.jsx'
 import Splash from './pages/Splash.jsx'
 import TripPlanner from './pages/TripPlanner.jsx'
@@ -36,7 +39,8 @@ export const router = createBrowserRouter([
   // Terbuka untuk tamu (ARCHITECTURE §4) …
   { path: 'navigasi', element: <Navigasi />, errorElement: <NotFound /> },
   { path: 'lalu-lintas', element: <LaluLintas />, errorElement: <NotFound /> },
-  { path: 'pembayaran', element: <Segera title="Digital Payment" /> },
+  // Katalog & estimasi biaya terbuka untuk tamu; membayar meminta masuk.
+  { path: 'pembayaran', element: <Pembayaran />, errorElement: <NotFound /> },
   { path: 'kampanye', element: <Kampanye />, errorElement: <NotFound /> },
   { path: 'kampanye/tips', element: <Tips /> },
   { path: 'kampanye/poster', element: <Poster /> },
@@ -48,6 +52,8 @@ export const router = createBrowserRouter([
     errorElement: <NotFound />,
     children: [
       { path: 'trip-planner', element: <TripPlanner /> },
+      { path: 'pembayaran/riwayat', element: <RiwayatPembayaran /> },
+      { path: 'pembayaran/:orderId', element: <StatusPembayaran /> },
       { path: 'rewards', element: <Segera title="Rewards" /> },
       { path: 'akun', element: <Segera title="Akun" account /> },
     ],
