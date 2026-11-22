@@ -10,6 +10,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../api.dart';
+import '../../i18n.dart';
 import '../../lalulintas.dart';
 import '../../navigasi.dart';
 import '../../state.dart';
@@ -58,12 +59,13 @@ Future<LokasiHasil> lokasiPerangkat() async {
 Future<void> bagikanSistem(String teks, String judul) =>
     SharePlus.instance.share(ShareParams(text: teks, subject: judul));
 
-const _teksLokasi = {
-  'mencari': 'Mencari lokasimu…',
-  'ditolak':
-      'Izin lokasi ditolak. Ketuk Ganti, lalu cari alamat atau ketuk peta.',
-  'luar': 'Lokasimu di luar Medan. Ketuk Ganti untuk memilih titik asal.',
-  'tidak': 'Ketuk Ganti, lalu cari alamat atau ketuk peta.',
+Map<String, String> get _teksLokasi => {
+  'mencari': tr('Mencari lokasimu…'),
+  'ditolak': tr(
+    'Izin lokasi ditolak. Ketuk Ganti, lalu cari alamat atau ketuk peta.',
+  ),
+  'luar': tr('Lokasimu di luar Medan. Ketuk Ganti untuk memilih titik asal.'),
+  'tidak': tr('Ketuk Ganti, lalu cari alamat atau ketuk peta.'),
 };
 
 /// Smart Navigation (mockup hal. 4, PRD §6.1): cari tujuan, pilih moda, rute di
@@ -221,7 +223,11 @@ class NavigationScreenState extends State<NavigationScreen> {
     _set(() {
       lokasiStatus = hasil.status;
       if (hasil.lokasi != null && dari == null) {
-        dari = Tempat(nama: 'Lokasi kamu', lokasi: hasil.lokasi!, saya: true);
+        dari = Tempat(
+          nama: tr('Lokasi kamu'),
+          lokasi: hasil.lokasi!,
+          saya: true,
+        );
       }
     });
     _hitungRute();
@@ -259,7 +265,7 @@ class NavigationScreenState extends State<NavigationScreen> {
       final t = Tempat.fromJson((r as Map)['tempat'] as Map);
       return Tempat(nama: t.nama, alamat: t.alamat, lokasi: p);
     } catch (_) {
-      return Tempat(nama: 'Titik di peta', lokasi: p);
+      return Tempat(nama: tr('Titik di peta'), lokasi: p);
     }
   }
 
@@ -272,7 +278,7 @@ class NavigationScreenState extends State<NavigationScreen> {
         () => _hasil = (
           status: 'galat',
           items: const [],
-          error: 'Ketik minimal 2 huruf.',
+          error: tr('Ketik minimal 2 huruf.'),
         ),
       );
       return;
@@ -319,7 +325,7 @@ class NavigationScreenState extends State<NavigationScreen> {
 
   Future<void> _ketukPeta(TapPosition _, LatLng p) async {
     if (!dalamWilayah(p)) {
-      _kabari('SmartMove baru melayani Medan dan sekitarnya.');
+      _kabari(tr('SmartMove baru melayani Medan dan sekitarnya.'));
       return;
     }
     _set(() => _hasil = null);
@@ -460,7 +466,9 @@ class NavigationScreenState extends State<NavigationScreen> {
     _aturTraffic(lapisan.contains('traffic'));
     if (baru.contains('traffic')) {
       _kabari(
-        'Lapisan Traffic aktif: garis berwarna = kondisi jalan utama, lingkaran = laporan warga.',
+        tr(
+          'Lapisan Traffic aktif: garis berwarna = kondisi jalan utama, lingkaran = laporan warga.',
+        ),
       );
     }
     if (lapisan.contains('street')) {
@@ -506,11 +514,11 @@ class NavigationScreenState extends State<NavigationScreen> {
         ? teksBagikanTransit(dari: a, ke: b, opsi: o)
         : teksBagikan(dari: a, ke: b, mode: mode, rute: r);
     try {
-      await widget.share(teks, 'Rute ke ${b.nama}');
+      await widget.share(teks, tr('Rute ke {0}', [b.nama]));
     } catch (_) {
       // Lembar bagikan tidak tersedia: salin saja.
       await Clipboard.setData(ClipboardData(text: teks));
-      _kabari('Rute disalin. Tempel di chat untuk membagikannya.');
+      _kabari(tr('Rute disalin. Tempel di chat untuk membagikannya.'));
     }
   }
 
@@ -558,7 +566,7 @@ class NavigationScreenState extends State<NavigationScreen> {
             child: BottomActionBar(
               actions: [
                 BarAction(
-                  label: 'Rute',
+                  label: tr('Rute'),
                   icon: Icons.route_rounded,
                   onPressed: adaRute
                       ? () {
@@ -571,12 +579,12 @@ class NavigationScreenState extends State<NavigationScreen> {
                       : null,
                 ),
                 BarAction(
-                  label: 'Play',
+                  label: tr('Play'),
                   icon: Icons.play_arrow_rounded,
                   onPressed: adaRute ? () => setPlay(0) : null,
                 ),
                 BarAction(
-                  label: 'Share',
+                  label: tr('Share'),
                   icon: Icons.share_outlined,
                   onPressed: adaRute ? _bagikan : null,
                 ),
@@ -589,7 +597,7 @@ class NavigationScreenState extends State<NavigationScreen> {
               title: 'Smart Navigation',
               leading: canPop
                   ? IconButton(
-                      tooltip: 'Kembali',
+                      tooltip: tr('Kembali'),
                       onPressed: () => Navigator.of(context).pop(),
                       icon: const Icon(Icons.arrow_back_rounded),
                     )
@@ -602,29 +610,31 @@ class NavigationScreenState extends State<NavigationScreen> {
                     if (v.isEmpty) setState(() => _hasil = null);
                   },
                   hint: target == 'dari'
-                      ? 'Cari titik asal'
-                      : 'Telusuri di sini',
-                  label: target == 'dari' ? 'Cari titik asal' : 'Cari tujuan',
+                      ? tr('Cari titik asal')
+                      : tr('Telusuri di sini'),
+                  label: target == 'dari'
+                      ? tr('Cari titik asal')
+                      : tr('Cari tujuan'),
                 ),
                 PillToggle<String>(
                   multiple: true,
                   selected: _nilaiLapisan,
                   onChanged: _ubahLapisan,
-                  options: const [
+                  options: [
                     PillOption(
                       'traffic',
-                      'Traffic',
+                      tr('Traffic'),
                       icon: Icons.traffic_rounded,
                     ),
                     PillOption(
                       'transit',
-                      'Transportasi umum',
-                      short: 'Umum',
+                      tr('Transportasi umum'),
+                      short: tr('Umum'),
                       icon: Icons.directions_bus_rounded,
                     ),
                     PillOption(
                       'street',
-                      'Street view',
+                      tr('Street view'),
                       icon: Icons.photo_camera_outlined,
                     ),
                   ],
@@ -877,13 +887,13 @@ class NavigationScreenState extends State<NavigationScreen> {
             children: [
               Expanded(
                 child: Text(
-                  'Pilih titik asal: cari alamat di atas atau ketuk peta.',
+                  tr('Pilih titik asal: cari alamat di atas atau ketuk peta.'),
                   style: sans(size: 14, height: 1.35),
                 ),
               ),
               TextButton(
                 onPressed: () => _gantiTarget('ke'),
-                child: const Text('Batal'),
+                child: Text(tr('Batal')),
               ),
             ],
           ),
@@ -893,11 +903,11 @@ class NavigationScreenState extends State<NavigationScreen> {
       if (ke == null) ...[
         Semantics(
           header: true,
-          child: Text('Mau ke mana?', style: titleSerif(size: 26)),
+          child: Text(tr('Mau ke mana?'), style: titleSerif(size: 26)),
         ),
         const SizedBox(height: AppSizes.s1),
         Text(
-          'Cari tempat di kolom atas atau ketuk peta untuk memilih tujuan.',
+          tr('Cari tempat di kolom atas atau ketuk peta untuk memilih tujuan.'),
           style: sans(size: 15, color: _muted, height: 1.45),
         ),
       ] else if (_umum)
@@ -906,7 +916,7 @@ class NavigationScreenState extends State<NavigationScreen> {
         ErrorBanner(error: _galatRute, onRetry: _hitungRute)
       else if (r == null || _memuatRute)
         Semantics(
-          label: 'Menghitung rute',
+          label: tr('Menghitung rute'),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -937,7 +947,7 @@ class NavigationScreenState extends State<NavigationScreen> {
         ),
         const SizedBox(height: 6),
         Text(
-          'Perkiraan waktu tanpa macet.',
+          tr('Perkiraan waktu tanpa macet.'),
           style: sans(size: 14, color: _muted),
         ),
       ],
@@ -976,12 +986,12 @@ class NavigationScreenState extends State<NavigationScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    '${_langkah.length} langkah',
+                    tr('{0} langkah', [_langkah.length]),
                     style: sans(size: 15, weight: FontWeight.w700),
                   ),
                 ),
                 Text(
-                  buka ? 'Sembunyikan' : 'Lihat semua',
+                  buka ? tr('Sembunyikan') : tr('Lihat semua'),
                   style: sans(
                     size: 14,
                     weight: FontWeight.w600,
@@ -1061,9 +1071,9 @@ class NavigationScreenState extends State<NavigationScreen> {
             onPressed: () =>
                 _gantiTarget(target == key && key == 'dari' ? 'ke' : key),
             child: Semantics(
-              label: 'Ganti titik ${label.toLowerCase()}',
+              label: tr('Ganti titik {0}', [label.toLowerCase()]),
               excludeSemantics: true,
-              child: const Text('Ganti'),
+              child: Text(tr('Ganti')),
             ),
           ),
         ],
@@ -1085,7 +1095,7 @@ class NavigationScreenState extends State<NavigationScreen> {
           children: [
             baris(
               key: 'dari',
-              label: 'Dari',
+              label: tr('Dari'),
               t: dari,
               kosong: _teksLokasi[lokasiStatus] ?? _teksLokasi['tidak']!,
               titik: Container(
@@ -1100,9 +1110,9 @@ class NavigationScreenState extends State<NavigationScreen> {
             ),
             baris(
               key: 'ke',
-              label: 'Ke',
+              label: tr('Ke'),
               t: ke,
-              kosong: 'Belum dipilih',
+              kosong: tr('Belum dipilih'),
               titik: Container(
                 width: 14,
                 height: 14,
@@ -1169,7 +1179,7 @@ class NavigationScreenState extends State<NavigationScreen> {
             child: Semantics(
               liveRegion: true,
               child: Text(
-                'Langkah ${i + 1} dari ${langkah.length}',
+                tr('Langkah {0} dari {1}', [i + 1, langkah.length]),
                 style: sans(size: 14, weight: FontWeight.w600, color: _muted),
               ),
             ),
@@ -1177,7 +1187,7 @@ class NavigationScreenState extends State<NavigationScreen> {
           TextButton.icon(
             onPressed: () => setPlay(null),
             icon: const Icon(Icons.close_rounded, size: 18),
-            label: const Text('Selesai'),
+            label: Text(tr('Selesai')),
           ),
         ],
       ),
@@ -1212,7 +1222,7 @@ class NavigationScreenState extends State<NavigationScreen> {
                   Padding(
                     padding: const EdgeInsets.only(top: AppSizes.s1),
                     child: Text(
-                      'Lalu ikuti jalan ${formatJarak(jarak)}',
+                      tr('Lalu ikuti jalan {0}', [formatJarak(jarak)]),
                       style: sans(size: 15, color: _muted),
                     ),
                   ),
@@ -1256,7 +1266,7 @@ class NavigationScreenState extends State<NavigationScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 8),
               ),
               icon: const Icon(Icons.chevron_left_rounded),
-              label: const Text('Sebelumnya'),
+              label: Text(tr('Sebelumnya')),
             ),
           ),
           const SizedBox(width: AppSizes.s3),
@@ -1272,7 +1282,7 @@ class NavigationScreenState extends State<NavigationScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(terakhir ? 'Selesai' : 'Berikutnya'),
+                  Text(terakhir ? tr('Selesai') : tr('Berikutnya')),
                   if (!terakhir) const Icon(Icons.chevron_right_rounded),
                 ],
               ),
@@ -1304,14 +1314,14 @@ class NavigationScreenState extends State<NavigationScreen> {
                 child: Image.network(
                   f['url'].toString(),
                   fit: BoxFit.cover,
-                  semanticLabel: 'Foto jalan sekitar titik ini',
+                  semanticLabel: tr('Foto jalan sekitar titik ini'),
                   loadingBuilder: (c, child, p) =>
                       p == null ? child : const _Tulang(),
                   errorBuilder: (c, e, s) => ColoredBox(
                     color: AppColors.search,
                     child: Center(
                       child: Text(
-                        'Foto belum bisa dimuat',
+                        tr('Foto belum bisa dimuat'),
                         style: sans(size: 14, color: _muted),
                       ),
                     ),
@@ -1324,7 +1334,7 @@ class NavigationScreenState extends State<NavigationScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    '±${formatJarak(f['jarakM'] as num? ?? 0)} dari titik, ${tanggalFoto(f['diambil']?.toString())}\n'
+                    '${tr('±{0} dari titik, {1}', [formatJarak(f['jarakM'] as num? ?? 0), tanggalFoto(f['diambil']?.toString())])}\n'
                     '© Mapillary${f['pengunggah'] != null ? ', ${f['pengunggah']}' : ''} (CC BY-SA)',
                     style: sans(size: 12, color: _muted, height: 1.35),
                   ),
@@ -1336,7 +1346,7 @@ class NavigationScreenState extends State<NavigationScreen> {
                   ),
                   iconAlignment: IconAlignment.end,
                   icon: const Icon(Icons.open_in_new_rounded, size: 16),
-                  label: const Text('Buka'),
+                  label: Text(tr('Buka')),
                 ),
               ],
             ),
@@ -1358,11 +1368,11 @@ class NavigationScreenState extends State<NavigationScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Belum ada foto jalan di sini',
+                      tr('Belum ada foto jalan di sini'),
                       style: sans(size: 15, weight: FontWeight.w600),
                     ),
                     Text(
-                      'Coba titik lain, mis. langkah berikutnya saat Play.',
+                      tr('Coba titik lain, mis. langkah berikutnya saat Play.'),
                       style: sans(size: 14, color: _muted),
                     ),
                   ],
@@ -1379,12 +1389,12 @@ class NavigationScreenState extends State<NavigationScreen> {
           children: [
             Expanded(
               child: Text(
-                'Street view',
+                tr('Street view'),
                 style: sans(size: 15, weight: FontWeight.w700),
               ),
             ),
             IconButton(
-              tooltip: 'Tutup Street view',
+              tooltip: tr('Tutup Street view'),
               onPressed: () => _ubahLapisan({...lapisan}..remove('street')),
               icon: const Icon(Icons.close_rounded, size: 20),
             ),

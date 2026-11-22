@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import 'i18n.dart';
 import 'navigasi.dart';
 import 'transit.dart';
 import 'wib.dart';
@@ -8,14 +9,20 @@ import 'wib.dart';
 
 /// Moda rencana (API: driving | motorcycle | walking | transit).
 enum ModaTrip {
-  driving('Mobil', Icons.directions_car_rounded),
-  motorcycle('Motor', Icons.two_wheeler_rounded),
-  walking('Jalan kaki', Icons.directions_walk_rounded),
-  transit('Transportasi umum', Icons.directions_bus_rounded);
+  driving(Icons.directions_car_rounded),
+  motorcycle(Icons.two_wheeler_rounded),
+  walking(Icons.directions_walk_rounded),
+  transit(Icons.directions_bus_rounded);
 
-  const ModaTrip(this.label, this.icon);
-  final String label;
+  const ModaTrip(this.icon);
   final IconData icon;
+
+  String get label => switch (this) {
+    ModaTrip.driving => tr('Mobil'),
+    ModaTrip.motorcycle => tr('Motor'),
+    ModaTrip.walking => tr('Jalan kaki'),
+    ModaTrip.transit => tr('Transportasi umum'),
+  };
 
   static ModaTrip dari(Object? v) =>
       ModaTrip.values.firstWhere((m) => m.name == v, orElse: () => driving);
@@ -88,7 +95,9 @@ String? teksRingkasan(Map? r, [ModaTrip? moda]) {
 /// "Berangkat dalam 1 j 5 mnt" / "Waktunya berangkat".
 String hitungMundur(DateTime t, DateTime now) {
   final s = t.difference(now).inSeconds;
-  return s < 60 ? 'Waktunya berangkat' : 'Berangkat dalam ${formatDurasi(s)}';
+  return s < 60
+      ? tr('Waktunya berangkat')
+      : tr('Berangkat dalam {0}', [formatDurasi(s)]);
 }
 
 /// Lewat lebih dari 30 menit dari jam berangkat.
@@ -125,7 +134,7 @@ class GrupTrip {
       grup.add(GrupTrip(judul, [t]));
     }
   }
-  if (bebas.isNotEmpty) grup.add(GrupTrip('Kapan saja', bebas));
+  if (bebas.isNotEmpty) grup.add(GrupTrip(tr('Kapan saja'), bebas));
   return (
     berikutnya: akan.isEmpty ? null : akan.first,
     grup: grup,
@@ -152,14 +161,7 @@ DateTime waktuWib(DateTime tanggal, TimeOfDay jam) => DateTime.utc(
 }
 
 /// "Kam, 19 Nov" untuk tombol tanggal.
-String labelTanggal(DateTime tanggal) {
-  const hari = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
-  const bulan = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', //
-    'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
-  ];
-  return '${hari[tanggal.weekday - 1]}, ${tanggal.day} ${bulan[tanggal.month - 1]}';
-}
+String labelTanggal(DateTime tanggal) =>
+    '${hariPendek(tanggal.weekday)}, ${tanggalBulan(tanggal.day, tanggal.month)}';
 
-String labelJam(TimeOfDay j) =>
-    '${j.hour.toString().padLeft(2, '0')}.${j.minute.toString().padLeft(2, '0')}';
+String labelJam(TimeOfDay j) => jamMenit(j.hour, j.minute);

@@ -6,6 +6,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../i18n.dart';
 import '../../kampanye.dart';
 import '../../state.dart';
 import '../../theme.dart';
@@ -115,12 +116,12 @@ class EventAlertScreenState extends State<EventAlertScreen> {
     if (e == null) return;
     final teks =
         '${e['judul']} (${infoJenisEvent(e['jenis'] as String?).label})\n'
-        '${rentangEvent(e, _now)}\n${e['isi']}\n\nEventAlert SmartMove Medan';
+        '${rentangEvent(e, _now)}\n${e['isi']}\n\n${tr('EventAlert SmartMove Medan')}';
     try {
       await widget.share(teks, '${e['judul']}');
     } catch (_) {
       await Clipboard.setData(ClipboardData(text: teks));
-      _kabari('Info event disalin. Tempel di chat untuk membagikannya.');
+      _kabari(tr('Info event disalin. Tempel di chat untuk membagikannya.'));
     }
   }
 
@@ -189,7 +190,7 @@ class EventAlertScreenState extends State<EventAlertScreen> {
             child: BottomActionBar(
               actions: [
                 BarAction(
-                  label: 'Rute',
+                  label: tr('Rute'),
                   icon: Icons.near_me_outlined,
                   onPressed: titik == null
                       ? null
@@ -203,7 +204,7 @@ class EventAlertScreenState extends State<EventAlertScreen> {
                         ),
                 ),
                 BarAction(
-                  label: 'Share',
+                  label: tr('Share'),
                   icon: Icons.share_outlined,
                   onPressed: e == null ? null : _bagikan,
                 ),
@@ -216,7 +217,7 @@ class EventAlertScreenState extends State<EventAlertScreen> {
               title: 'EventAlert',
               leading: canPop
                   ? IconButton(
-                      tooltip: 'Kembali',
+                      tooltip: tr('Kembali'),
                       onPressed: () => Navigator.of(context).pop(),
                       icon: const Icon(Icons.arrow_back_rounded),
                     )
@@ -235,7 +236,7 @@ class EventAlertScreenState extends State<EventAlertScreen> {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: AppSizes.s6),
           child: Text(
-            'Memuat event…',
+            tr('Memuat event…'),
             style: sans(size: 14, color: AppColors.ink.withValues(alpha: 0.7)),
           ),
         ),
@@ -243,20 +244,25 @@ class EventAlertScreenState extends State<EventAlertScreen> {
     } else if (status == 'galat') {
       isi = [ErrorBanner(error: galat, onRetry: _muat)];
     } else if (items.isEmpty) {
-      isi = const [
+      isi = [
         EmptyState(
           icon: Icons.event_note_outlined,
-          title: 'Belum ada event',
-          message: 'Car Free Day, rekayasa arus, dan acara yang memengaruhi jalan di Medan akan muncul di sini.',
+          title: tr('Belum ada event'),
+          message: tr(
+            'Car Free Day, rekayasa arus, dan acara yang memengaruhi jalan di Medan akan muncul di sini.',
+          ),
         ),
       ];
     } else {
       final kelompok = [
         (
-          'Sedang berlangsung',
+          tr('Sedang berlangsung'),
           items.where((e) => e['status'] == 'berlangsung').toList(),
         ),
-        ('Mendatang', items.where((e) => e['status'] == 'mendatang').toList()),
+        (
+          tr('Mendatang'),
+          items.where((e) => e['status'] == 'mendatang').toList(),
+        ),
       ];
       isi = [
         for (final (judul, xs) in kelompok)
@@ -404,7 +410,7 @@ class EventAlertScreenState extends State<EventAlertScreen> {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                'Tanpa titik di peta',
+                                tr('Tanpa titik di peta'),
                                 style: sans(
                                   size: 12,
                                   color: AppColors.ink.withValues(alpha: 0.5),

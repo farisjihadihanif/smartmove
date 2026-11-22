@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../api.dart';
+import '../../i18n.dart';
 import '../../state.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
@@ -9,26 +10,13 @@ import '../../widgets/widgets.dart';
 // Rewards (DESIGN §3, PRD §6.4, T-304): saldo poin, tukar voucher, voucher saya, riwayat.
 // Sama dengan web pages/Rewards.jsx. Voucher digambar sebagai kupon sobek (bahasa visual e-tiket).
 
-const _bulan = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', //
-  'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
-];
-
-String _poin(num n) {
-  final s = n.abs().round().toString();
-  final b = StringBuffer();
-  for (var i = 0; i < s.length; i++) {
-    if (i > 0 && (s.length - i) % 3 == 0) b.write('.');
-    b.write(s[i]);
-  }
-  return '$b';
-}
+String _poin(num n) => angka(n.abs().round());
 
 String _tanggal(Object? iso) {
   final d = DateTime.tryParse('$iso');
   if (d == null) return '';
   final w = d.toUtc().add(const Duration(hours: 7));
-  return '${w.day} ${_bulan[w.month - 1]} ${w.year}';
+  return tanggalBulanTahun(w.day, w.month, w.year);
 }
 
 class RewardsScreen extends StatefulWidget {
@@ -116,17 +104,17 @@ class RewardsScreenState extends State<RewardsScreen> {
             title: 'Rewards',
             leading: canPop
                 ? IconButton(
-                    tooltip: 'Kembali',
+                    tooltip: tr('Kembali'),
                     onPressed: () => Navigator.of(context).pop(),
                     icon: const Icon(Icons.arrow_back_rounded),
                   )
                 : null,
             children: [
               PillToggle<String>(
-                options: const [
-                  PillOption('tukar', 'Tukar poin'),
-                  PillOption('saya', 'Voucher saya'),
-                  PillOption('riwayat', 'Riwayat'),
+                options: [
+                  PillOption('tukar', tr('Tukar poin')),
+                  PillOption('saya', tr('Voucher saya')),
+                  PillOption('riwayat', tr('Riwayat')),
                 ],
                 selected: {tab},
                 onChanged: (v) => setState(() => tab = v.first),
@@ -171,7 +159,7 @@ class RewardsScreenState extends State<RewardsScreen> {
   List<Widget> _katalog() {
     final list = vouchers;
     return [
-      Text('Tukar poin', style: titleSerif(size: 24)),
+      Text(tr('Tukar poin'), style: titleSerif(size: 24)),
       const SizedBox(height: AppSizes.s3),
       if (hasil != null)
         Semantics(
@@ -190,7 +178,9 @@ class RewardsScreenState extends State<RewardsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Voucher ditukar: ${(hasil!['voucher'] as Map?)?['nama'] ?? ''}',
+                  tr('Voucher ditukar: {0}', [
+                    (hasil!['voucher'] as Map?)?['nama'] ?? '',
+                  ]),
                   style: sans(
                     size: 15,
                     weight: FontWeight.w600,
@@ -204,7 +194,7 @@ class RewardsScreenState extends State<RewardsScreen> {
                 ),
                 TextButton(
                   onPressed: () => setState(() => tab = 'saya'),
-                  child: const Text('Lihat di Voucher saya'),
+                  child: Text(tr('Lihat di Voucher saya')),
                 ),
               ],
             ),
@@ -218,7 +208,7 @@ class RewardsScreenState extends State<RewardsScreen> {
                 ? null
                 : galatTukar,
             message: (galatTukar as ApiException?)?.code == 'POIN_KURANG'
-                ? 'Poinmu belum cukup untuk voucher ini.'
+                ? tr('Poinmu belum cukup untuk voucher ini.')
                 : null,
             onDismiss: () => setState(() => galatTukar = null),
           ),
@@ -226,10 +216,12 @@ class RewardsScreenState extends State<RewardsScreen> {
       if (list == null)
         _memuat
       else if (list.isEmpty)
-        const EmptyState(
+        EmptyState(
           icon: Icons.card_giftcard_rounded,
-          title: 'Belum ada voucher',
-          message: 'Voucher baru akan muncul di sini. Sambil menunggu, kumpulkan poinnya dulu.',
+          title: tr('Belum ada voucher'),
+          message: tr(
+            'Voucher baru akan muncul di sini. Sambil menunggu, kumpulkan poinnya dulu.',
+          ),
         )
       else
         for (final v in list) _kuponVoucher(v),
@@ -255,7 +247,7 @@ class RewardsScreenState extends State<RewardsScreen> {
               style: titleSerif(size: 24, color: AppColors.white),
             ),
             Text(
-              'poin',
+              tr('poin'),
               style: sans(
                 size: 12,
                 weight: FontWeight.w600,
@@ -281,8 +273,8 @@ class RewardsScreenState extends State<RewardsScreen> {
               ),
             const SizedBox(height: 2),
             Text(
-              '${tersedia ? 'Sisa ${v['stok']}' : 'Stok habis'}'
-              '${v['berlakuSampai'] != null ? ', berlaku sampai ${_tanggal(v['berlakuSampai'])}' : ''}',
+              '${tersedia ? tr('Sisa {0}', [v['stok']]) : tr('Stok habis')}'
+              '${v['berlakuSampai'] != null ? tr(', berlaku sampai {0}', [_tanggal(v['berlakuSampai'])]) : ''}',
               style: redup,
             ),
             if (v['syarat'] != null) _Syarat(teks: '${v['syarat']}'),
@@ -299,13 +291,13 @@ class RewardsScreenState extends State<RewardsScreen> {
                     ),
                     child: Text(
                       menukar == id
-                          ? 'Menukar…'
-                          : 'Tukar ${_poin(harga)} poin?',
+                          ? tr('Menukar…')
+                          : tr('Tukar {0} poin?', [_poin(harga)]),
                     ),
                   ),
                   TextButton(
                     onPressed: () => setState(() => yakin = null),
-                    child: const Text('Batal'),
+                    child: Text(tr('Batal')),
                   ),
                 ],
               )
@@ -317,10 +309,10 @@ class RewardsScreenState extends State<RewardsScreen> {
                 ),
                 child: Text(
                   !tersedia
-                      ? 'Habis'
+                      ? tr('Habis')
                       : kurang
-                      ? 'Kurang ${_poin(harga - saldo!)} poin'
-                      : 'Tukar',
+                      ? tr('Kurang {0} poin', [_poin(harga - saldo!)])
+                      : tr('Tukar'),
                 ),
               ),
           ],
@@ -332,15 +324,17 @@ class RewardsScreenState extends State<RewardsScreen> {
   List<Widget> _saya() {
     final list = saya;
     return [
-      Text('Voucher saya', style: titleSerif(size: 24)),
+      Text(tr('Voucher saya'), style: titleSerif(size: 24)),
       const SizedBox(height: AppSizes.s3),
       if (list == null)
         _memuat
       else if (list.isEmpty)
-        const EmptyState(
+        EmptyState(
           icon: Icons.confirmation_number_outlined,
-          title: 'Belum ada voucher',
-          message: 'Tukar poinmu di Tukar poin, vouchernya tersimpan di sini.',
+          title: tr('Belum ada voucher'),
+          message: tr(
+            'Tukar poinmu di Tukar poin, vouchernya tersimpan di sini.',
+          ),
         )
       else
         for (final r in list) _kuponSaya(r),
@@ -351,9 +345,9 @@ class RewardsScreenState extends State<RewardsScreen> {
     final v = (r['voucher'] as Map?) ?? const {};
     final status = '${r['status']}';
     final (label, warna) = switch (status) {
-      'aktif' => ('Bisa dipakai', AppColors.teksHijau),
-      'dipakai' => ('Sudah dipakai', AppColors.teksAbu),
-      _ => ('Kedaluwarsa', AppColors.teksAbu),
+      'aktif' => (tr('Bisa dipakai'), AppColors.teksHijau),
+      'dipakai' => (tr('Sudah dipakai'), AppColors.teksAbu),
+      _ => (tr('Kedaluwarsa'), AppColors.teksAbu),
     };
     final kode = '${r['kode']}';
     return Padding(
@@ -394,12 +388,12 @@ class RewardsScreenState extends State<RewardsScreen> {
                   ),
                 ),
                 IconButton(
-                  tooltip: 'Salin kode $kode',
+                  tooltip: tr('Salin kode {0}', [kode]),
                   onPressed: () async {
                     await Clipboard.setData(ClipboardData(text: kode));
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Kode disalin')),
+                        SnackBar(content: Text(tr('Kode disalin'))),
                       );
                     }
                   },
@@ -412,8 +406,12 @@ class RewardsScreenState extends State<RewardsScreen> {
               ],
             ),
             Text(
-              'Ditukar ${_tanggal(r['createdAt'])}'
-              '${v['berlakuSampai'] != null ? ', berlaku sampai ${_tanggal(v['berlakuSampai'])}' : ''}',
+              tr('Ditukar {0}', [_tanggal(r['createdAt'])]) +
+                  (v['berlakuSampai'] != null
+                      ? tr(', berlaku sampai {0}', [
+                          _tanggal(v['berlakuSampai']),
+                        ])
+                      : ''),
               style: sans(
                 size: 12,
                 color: AppColors.ink.withValues(alpha: 0.55),
@@ -429,15 +427,17 @@ class RewardsScreenState extends State<RewardsScreen> {
   List<Widget> _riwayat() {
     final list = riwayat;
     return [
-      Text('Riwayat poin', style: titleSerif(size: 24)),
+      Text(tr('Riwayat poin'), style: titleSerif(size: 24)),
       const SizedBox(height: AppSizes.s2),
       if (list == null)
         _memuat
       else if (list.isEmpty)
-        const EmptyState(
+        EmptyState(
           icon: Icons.card_giftcard_rounded,
-          title: 'Belum ada poin',
-          message: 'Poin pertamamu datang dari pemesanan yang lunas atau umpan balik.',
+          title: tr('Belum ada poin'),
+          message: tr(
+            'Poin pertamamu datang dari pemesanan yang lunas atau umpan balik.',
+          ),
         )
       else
         for (final l in list)
@@ -496,7 +496,9 @@ class _KartuSaldo extends StatelessWidget {
       Shadow(color: Color(0x5941396F), blurRadius: 2, offset: Offset(0, 1)),
     ];
     return Semantics(
-      label: saldo == null ? 'Memuat poin' : 'Poin kamu ${_poin(saldo!)}',
+      label: saldo == null
+          ? tr('Memuat poin')
+          : tr('Poin kamu {0}', [_poin(saldo!)]),
       excludeSemantics: true,
       child: Container(
         padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
@@ -516,7 +518,7 @@ class _KartuSaldo extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Poin kamu',
+              tr('Poin kamu'),
               style: titleSerif(
                 size: 15,
                 color: AppColors.white.withValues(alpha: 0.9),
@@ -577,16 +579,19 @@ class _CaraDapat extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Cara dapat poin', style: sans(size: 14, weight: FontWeight.w700)),
+        Text(
+          tr('Cara dapat poin'),
+          style: sans(size: 14, weight: FontWeight.w700),
+        ),
         baris(
           Icons.confirmation_number_outlined,
-          'Pesan tiket atau parkir',
-          ': 1 poin tiap Rp1.000 setelah lunas (simulasi).',
+          tr('Pesan tiket atau parkir'),
+          tr(': 1 poin tiap Rp1.000 setelah lunas (simulasi).'),
         ),
         baris(
           Icons.rate_review_outlined,
-          'Kirim umpan balik',
-          ': 5 poin, sekali seminggu.',
+          tr('Kirim umpan balik'),
+          tr(': 5 poin, sekali seminggu.'),
         ),
       ],
     );
@@ -618,7 +623,7 @@ class _SyaratState extends State<_Syarat> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Syarat',
+                  tr('Syarat'),
                   style: sans(
                     size: 13,
                     weight: FontWeight.w600,

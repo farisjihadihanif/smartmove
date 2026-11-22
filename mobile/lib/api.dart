@@ -6,6 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 import 'config.dart';
+import 'i18n.dart';
 
 /// Galat API (format API_SPECS §1: `{ message, code }`).
 class ApiException implements Exception {
@@ -83,12 +84,12 @@ Future<bool> probeInternet() async {
 }
 
 String _defaultMessage(int status) {
-  if (status == 401) return 'Sesi berakhir, silakan masuk lagi';
-  if (status == 403) return 'Kamu tidak punya akses';
-  if (status == 404) return 'Data tidak ditemukan';
-  if (status == 429) return 'Terlalu banyak permintaan, coba lagi nanti';
-  if (status >= 500) return 'Terjadi kesalahan pada server';
-  return 'Permintaan gagal';
+  if (status == 401) return tr('Sesi berakhir, silakan masuk lagi');
+  if (status == 403) return tr('Kamu tidak punya akses');
+  if (status == 404) return tr('Data tidak ditemukan');
+  if (status == 429) return tr('Terlalu banyak permintaan, coba lagi nanti');
+  if (status >= 500) return tr('Terjadi kesalahan pada server');
+  return tr('Permintaan gagal');
 }
 
 /// Ubah koordinat ke format query `lat,lng` (API_SPECS §1).
@@ -129,10 +130,10 @@ class ApiClient {
     return online
         ? ApiException(
             0,
-            'Tidak bisa terhubung ke server SmartMove. Coba lagi sebentar.',
+            tr('Tidak bisa terhubung ke server SmartMove. Coba lagi sebentar.'),
             kServerUnreachable,
           )
-        : ApiException(0, 'Kamu sedang offline', kOffline);
+        : ApiException(0, tr('Kamu sedang offline'), kOffline);
   }
 
   Uri uri(String path, [Map<String, Object?>? query]) {
@@ -180,6 +181,8 @@ class ApiClient {
 
   Future<dynamic> _kirim(http.BaseRequest req, {bool auth = true}) async {
     req.headers['Accept'] = 'application/json';
+    // Teks dari API (galat, sapaan, langkah rute) mengikuti bahasa pilihan (T-111).
+    req.headers['Accept-Language'] = bahasa;
     if (auth) {
       final token = sessionToken ?? await tokens.read();
       if (token != null && token.isNotEmpty) {

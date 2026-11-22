@@ -2,6 +2,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' hide Path;
 import 'package:material_ui/material_ui.dart';
 
+import '../../i18n.dart';
 import '../../lalulintas.dart';
 import '../../theme.dart';
 
@@ -247,8 +248,10 @@ class PenandaLaporan extends StatelessWidget {
     final ukuran = aktif ? 38.0 : 30.0;
     return Semantics(
       button: onTap != null,
-      label:
-          'Laporan ${infoTingkat(t).label}${k != 'none' ? ', ${kejadianLaluLintas[k]}' : ''}',
+      label: tr('Laporan {0}{1}', [
+        infoTingkat(t).label,
+        k != 'none' ? ', ${kejadianLaluLintas[k]}' : '',
+      ]),
       excludeSemantics: true,
       child: GestureDetector(
         onTap: onTap,
@@ -297,7 +300,7 @@ class TrafficLegend extends StatelessWidget {
     final items = [...tingkatLaluLintas.values, tanpaLaporan];
     return Semantics(
       container: true,
-      label: 'Legenda lalu lintas',
+      label: tr('Legenda lalu lintas'),
       child: Wrap(
         spacing: 16,
         runSpacing: 6,

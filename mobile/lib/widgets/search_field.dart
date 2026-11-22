@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../i18n.dart';
 import '../theme.dart';
 
 /// Kolom "Telusuri di sini" (mockup hal. 3–7): kapsul abu muda, pin kiri,
@@ -10,8 +11,8 @@ class SearchField extends StatelessWidget {
     this.controller,
     this.onChanged,
     this.onSubmitted,
-    this.hint = 'Telusuri di sini',
-    this.label = 'Cari tempat',
+    this.hint,
+    this.label,
     this.leading = const _DefaultPin(),
     this.showSubmit = true,
     this.autofocus = false,
@@ -20,8 +21,8 @@ class SearchField extends StatelessWidget {
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
-  final String hint;
-  final String label;
+  final String? hint;
+  final String? label;
   final Widget? leading;
   final bool showSubmit;
   final bool autofocus;
@@ -65,11 +66,11 @@ class SearchField extends StatelessWidget {
               textInputAction: TextInputAction.search,
               style: textStyle,
               decoration: InputDecoration(
-                hintText: hint,
+                hintText: hint ?? tr('Telusuri di sini'),
                 hintStyle: textStyle?.copyWith(
                   color: AppColors.ink.withValues(alpha: 0.6),
                 ),
-                semanticCounterText: label,
+                semanticCounterText: label ?? tr('Cari tempat'),
                 filled: false,
                 isCollapsed: true,
                 border: InputBorder.none,
@@ -80,7 +81,7 @@ class SearchField extends StatelessWidget {
           ),
           if (showSubmit)
             IconButton.filled(
-              tooltip: 'Cari',
+              tooltip: tr('Cari'),
               onPressed: () => onSubmitted?.call(controller?.text ?? ''),
               style: IconButton.styleFrom(
                 backgroundColor: AppColors.inkVioletIsi,

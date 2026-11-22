@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../api.dart';
+import '../../i18n.dart';
 import '../../pembayaran.dart';
 import '../../state.dart';
 import '../../theme.dart';
@@ -168,7 +169,7 @@ class PaymentScreenState extends State<PaymentScreen> {
         langkah = 'biaya';
         galatBayar = ApiException(
           400,
-          'Pilih cara bayar dulu: QRIS, virtual account, atau e-wallet.',
+          tr('Pilih cara bayar dulu: QRIS, virtual account, atau e-wallet.'),
         );
       });
       return;
@@ -210,12 +211,16 @@ class PaymentScreenState extends State<PaymentScreen> {
   void _bagikan() {
     final l = layanan;
     final teks = l == null
-        ? 'Pesan tiket transportasi & parkir (simulasi) di SmartMove Medan'
+        ? tr('Pesan tiket transportasi & parkir (simulasi) di SmartMove Medan')
         : [
-            '${l['nama']} (simulasi)',
+            tr('{0} (simulasi)', [l['nama']]),
             ruteLayanan(l),
             if (slot != null) waktuLengkap(slot!.waktu),
-            'Estimasi ${rupiah(total)} untuk $jumlah ${satuan(l)}',
+            tr('Estimasi {0} untuk {1} {2}', [
+              rupiah(total),
+              jumlah,
+              satuan(l),
+            ]),
             'SmartMove Medan',
           ].join('\n');
     SharePlus.instance.share(ShareParams(text: teks));
@@ -233,24 +238,28 @@ class PaymentScreenState extends State<PaymentScreen> {
             title: 'Digital Payment',
             leading: canPop
                 ? IconButton(
-                    tooltip: 'Kembali',
+                    tooltip: tr('Kembali'),
                     onPressed: () => Navigator.of(context).pop(),
                     icon: const Icon(Icons.arrow_back_rounded),
                   )
                 : null,
             children: [
               SearchField(
-                hint: 'Cari layanan atau tujuan',
-                label: 'Cari layanan',
+                hint: tr('Cari layanan atau tujuan'),
+                label: tr('Cari layanan'),
                 leading: Icon(Icons.search_rounded, color: AppColors.inkViolet),
                 showSubmit: false,
                 onChanged: (v) => setState(() => _cari = v),
               ),
               const SizedBox(height: AppSizes.s3),
               PillToggle<String>(
-                options: const [
-                  PillOption('pilih', 'Pilih transportasi', short: 'Pilih'),
-                  PillOption('biaya', 'Estimasi biaya'),
+                options: [
+                  PillOption(
+                    'pilih',
+                    tr('Pilih transportasi'),
+                    short: tr('Pilih'),
+                  ),
+                  PillOption('biaya', tr('Estimasi biaya')),
                 ],
                 selected: {langkah},
                 onChanged: (v) => setState(() => langkah = v.first),
@@ -273,19 +282,19 @@ class PaymentScreenState extends State<PaymentScreen> {
             actions: [
               BarAction(
                 label: kirim
-                    ? 'Membuka…'
+                    ? tr('Membuka…')
                     : user == null
-                    ? 'Masuk untuk bayar'
+                    ? tr('Masuk untuk bayar')
                     : siapBayar
-                    ? 'Bayar ${rupiah(total)}'
-                    : 'Bayar sekarang',
-                short: 'Bayar',
+                    ? tr('Bayar {0}', [rupiah(total)])
+                    : tr('Bayar sekarang'),
+                short: tr('Bayar'),
                 icon: Icons.play_arrow_rounded,
                 filled: true,
                 onPressed: kirim ? null : _bayar,
               ),
               BarAction(
-                label: 'Bagikan',
+                label: tr('Bagikan'),
                 icon: Icons.share_rounded,
                 filled: true,
                 onPressed: _bagikan,
@@ -311,14 +320,14 @@ class PaymentScreenState extends State<PaymentScreen> {
               ),
             ),
             icon: const Icon(Icons.history_rounded, size: 18),
-            label: const Text('Riwayat pemesanan'),
+            label: Text(tr('Riwayat pemesanan')),
           ),
         ),
       SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            _chipJenis(null, 'Semua', null),
+            _chipJenis(null, tr('Semua'), null),
             for (final (v, l, i) in jenisLayanan) _chipJenis(v, l, i),
           ],
         ),
@@ -332,24 +341,31 @@ class PaymentScreenState extends State<PaymentScreen> {
             color: AppColors.inkViolet,
           ),
           const SizedBox(width: AppSizes.s2),
-          Text('Tanggal', style: label),
+          Text(tr('Tanggal'), style: label),
         ],
       ),
       const SizedBox(height: AppSizes.s2),
       PitaTanggal(hariIni: _hariIni, value: tanggal, onChanged: _pilihTanggal),
       if (_ruteTakCocok)
         _catatan(
-          'Belum ada layanan untuk rute ${widget.asal ?? '…'} → ${widget.tujuan ?? '…'}. '
-          'Pilih dari semua layanan di bawah.',
+          tr(
+            'Belum ada layanan untuk rute {0} → {1}. Pilih dari semua layanan di bawah.',
+            [widget.asal ?? '…', widget.tujuan ?? '…'],
+          ),
         ),
       if (_ruteCocok)
         _catatan(
           semuaLayanan
-              ? 'Menampilkan semua layanan.'
-              : 'Layanan untuk rute ${widget.asal ?? '…'} → ${widget.tujuan ?? '…'}.',
+              ? tr('Menampilkan semua layanan.')
+              : tr('Layanan untuk rute {0} → {1}.', [
+                  widget.asal ?? '…',
+                  widget.tujuan ?? '…',
+                ]),
           aksi: TextButton(
             onPressed: () => setState(() => semuaLayanan = !semuaLayanan),
-            child: Text(semuaLayanan ? 'Hanya rute ini' : 'Lihat semua'),
+            child: Text(
+              semuaLayanan ? tr('Hanya rute ini') : tr('Lihat semua'),
+            ),
           ),
         ),
       const SizedBox(height: AppSizes.s2),
@@ -361,10 +377,10 @@ class PaymentScreenState extends State<PaymentScreen> {
       else if (status == 'galat')
         ErrorBanner(error: _galat, onRetry: _muat)
       else if (daftar.isEmpty)
-        const EmptyState(
+        EmptyState(
           icon: Icons.confirmation_number_outlined,
-          title: 'Layanan tidak ditemukan',
-          message: 'Coba jenis lain atau hapus kata pencarian.',
+          title: tr('Layanan tidak ditemukan'),
+          message: tr('Coba jenis lain atau hapus kata pencarian.'),
         )
       else
         for (final s in daftar)
@@ -468,13 +484,13 @@ class PaymentScreenState extends State<PaymentScreen> {
     final l = layanan;
     final redup = AppColors.ink.withValues(alpha: 0.65);
     return [
-      Text('Estimasi biaya', style: titleSerif(size: 24)),
+      Text(tr('Estimasi biaya'), style: titleSerif(size: 24)),
       const SizedBox(height: AppSizes.s2),
       if (l == null || slot == null)
         Text(
           l == null
-              ? 'Pilih layanan dan jamnya dulu, totalnya muncul di sini.'
-              : 'Pilih jam keberangkatan dulu.',
+              ? tr('Pilih layanan dan jamnya dulu, totalnya muncul di sini.')
+              : tr('Pilih jam keberangkatan dulu.'),
           style: sans(size: 15, height: 1.45, color: redup),
         )
       else ...[
@@ -485,12 +501,12 @@ class PaymentScreenState extends State<PaymentScreen> {
           children: [
             Expanded(
               child: Text(
-                adalahParkir(l) ? 'Lama parkir' : 'Penumpang',
+                adalahParkir(l) ? tr('Lama parkir') : tr('Penumpang'),
                 style: sans(size: 14, weight: FontWeight.w600),
               ),
             ),
             IconButton.outlined(
-              tooltip: 'Kurangi ${satuan(l)}',
+              tooltip: tr('Kurangi {0}', [satuan(l)]),
               onPressed: jumlah <= 1 ? null : () => setState(() => jumlah--),
               icon: const Icon(Icons.remove_rounded),
             ),
@@ -513,7 +529,7 @@ class PaymentScreenState extends State<PaymentScreen> {
               ),
             ),
             IconButton.outlined(
-              tooltip: 'Tambah ${satuan(l)}',
+              tooltip: tr('Tambah {0}', [satuan(l)]),
               onPressed: jumlah >= maksJumlah(l)
                   ? null
                   : () => setState(() => jumlah++),
@@ -541,7 +557,10 @@ class PaymentScreenState extends State<PaymentScreen> {
         ),
       ],
       const SizedBox(height: AppSizes.s6),
-      Text('Metode pembayaran', style: sans(size: 14, weight: FontWeight.w600)),
+      Text(
+        tr('Metode pembayaran'),
+        style: sans(size: 14, weight: FontWeight.w600),
+      ),
       for (final g in grupMetode) ...[
         BarisMetode(
           label: g.label,
@@ -564,8 +583,8 @@ class PaymentScreenState extends State<PaymentScreen> {
           ),
       ],
       BarisMetode(
-        label: 'Bayar parkir',
-        keterangan: 'Pesan tempat parkir per jam',
+        label: tr('Bayar parkir'),
+        keterangan: tr('Pesan tempat parkir per jam'),
         ikon: Icons.local_parking_rounded,
         warna: AppColors.iconBlueDeep,
         panah: true,
@@ -577,7 +596,7 @@ class PaymentScreenState extends State<PaymentScreen> {
       const SizedBox(height: AppSizes.s2),
       if (metode == null)
         Text(
-          'Pilih cara bayar dulu. Kartu kredit tidak tersedia.',
+          tr('Pilih cara bayar dulu. Kartu kredit tidak tersedia.'),
           style: sans(size: 13, color: AppColors.ink.withValues(alpha: 0.55)),
         ),
       if (galatBayar != null) ...[

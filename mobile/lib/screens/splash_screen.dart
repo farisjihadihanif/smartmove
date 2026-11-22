@@ -2,15 +2,16 @@ import 'dart:math' as math;
 
 import 'package:material_ui/material_ui.dart';
 
+import '../i18n.dart';
 import '../theme.dart';
 
 /// Fitur unggulan, teks dari poster (mockup hal. 1); ikon garis menggantikan
 /// centang clip-art. Sama dengan FITUR di web/src/pages/Splash.jsx.
-const splashFeatures = [
-  'Navigasi rute alternatif',
-  'Pemantau lalu lintas real time',
-  'Sistem pembayaran terintegrasi transportasi umum',
-  'Kampanye kesadaran penggunaan transportasi umum',
+List<String> get splashFeatures => [
+  tr('Navigasi rute alternatif'),
+  tr('Pemantau lalu lintas real time'),
+  tr('Sistem pembayaran terintegrasi transportasi umum'),
+  tr('Kampanye kesadaran penggunaan transportasi umum'),
 ];
 
 const _featureIcons = [
@@ -109,7 +110,7 @@ class _SplashScreenState extends State<SplashScreen>
                         1,
                         Semantics(
                           header: true,
-                          label: 'Permudah kegiatanmu',
+                          label: tr('Permudah kegiatanmu'),
                           child: ExcludeSemantics(
                             child: Text(
                               'PERMUDAH\nKEGIATANMU',
@@ -128,8 +129,9 @@ class _SplashScreenState extends State<SplashScreen>
                       _rise(
                         2,
                         Text(
-                          'Rute, lalu lintas, dan tiket transportasi umum '
-                          'Medan dalam satu aplikasi.',
+                          tr(
+                            'Rute, lalu lintas, dan tiket transportasi umum Medan dalam satu aplikasi.',
+                          ),
                           style: sans(
                             color: AppColors.oliveSoft,
                             size: 17,

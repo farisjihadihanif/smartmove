@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../../i18n.dart';
 import '../../pembayaran.dart';
 import '../../theme.dart';
 import 'payment_widgets.dart';
@@ -39,25 +40,25 @@ class InstruksiBayar extends StatelessWidget {
     final mandiri = metode == 'mandiri';
     final namaEwallet = metode == 'shopeepay' ? 'ShopeePay' : 'GoPay';
     final langkah = switch (grup) {
-      'qris' => const [
-        'Buka aplikasi bank atau e-wallet yang punya menu QRIS.',
-        'Pindai kode QR di atas.',
-        'Periksa nama penerima dan jumlah, lalu bayar.',
+      'qris' => [
+        tr('Buka aplikasi bank atau e-wallet yang punya menu QRIS.'),
+        tr('Pindai kode QR di atas.'),
+        tr('Periksa nama penerima dan jumlah, lalu bayar.'),
       ],
-      'va' when mandiri => const [
-        'Buka Livin’ by Mandiri atau ATM Mandiri.',
-        'Pilih Bayar → Multipayment, masukkan kode perusahaan.',
-        'Masukkan kode bayar, periksa jumlah, lalu bayar.',
+      'va' when mandiri => [
+        tr('Buka Livin’ by Mandiri atau ATM Mandiri.'),
+        tr('Pilih Bayar → Multipayment, masukkan kode perusahaan.'),
+        tr('Masukkan kode bayar, periksa jumlah, lalu bayar.'),
       ],
-      'va' => const [
-        'Buka m-banking, internet banking, atau ATM bank yang sama.',
-        'Pilih Transfer ke Virtual Account.',
-        'Masukkan nomor di atas, periksa jumlah, lalu bayar.',
+      'va' => [
+        tr('Buka m-banking, internet banking, atau ATM bank yang sama.'),
+        tr('Pilih Transfer ke Virtual Account.'),
+        tr('Masukkan nomor di atas, periksa jumlah, lalu bayar.'),
       ],
-      _ => const [
-        'Ketuk tombol untuk membuka aplikasinya.',
-        'Periksa jumlah, lalu konfirmasi pembayaran.',
-        'Kembali ke sini; status diperbarui otomatis.',
+      _ => [
+        tr('Ketuk tombol untuk membuka aplikasinya.'),
+        tr('Periksa jumlah, lalu konfirmasi pembayaran.'),
+        tr('Kembali ke sini; status diperbarui otomatis.'),
       ],
     };
 
@@ -97,7 +98,7 @@ class InstruksiBayar extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Menunggu pembayaran',
+                  tr('Menunggu pembayaran'),
                   style: sans(
                     size: 15,
                     weight: FontWeight.w600,
@@ -111,13 +112,15 @@ class InstruksiBayar extends StatelessWidget {
           if (batas != null) ...[
             const SizedBox(height: AppSizes.s2),
             Text(
-              habis ? 'Batas bayar sudah lewat' : 'Bayar sebelum waktu habis',
+              habis
+                  ? tr('Batas bayar sudah lewat')
+                  : tr('Bayar sebelum waktu habis'),
               style: redup,
             ),
             Semantics(
               label: habis
-                  ? 'Waktu bayar habis'
-                  : 'Sisa waktu ${sisaWaktu(sisa!)}',
+                  ? tr('Waktu bayar habis')
+                  : tr('Sisa waktu {0}', [sisaWaktu(sisa!)]),
               excludeSemantics: true,
               child: Text(
                 sisaWaktu(sisa),
@@ -135,7 +138,7 @@ class InstruksiBayar extends StatelessWidget {
                     ),
               ),
             ),
-            Text('Batas: ${waktuLengkap(batas)}', style: redup),
+            Text(tr('Batas: {0}', [waktuLengkap(batas)]), style: redup),
           ],
           const SizedBox(height: AppSizes.s4),
           const GarisPutus(),
@@ -147,7 +150,7 @@ class InstruksiBayar extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Total bayar', style: redup),
+                    Text(tr('Total bayar'), style: redup),
                     Text(
                       rupiah(p['jumlah'] as num? ?? 0),
                       style: titleSerif(size: 26),
@@ -168,7 +171,7 @@ class InstruksiBayar extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Semantics(
-                  label: 'Kode QRIS untuk dibayar',
+                  label: tr('Kode QRIS untuk dibayar'),
                   excludeSemantics: true,
                   child: ins['qrString'] != null
                       ? QrImageView(
@@ -195,7 +198,7 @@ class InstruksiBayar extends StatelessWidget {
             const SizedBox(height: AppSizes.s2),
             Center(
               child: Text(
-                'QRIS, bisa dipindai semua aplikasi pembayaran',
+                tr('QRIS, bisa dipindai semua aplikasi pembayaran'),
                 style: redup,
               ),
             ),
@@ -203,16 +206,18 @@ class InstruksiBayar extends StatelessWidget {
           if (!habis && grup == 'va') ...[
             if (mandiri) ...[
               nomor(
-                'Kode perusahaan',
+                tr('Kode perusahaan'),
                 '${ins['kodePerusahaan']}',
-                'kode perusahaan',
+                tr('kode perusahaan'),
               ),
-              nomor('Kode bayar', '${ins['kodeBayar']}', 'kode bayar'),
+              nomor(tr('Kode bayar'), '${ins['kodeBayar']}', tr('kode bayar')),
             ] else
               nomor(
-                'Nomor virtual account ${'${ins['bank'] ?? ''}'.toUpperCase()}',
+                tr('Nomor virtual account {0}', [
+                  '${ins['bank'] ?? ''}'.toUpperCase(),
+                ]),
                 '${ins['nomorVa']}',
-                'nomor virtual account',
+                tr('nomor virtual account'),
               ),
           ],
           if (!habis && grup == 'ewallet' && ins['deeplink'] != null) ...[
@@ -221,7 +226,7 @@ class InstruksiBayar extends StatelessWidget {
               child: FilledButton.icon(
                 onPressed: () => bukaTautan(Uri.parse('${ins['deeplink']}')),
                 icon: const Icon(Icons.open_in_new_rounded, size: 18),
-                label: Text('Buka $namaEwallet'),
+                label: Text(tr('Buka {0}', [namaEwallet])),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.pillVia,
                   minimumSize: const Size(200, AppSizes.touch),
@@ -281,7 +286,9 @@ class InstruksiBayar extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSizes.s2),
-              Expanded(child: Text('Status diperbarui otomatis', style: redup)),
+              Expanded(
+                child: Text(tr('Status diperbarui otomatis'), style: redup),
+              ),
               OutlinedButton.icon(
                 onPressed: memeriksa ? null : onCek,
                 icon: memeriksa
@@ -290,7 +297,7 @@ class InstruksiBayar extends StatelessWidget {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.refresh_rounded, size: 18),
-                label: const Text('Cek sekarang'),
+                label: Text(tr('Cek sekarang')),
               ),
             ],
           ),
@@ -302,11 +309,13 @@ class InstruksiBayar extends StatelessWidget {
               child: Text.rich(
                 TextSpan(
                   children: [
-                    const TextSpan(
-                      text: 'Ini simulasi; tidak ada uang sungguhan. Untuk uji coba, bayar lewat ',
+                    TextSpan(
+                      text: tr(
+                        'Ini simulasi; tidak ada uang sungguhan. Untuk uji coba, bayar lewat ',
+                      ),
                     ),
                     TextSpan(
-                      text: 'simulator Midtrans sandbox',
+                      text: tr('simulator Midtrans sandbox'),
                       style: sans(
                         size: 12,
                         weight: FontWeight.w600,
@@ -356,9 +365,11 @@ class _TombolSalinState extends State<TombolSalin> {
     icon: Icon(ok ? Icons.check_rounded : Icons.copy_rounded, size: 16),
     label: Semantics(
       liveRegion: true,
-      label: ok ? '${widget.label} disalin' : 'Salin ${widget.label}',
+      label: ok
+          ? tr('{0} disalin', [widget.label])
+          : tr('Salin {0}', [widget.label]),
       excludeSemantics: true,
-      child: Text(ok ? 'Disalin' : 'Salin'),
+      child: Text(ok ? tr('Disalin') : tr('Salin')),
     ),
   );
 }

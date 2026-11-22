@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../api.dart';
+import '../../i18n.dart';
 import '../../kampanye.dart';
 import '../../state.dart';
 import '../../theme.dart';
@@ -55,7 +56,7 @@ class _MuatState extends State<_Muat> {
                 ),
                 const SizedBox(width: AppSizes.s2),
                 Text(
-                  'Memuat…',
+                  tr('Memuat…'),
                   style: sans(
                     size: 14,
                     color: AppColors.ink.withValues(alpha: 0.7),
@@ -96,7 +97,7 @@ class _Halaman extends StatelessWidget {
             title: title,
             leading: canPop
                 ? IconButton(
-                    tooltip: 'Kembali',
+                    tooltip: tr('Kembali'),
                     onPressed: () => Navigator.of(context).pop(),
                     icon: const Icon(Icons.arrow_back_rounded),
                   )
@@ -192,8 +193,8 @@ class _CampaignScreenState extends State<CampaignScreen> {
           controller: _q,
           onChanged: (_) => setState(() {}),
           onSubmitted: (_) => setState(() {}),
-          hint: 'Telusuri di sini',
-          label: 'Cari tips atau event',
+          hint: tr('Telusuri di sini'),
+          label: tr('Cari tips atau event'),
         ),
       ],
       children: [
@@ -205,7 +206,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
           children: [
             MenuTile(
               variant: MenuTileVariant.pill,
-              label: 'Tips Keselamatan',
+              label: tr('Tips Keselamatan'),
               icon: const Icon(
                 Icons.health_and_safety_outlined,
                 size: 60,
@@ -215,7 +216,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
             ),
             MenuTile(
               variant: MenuTileVariant.pill,
-              label: 'Poster',
+              label: tr('Poster'),
               icon: Icon(
                 Icons.image_outlined,
                 size: 60,
@@ -235,7 +236,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
             ),
             MenuTile(
               variant: MenuTileVariant.pill,
-              label: 'Umpan Balik',
+              label: tr('Umpan Balik'),
               icon: const Icon(
                 Icons.assignment_outlined,
                 size: 60,
@@ -261,11 +262,11 @@ class _CampaignScreenState extends State<CampaignScreen> {
   List<Widget> _berlangsung() {
     final aktif = _events.where((e) => e['status'] == 'berlangsung').toList();
     return [
-      _judul('Sedang berlangsung'),
+      _judul(tr('Sedang berlangsung')),
       if (aktif.isEmpty)
         Text.rich(
           TextSpan(
-            text: 'Tidak ada event lalu lintas saat ini. ',
+            text: tr('Tidak ada event lalu lintas saat ini. '),
             children: [
               WidgetSpan(
                 alignment: PlaceholderAlignment.baseline,
@@ -273,7 +274,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
                 child: GestureDetector(
                   onTap: () => _buka(context, const EventAlertScreen()),
                   child: Text(
-                    'Lihat jadwal mendatang',
+                    tr('Lihat jadwal mendatang'),
                     style: sans(
                       size: 15,
                       weight: FontWeight.w600,
@@ -328,14 +329,14 @@ class _CampaignScreenState extends State<CampaignScreen> {
     if (tips.isEmpty && ev.isEmpty) {
       return [
         Text(
-          'Tidak ada tips atau event yang cocok dengan “${q.trim()}”.',
+          tr('Tidak ada tips atau event yang cocok dengan “{0}”.', [q.trim()]),
           style: sans(size: 15, color: AppColors.ink.withValues(alpha: 0.65)),
         ),
       ];
     }
     return [
       if (tips.isNotEmpty) ...[
-        _judul('Tips'),
+        _judul(tr('Tips')),
         for (final t in tips)
           ListTile(
             contentPadding: EdgeInsets.zero,
@@ -349,7 +350,7 @@ class _CampaignScreenState extends State<CampaignScreen> {
         const SizedBox(height: AppSizes.s4),
       ],
       if (ev.isNotEmpty) ...[
-        _judul('Event'),
+        _judul(tr('Event')),
         for (final e in ev) _barisEvent(e),
       ],
     ];
@@ -421,7 +422,7 @@ class TipsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _Halaman(
-      title: 'Tips Keselamatan',
+      title: tr('Tips Keselamatan'),
       children: [
         _Muat(
           path: '/campaign/contents',
@@ -431,10 +432,12 @@ class TipsScreen extends StatelessWidget {
                 .whereType<Map>()
                 .toList();
             if (items.isEmpty) {
-              return const EmptyState(
+              return EmptyState(
                 icon: Icons.health_and_safety_outlined,
-                title: 'Belum ada tips',
-                message: 'Tips keselamatan dari pengelola SmartMove akan muncul di sini.',
+                title: tr('Belum ada tips'),
+                message: tr(
+                  'Tips keselamatan dari pengelola SmartMove akan muncul di sini.',
+                ),
               );
             }
             return Column(
@@ -496,7 +499,7 @@ class PosterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _Halaman(
-      title: 'Poster',
+      title: tr('Poster'),
       children: [
         _Muat(
           path: '/campaign/contents',
@@ -506,10 +509,12 @@ class PosterScreen extends StatelessWidget {
                 .whereType<Map>()
                 .toList();
             if (items.isEmpty) {
-              return const EmptyState(
+              return EmptyState(
                 icon: Icons.image_outlined,
-                title: 'Belum ada poster',
-                message: 'Poster kampanye keselamatan dari pengelola SmartMove akan muncul di sini.',
+                title: tr('Belum ada poster'),
+                message: tr(
+                  'Poster kampanye keselamatan dari pengelola SmartMove akan muncul di sini.',
+                ),
               );
             }
             return GridView.count(
@@ -610,13 +615,15 @@ class _PenampilPoster extends StatelessWidget {
             child: FilledButton.icon(
               onPressed: () => SharePlus.instance.share(
                 ShareParams(
-                  text:
-                      '${poster['judul']}${url != null ? '\n$url' : ''}\n\nKampanye keselamatan SmartMove Medan',
+                  text: tr('{0}{1}\n\nKampanye keselamatan SmartMove Medan', [
+                    poster['judul'],
+                    url != null ? '\n$url' : '',
+                  ]),
                   subject: '${poster['judul']}',
                 ),
               ),
               icon: const Icon(Icons.share_outlined),
-              label: const Text('Share'),
+              label: Text(tr('Share')),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.actionPill,
                 foregroundColor: AppColors.inkVioletTetap,
@@ -694,24 +701,28 @@ class FeedbackScreenState extends State<FeedbackScreen> {
   Widget build(BuildContext context) {
     final user = AppScope.of(context).user;
     return _Halaman(
-      title: 'Umpan Balik',
+      title: tr('Umpan Balik'),
       children: [
         if (user == null)
           _kartu(
-            judul: 'Masuk dulu untuk memberi masukan',
-            isi: 'Satu akun bisa mengirim beberapa masukan, jadi kami bisa menindaklanjutinya.',
+            judul: tr('Masuk dulu untuk memberi masukan'),
+            isi: tr(
+              'Satu akun bisa mengirim beberapa masukan, jadi kami bisa menindaklanjutinya.',
+            ),
             aksi: FilledButton.icon(
               onPressed: () => pushLogin(context),
               icon: const Icon(Icons.login_rounded, size: 18),
-              label: const Text('Masuk'),
+              label: Text(tr('Masuk')),
             ),
           )
         else if (selesai)
           _kartu(
-            judul: 'Terima kasih!',
+            judul: tr('Terima kasih!'),
             isi:
-                'Masukanmu sudah terkirim dan akan dibaca tim SmartMove Medan.'
-                '${poin > 0 ? ' Kamu dapat +$poin poin.' : ''}',
+                tr(
+                  'Masukanmu sudah terkirim dan akan dibaca tim SmartMove Medan.',
+                ) +
+                (poin > 0 ? tr(' Kamu dapat +{0} poin.', [poin]) : ''),
             aksi: Wrap(
               alignment: WrapAlignment.center,
               spacing: 12,
@@ -719,11 +730,11 @@ class FeedbackScreenState extends State<FeedbackScreen> {
               children: [
                 FilledButton(
                   onPressed: () => Navigator.of(context).maybePop(),
-                  child: const Text('Kembali ke Kampanye'),
+                  child: Text(tr('Kembali ke Kampanye')),
                 ),
                 OutlinedButton(
                   onPressed: _ulang,
-                  child: const Text('Kirim masukan lain'),
+                  child: Text(tr('Kirim masukan lain')),
                 ),
               ],
             ),
@@ -769,7 +780,10 @@ class FeedbackScreenState extends State<FeedbackScreen> {
   List<Widget> _form() {
     final label = sans(size: 14, weight: FontWeight.w600);
     return [
-      Text('Seberapa membantu SmartMove buatmu?', style: titleSerif(size: 22)),
+      Text(
+        tr('Seberapa membantu SmartMove buatmu?'),
+        style: titleSerif(size: 22),
+      ),
       const SizedBox(height: AppSizes.s3),
       Row(
         children: [
@@ -777,7 +791,7 @@ class FeedbackScreenState extends State<FeedbackScreen> {
             Semantics(
               selected: rating == n,
               inMutuallyExclusiveGroup: true,
-              label: '$n dari 5, ${labelRating[n].toLowerCase()}',
+              label: tr('{0} dari 5, {1}', [n, labelRating[n].toLowerCase()]),
               excludeSemantics: true,
               child: IconButton(
                 onPressed: () => setState(() => rating = n),
@@ -804,7 +818,7 @@ class FeedbackScreenState extends State<FeedbackScreen> {
         ],
       ),
       const SizedBox(height: AppSizes.s6),
-      Text('Tentang fitur apa? (boleh dilewati)', style: label),
+      Text(tr('Tentang fitur apa? (boleh dilewati)'), style: label),
       const SizedBox(height: AppSizes.s2),
       Wrap(
         spacing: 8,
@@ -836,7 +850,7 @@ class FeedbackScreenState extends State<FeedbackScreen> {
         ],
       ),
       const SizedBox(height: AppSizes.s6),
-      Text('Ceritakan lebih lanjut (boleh kosong)', style: label),
+      Text(tr('Ceritakan lebih lanjut (boleh kosong)'), style: label),
       const SizedBox(height: AppSizes.s2),
       TextField(
         controller: _komentar,
@@ -845,7 +859,7 @@ class FeedbackScreenState extends State<FeedbackScreen> {
         maxLines: 6,
         style: sans(size: 15),
         decoration: InputDecoration(
-          hintText: 'Apa yang sudah bagus, apa yang perlu diperbaiki?',
+          hintText: tr('Apa yang sudah bagus, apa yang perlu diperbaiki?'),
           filled: true,
           fillColor: AppColors.search,
           border: OutlineInputBorder(
@@ -870,7 +884,7 @@ class FeedbackScreenState extends State<FeedbackScreen> {
                 ),
               )
             : const Icon(Icons.send_rounded, size: 18),
-        label: const Text('Kirim umpan balik'),
+        label: Text(tr('Kirim umpan balik')),
         style: FilledButton.styleFrom(
           backgroundColor: AppColors.loginButton,
           minimumSize: const Size.fromHeight(AppSizes.touch),
@@ -881,7 +895,7 @@ class FeedbackScreenState extends State<FeedbackScreen> {
         Padding(
           padding: const EdgeInsets.only(top: AppSizes.s2),
           child: Text(
-            'Pilih bintang dulu untuk mengirim.',
+            tr('Pilih bintang dulu untuk mengirim.'),
             textAlign: TextAlign.center,
             style: sans(size: 13, color: AppColors.ink.withValues(alpha: 0.55)),
           ),

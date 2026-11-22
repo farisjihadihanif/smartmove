@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../api.dart';
 import '../../config.dart';
+import '../../i18n.dart';
 import '../../state.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
@@ -24,10 +25,6 @@ Future<(List<int>, String)?> pilihFotoGaleri() async {
 }
 
 const _fotoMaks = 2 * 1024 * 1024;
-const _bulan = [
-  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', //
-  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
-];
 
 /// Akun (DESIGN §3, T-116): foto profil, nama & username, ganti password, Tampilan,
 /// riwayat pemesanan, Rewards, keluar. Sama dengan web pages/Akun.jsx.
@@ -93,7 +90,7 @@ class AccountScreenState extends State<AccountScreen> {
     final (bytes, nama) = hasil;
     if (bytes.length > _fotoMaks) {
       setState(
-        () => galatFoto = ApiException(400, 'Ukuran foto maksimal 2 MB.'),
+        () => galatFoto = ApiException(400, tr('Ukuran foto maksimal 2 MB.')),
       );
       return;
     }
@@ -140,10 +137,10 @@ class AccountScreenState extends State<AccountScreen> {
 
   String? get _masalahPw {
     if (_baru.text.isNotEmpty && _baru.text.length < 8) {
-      return 'Password baru minimal 8 karakter.';
+      return tr('Password baru minimal 8 karakter.');
     }
     if (_ulang.text.isNotEmpty && _ulang.text != _baru.text) {
-      return 'Ulangi password belum sama dengan password baru.';
+      return tr('Ulangi password belum sama dengan password baru.');
     }
     return null;
   }
@@ -183,10 +180,10 @@ class AccountScreenState extends State<AccountScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           NebulaHeader(
-            title: 'Akun',
+            title: tr('Akun'),
             leading: canPop
                 ? IconButton(
-                    tooltip: 'Kembali',
+                    tooltip: tr('Kembali'),
                     onPressed: () => Navigator.of(context).pop(),
                     icon: const Icon(Icons.arrow_back_rounded),
                   )
@@ -199,9 +196,10 @@ class AccountScreenState extends State<AccountScreen> {
                 _identitas(user),
                 const SizedBox(height: AppSizes.s6),
                 PilihTema(value: app.tema, onChanged: app.setTema),
+                PilihBahasa(value: app.pilihanBahasa, onChanged: app.setBahasa),
                 _baris(
                   Icons.receipt_long_rounded,
-                  'Riwayat pemesanan',
+                  tr('Riwayat pemesanan'),
                   () => _buka(const PaymentHistoryScreen()),
                 ),
                 _baris(
@@ -211,7 +209,7 @@ class AccountScreenState extends State<AccountScreen> {
                 ),
                 _baris(
                   Icons.logout_rounded,
-                  'Keluar',
+                  tr('Keluar'),
                   app.signOut,
                   merah: true,
                 ),
@@ -294,8 +292,8 @@ class AccountScreenState extends State<AccountScreen> {
                   ),
                   child: IconButton(
                     tooltip: url == null
-                        ? 'Tambah foto profil'
-                        : 'Ganti foto profil',
+                        ? tr('Tambah foto profil')
+                        : tr('Ganti foto profil'),
                     onPressed: mengunggah ? null : _gantiFoto,
                     icon: const Icon(
                       Icons.photo_camera_rounded,
@@ -313,12 +311,14 @@ class AccountScreenState extends State<AccountScreen> {
         Text('${user['email'] ?? ''}', style: redup),
         if (dibuat != null)
           Text(
-            'Bergabung ${_bulan[dibuat.toUtc().add(const Duration(hours: 7)).month - 1]} ${dibuat.year}',
+            tr('Bergabung {0}', [
+              '${bulanPanjang(dibuat.toUtc().add(const Duration(hours: 7)).month)} ${dibuat.year}',
+            ]),
             style: sans(size: 13, color: AppColors.ink.withValues(alpha: 0.5)),
           ),
         const SizedBox(height: AppSizes.s1),
         Text(
-          'Foto JPG, PNG, atau WEBP, maksimal 2 MB.',
+          tr('Foto JPG, PNG, atau WEBP, maksimal 2 MB.'),
           style: sans(size: 12, color: AppColors.ink.withValues(alpha: 0.5)),
         ),
         if (galatFoto != null) ...[
@@ -417,8 +417,8 @@ class AccountScreenState extends State<AccountScreen> {
   );
 
   List<Widget> _formProfil() => [
-    Text('Profil', style: titleSerif(size: 24)),
-    _label('Nama lengkap'),
+    Text(tr('Profil'), style: titleSerif(size: 24)),
+    _label(tr('Nama lengkap')),
     TextField(
       controller: _nama,
       maxLength: 80,
@@ -427,7 +427,7 @@ class AccountScreenState extends State<AccountScreen> {
       onChanged: (_) => setState(() => profilOk = false),
       decoration: _dekor().copyWith(counterText: ''),
     ),
-    _label('Username'),
+    _label(tr('Username')),
     TextField(
       controller: _username,
       maxLength: 30,
@@ -436,7 +436,9 @@ class AccountScreenState extends State<AccountScreen> {
       onChanged: (_) => setState(() => profilOk = false),
       decoration: _dekor(
         prefix: '@',
-        helper: '3–30 karakter: huruf kecil, angka, titik, atau garis bawah. Dipakai untuk masuk.',
+        helper: tr(
+          '3–30 karakter: huruf kecil, angka, titik, atau garis bawah. Dipakai untuk masuk.',
+        ),
       ).copyWith(counterText: ''),
     ),
     if (galatProfil != null) ...[
@@ -451,9 +453,9 @@ class AccountScreenState extends State<AccountScreen> {
       children: [
         FilledButton(
           onPressed: !_profilBerubah || simpanProfil ? null : _simpanProfil,
-          child: Text(simpanProfil ? 'Menyimpan…' : 'Simpan profil'),
+          child: Text(simpanProfil ? tr('Menyimpan…') : tr('Simpan profil')),
         ),
-        if (profilOk && !_profilBerubah) _berhasil('Profil disimpan.'),
+        if (profilOk && !_profilBerubah) _berhasil(tr('Profil disimpan.')),
       ],
     ),
   ];
@@ -479,8 +481,8 @@ class AccountScreenState extends State<AccountScreen> {
               decoration: _dekor(
                 suffix: IconButton(
                   tooltip: lihatPw
-                      ? 'Sembunyikan password'
-                      : 'Tampilkan password',
+                      ? tr('Sembunyikan password')
+                      : tr('Tampilkan password'),
                   onPressed: () => setState(() => lihatPw = !lihatPw),
                   icon: Icon(
                     lihatPw
@@ -493,15 +495,19 @@ class AccountScreenState extends State<AccountScreen> {
           ],
         );
     return [
-      Text('Ganti password', style: titleSerif(size: 24)),
+      Text(tr('Ganti password'), style: titleSerif(size: 24)),
       const SizedBox(height: 4),
       Text(
-        'Setelah diganti, perangkat lain yang masuk dengan akun ini otomatis keluar.',
+        tr(
+          'Setelah diganti, perangkat lain yang masuk dengan akun ini otomatis keluar.',
+        ),
         style: sans(size: 14, color: AppColors.ink.withValues(alpha: 0.6)),
       ),
-      isian('Password lama', _lama, const [AutofillHints.password]),
-      isian('Password baru', _baru, const [AutofillHints.newPassword]),
-      isian('Ulangi password baru', _ulang, const [AutofillHints.newPassword]),
+      isian(tr('Password lama'), _lama, const [AutofillHints.password]),
+      isian(tr('Password baru'), _baru, const [AutofillHints.newPassword]),
+      isian(tr('Ulangi password baru'), _ulang, const [
+        AutofillHints.newPassword,
+      ]),
       if (masalah != null)
         Padding(
           padding: const EdgeInsets.only(top: AppSizes.s2),
@@ -522,9 +528,9 @@ class AccountScreenState extends State<AccountScreen> {
         children: [
           FilledButton(
             onPressed: !siap || simpanPw ? null : _simpanPassword,
-            child: Text(simpanPw ? 'Menyimpan…' : 'Simpan password'),
+            child: Text(simpanPw ? tr('Menyimpan…') : tr('Simpan password')),
           ),
-          if (pwOk) _berhasil('Password diganti.'),
+          if (pwOk) _berhasil(tr('Password diganti.')),
         ],
       ),
     ];

@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../../api.dart';
+import '../../i18n.dart';
 import '../../pembayaran.dart';
 import '../../state.dart';
 import '../../theme.dart';
@@ -73,9 +74,9 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           NebulaHeader(
-            title: 'Riwayat pemesanan',
+            title: tr('Riwayat pemesanan'),
             leading: IconButton(
-              tooltip: 'Kembali',
+              tooltip: tr('Kembali'),
               onPressed: () => Navigator.of(context).maybePop(),
               icon: const Icon(Icons.arrow_back_rounded),
             ),
@@ -98,9 +99,11 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                   else if (items.isEmpty)
                     EmptyState(
                       icon: Icons.confirmation_number_outlined,
-                      title: 'Belum ada pemesanan',
-                      message: 'Pesan tiket kereta, bus, travel, atau parkir dari Digital Payment.',
-                      actionLabel: 'Pesan tiket',
+                      title: tr('Belum ada pemesanan'),
+                      message: tr(
+                        'Pesan tiket kereta, bus, travel, atau parkir dari Digital Payment.',
+                      ),
+                      actionLabel: tr('Pesan tiket'),
                       onAction: () => Navigator.of(context).maybePop(),
                     )
                   else ...[
@@ -112,7 +115,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                           onPressed: status == 'menambah'
                               ? null
                               : () => _muat(page + 1),
-                          child: const Text('Muat lebih banyak'),
+                          child: Text(tr('Muat lebih banyak')),
                         ),
                       ),
                   ],

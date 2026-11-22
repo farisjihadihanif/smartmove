@@ -84,7 +84,7 @@ void main() {
     await tester.pump();
     expect(find.text('Tampilan'), findsOneWidget);
     expect(find.text('Ikuti sistem'), findsOneWidget);
-    await tester.tap(find.byType(DropdownButton<String>));
+    await tester.tap(find.byType(DropdownButton<String>).first);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Gelap').last);
     await tester.runAsync(() => Future<void>.delayed(Duration.zero));
@@ -96,7 +96,7 @@ void main() {
     );
 
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(DropdownButton<String>));
+    await tester.tap(find.byType(DropdownButton<String>).first);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Ikuti sistem').last);
     await tester.runAsync(() => Future<void>.delayed(Duration.zero));

@@ -7,6 +7,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../api.dart';
+import '../../i18n.dart';
 import '../../lalulintas.dart';
 import '../../navigasi.dart';
 import '../../state.dart';
@@ -156,13 +157,13 @@ class TrafficScreenState extends State<TrafficScreen> {
       );
       return Tempat.fromJson((r as Map)['tempat'] as Map).nama;
     } catch (_) {
-      return 'Titik di peta';
+      return tr('Titik di peta');
     }
   }
 
   Future<void> _aturTitik(LatLng p, [String? nama]) async {
     if (!dalamWilayah(p)) {
-      _kabari('SmartMove baru melayani Medan dan sekitarnya.');
+      _kabari(tr('SmartMove baru melayani Medan dan sekitarnya.'));
       return;
     }
     setState(() => lapor = (titik: p, nama: nama ?? ''));
@@ -183,11 +184,11 @@ class TrafficScreenState extends State<TrafficScreen> {
           _map.move(h.lokasi!, math.max(_map.camera.zoom, 15));
         }
       case 'ditolak':
-        _kabari('Izin lokasi ditolak. Ketuk peta untuk memilih titik.');
+        _kabari(tr('Izin lokasi ditolak. Ketuk peta untuk memilih titik.'));
       case 'luar':
-        _kabari('Lokasimu di luar Medan. Ketuk peta untuk memilih titik.');
+        _kabari(tr('Lokasimu di luar Medan. Ketuk peta untuk memilih titik.'));
       default:
-        _kabari('Lokasi belum terbaca. Ketuk peta untuk memilih titik.');
+        _kabari(tr('Lokasi belum terbaca. Ketuk peta untuk memilih titik.'));
     }
   }
 
@@ -251,7 +252,7 @@ class TrafficScreenState extends State<TrafficScreen> {
         () => _hasil = (
           status: 'galat',
           items: const [],
-          error: 'Ketik minimal 2 huruf.',
+          error: tr('Ketik minimal 2 huruf.'),
         ),
       );
       return;
@@ -302,11 +303,13 @@ class TrafficScreenState extends State<TrafficScreen> {
     if (data.koridor.isEmpty) return;
     final teks = teksBagikanLaluLintas(data.koridor);
     try {
-      await widget.share(teks, 'Lalu lintas Medan');
+      await widget.share(teks, tr('Lalu lintas Medan'));
     } catch (_) {
       await Clipboard.setData(ClipboardData(text: teks));
       _kabari(
-        'Ringkasan lalu lintas disalin. Tempel di chat untuk membagikannya.',
+        tr(
+          'Ringkasan lalu lintas disalin. Tempel di chat untuk membagikannya.',
+        ),
       );
     }
   }
@@ -369,7 +372,7 @@ class TrafficScreenState extends State<TrafficScreen> {
             child: BottomActionBar(
               actions: [
                 BarAction(
-                  label: 'Rute',
+                  label: tr('Rute'),
                   icon: Icons.route_rounded,
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(
@@ -378,13 +381,13 @@ class TrafficScreenState extends State<TrafficScreen> {
                   ),
                 ),
                 BarAction(
-                  label: 'Laporkan',
-                  short: 'Lapor',
+                  label: tr('Laporkan'),
+                  short: tr('Lapor'),
                   icon: Icons.campaign_outlined,
                   onPressed: melapor ? null : mulaiLapor,
                 ),
                 BarAction(
-                  label: 'Share',
+                  label: tr('Share'),
                   icon: Icons.share_outlined,
                   onPressed: data.koridor.isEmpty ? null : _bagikan,
                 ),
@@ -397,7 +400,7 @@ class TrafficScreenState extends State<TrafficScreen> {
               title: 'Live Traffic Information',
               leading: canPop
                   ? IconButton(
-                      tooltip: 'Kembali',
+                      tooltip: tr('Kembali'),
                       onPressed: () => Navigator.of(context).pop(),
                       icon: const Icon(Icons.arrow_back_rounded),
                     )
@@ -409,8 +412,8 @@ class TrafficScreenState extends State<TrafficScreen> {
                   onChanged: (v) {
                     if (v.isEmpty) setState(() => _hasil = null);
                   },
-                  hint: 'Telusuri di sini',
-                  label: 'Cari tempat di peta',
+                  hint: tr('Telusuri di sini'),
+                  label: tr('Cari tempat di peta'),
                 ),
                 PillToggle<String>(
                   selected: {tab},
@@ -421,9 +424,9 @@ class TrafficScreenState extends State<TrafficScreen> {
                       aktif = null;
                     });
                   },
-                  options: const [
-                    PillOption('estimasi', 'Estimasi Waktu'),
-                    PillOption('peta', 'Peta Interaktif'),
+                  options: [
+                    PillOption('estimasi', tr('Estimasi Waktu')),
+                    PillOption('peta', tr('Peta Interaktif')),
                   ],
                 ),
               ],
@@ -459,7 +462,7 @@ class TrafficScreenState extends State<TrafficScreen> {
       ];
     } else if (estimasi) {
       isi = [
-        Text('Jalan utama sekarang', style: titleSerif(size: 22)),
+        Text(tr('Jalan utama sekarang'), style: titleSerif(size: 22)),
         const SizedBox(height: AppSizes.s2),
         const TrafficLegend(),
         const SizedBox(height: AppSizes.s2),

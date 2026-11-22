@@ -36,3 +36,4 @@ flutter:
     - assets/google_fonts/
     - assets/textures/
     - assets/brand/
+    - assets/i18n/

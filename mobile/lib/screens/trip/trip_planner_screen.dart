@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:material_ui/material_ui.dart';
 
 import '../../api.dart';
+import '../../i18n.dart';
 import '../../pembayaran.dart';
 import '../../state.dart';
 import '../../theme.dart';
@@ -124,29 +125,29 @@ class TripPlannerScreenState extends State<TripPlannerScreen> {
         items = [for (final t in items) t.id == hasil.id ? hasil : t];
       }
     });
-    _kabari(awal == null ? 'Rencana disimpan.' : 'Perubahan disimpan.');
+    _kabari(awal == null ? tr('Rencana disimpan.') : tr('Perubahan disimpan.'));
   }
 
   Future<void> _hapus(Trip trip) async {
     final ya = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Hapus rencana ini?', style: titleSerif(size: 20)),
+        title: Text(tr('Hapus rencana ini?'), style: titleSerif(size: 20)),
         content: Text(
-          'Rencana ke ${trip.tujuan.nama} akan dihapus.',
+          tr('Rencana ke {0} akan dihapus.', [trip.tujuan.nama]),
           style: sans(size: 15),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Batal'),
+            child: Text(tr('Batal')),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.trafficMacet,
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Hapus'),
+            child: Text(tr('Hapus')),
           ),
         ],
       ),
@@ -159,7 +160,7 @@ class TripPlannerScreenState extends State<TripPlannerScreen> {
         items = items.where((t) => t.id != trip.id).toList();
         _total = (_total - 1).clamp(0, 1 << 30);
       });
-      _kabari('Rencana dihapus.');
+      _kabari(tr('Rencana dihapus.'));
     } on ApiException catch (e) {
       _kabari(e.message);
     }
@@ -197,7 +198,7 @@ class TripPlannerScreenState extends State<TripPlannerScreen> {
               shape: const StadiumBorder(),
               icon: const Icon(Icons.add_rounded),
               label: Text(
-                'Buat rencana',
+                tr('Buat rencana'),
                 style: sans(
                   size: 15,
                   weight: FontWeight.w600,
@@ -215,7 +216,7 @@ class TripPlannerScreenState extends State<TripPlannerScreen> {
               title: 'Trip Planner',
               leading: canPop
                   ? IconButton(
-                      tooltip: 'Kembali',
+                      tooltip: tr('Kembali'),
                       onPressed: () => Navigator.of(context).pop(),
                       icon: const Icon(Icons.arrow_back_rounded),
                     )
@@ -248,14 +249,16 @@ class TripPlannerScreenState extends State<TripPlannerScreen> {
                     ),
                   ],
                   if (kosong)
-                    const EmptyState(
+                    EmptyState(
                       icon: Icons.event_note_rounded,
-                      title: 'Belum ada rencana',
-                      message: 'Simpan rute yang sering kamu tempuh, misalnya rumah ke kampus, lalu mulai navigasi dengan sekali ketuk.',
+                      title: tr('Belum ada rencana'),
+                      message: tr(
+                        'Simpan rute yang sering kamu tempuh, misalnya rumah ke kampus, lalu mulai navigasi dengan sekali ketuk.',
+                      ),
                     ),
                   if (k.grup.isNotEmpty) ...[
                     const SizedBox(height: AppSizes.s8),
-                    Text('Rencanamu', style: titleSerif(size: 24)),
+                    Text(tr('Rencanamu'), style: titleSerif(size: 24)),
                     for (final g in k.grup) ...[
                       const SizedBox(height: AppSizes.s4),
                       Text(
@@ -306,8 +309,8 @@ class TripPlannerScreenState extends State<TripPlannerScreen> {
                             : () => _muat(_page + 1),
                         child: Text(
                           status == 'menambah'
-                              ? 'Memuat…'
-                              : 'Muat rencana lainnya',
+                              ? tr('Memuat…')
+                              : tr('Muat rencana lainnya'),
                         ),
                       ),
                     ),
@@ -344,7 +347,7 @@ class _KartuMemuat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-    label: 'Memuat rencana',
+    label: tr('Memuat rencana'),
     child: Container(
       height: 220,
       decoration: _kartuGradasi().copyWith(
@@ -376,7 +379,7 @@ void _pesan(BuildContext context, Trip t) {
 }
 
 String _labelPesan(Trip t) =>
-    t.moda == ModaTrip.transit ? 'Pesan tiket' : 'Pesan parkir';
+    t.moda == ModaTrip.transit ? tr('Pesan tiket') : tr('Pesan parkir');
 
 /// Kartu gradasi: rencana terdekat, atau ajakan membuat rencana.
 class _Sorotan extends StatelessWidget {
@@ -403,7 +406,7 @@ class _Sorotan extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Mau ke mana berikutnya?',
+              tr('Mau ke mana berikutnya?'),
               style: titleSerif(
                 size: 28,
                 color: AppColors.white,
@@ -411,7 +414,7 @@ class _Sorotan extends StatelessWidget {
             ),
             const SizedBox(height: AppSizes.s2),
             Text(
-              'Buat perencanaan terbaik untuk setiap perjalananmu.',
+              tr('Buat perencanaan terbaik untuk setiap perjalananmu.'),
               style: titleSerif(
                 size: 15,
                 color: AppColors.white,
@@ -420,7 +423,7 @@ class _Sorotan extends StatelessWidget {
             const SizedBox(height: AppSizes.s4 + AppSizes.s1),
             _TombolPutih(
               icon: Icons.add_rounded,
-              label: 'Buat rencana',
+              label: tr('Buat rencana'),
               onPressed: onBuat,
             ),
           ],
@@ -432,7 +435,7 @@ class _Sorotan extends StatelessWidget {
     final hari = hariWib(t.berangkatPada!, now);
     return Semantics(
       container: true,
-      label: 'Perjalanan berikutnya',
+      label: tr('Perjalanan berikutnya'),
       child: Container(
         decoration: _kartuGradasi(),
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
@@ -487,7 +490,7 @@ class _Sorotan extends StatelessWidget {
               children: [
                 _TombolPutih(
                   icon: Icons.navigation_rounded,
-                  label: 'Mulai navigasi',
+                  label: tr('Mulai navigasi'),
                   onPressed: () => onMulai(t),
                 ),
                 if (pesananDariTrip(t) != null)
@@ -509,7 +512,7 @@ class _Sorotan extends StatelessWidget {
                   ),
                 if (ringkas != null)
                   Text(
-                    'Estimasi $ringkas',
+                    tr('Estimasi {0}', [ringkas]),
                     style: sans(
                       size: 14,
                       weight: FontWeight.w600,
@@ -605,7 +608,7 @@ class Lintasan extends StatelessWidget {
         ? AppColors.white.withValues(alpha: 0.6)
         : AppColors.inkViolet.withValues(alpha: 0.35);
     return Semantics(
-      label: 'Dari $asal ke $tujuan',
+      label: tr('Dari {0} ke {1}', [asal, tujuan]),
       excludeSemantics: true,
       child: Stack(
         children: [
@@ -732,7 +735,7 @@ class _ItemRencana extends StatelessWidget {
                 ? Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
-                      'Tanpa jam',
+                      tr('Tanpa jam'),
                       style: sans(
                         size: 12,
                         weight: FontWeight.w600,
@@ -812,7 +815,7 @@ class _ItemRencana extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          tooltip: 'Ubah rencana',
+                          tooltip: tr('Ubah rencana'),
                           onPressed: onUbah,
                           icon: Icon(
                             Icons.edit_outlined,
@@ -821,7 +824,7 @@ class _ItemRencana extends StatelessWidget {
                           ),
                         ),
                         IconButton(
-                          tooltip: 'Hapus rencana',
+                          tooltip: tr('Hapus rencana'),
                           onPressed: onHapus,
                           icon: Icon(
                             Icons.delete_outline_rounded,
@@ -871,7 +874,7 @@ class _TombolMulai extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSizes.s2),
                 Text(
-                  'Mulai navigasi',
+                  tr('Mulai navigasi'),
                   style: sans(
                     size: 14,
                     weight: FontWeight.w600,
@@ -918,7 +921,7 @@ class _Lewat extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'Sudah lewat ($jumlah)',
+                    tr('Sudah lewat ({0})', [jumlah]),
                     style: sans(
                       size: 15,
                       weight: FontWeight.w600,
@@ -927,7 +930,7 @@ class _Lewat extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  terbuka ? 'Sembunyikan' : 'Tampilkan',
+                  terbuka ? tr('Sembunyikan') : tr('Tampilkan'),
                   style: sans(size: 14, color: AppColors.inkViolet),
                 ),
               ],

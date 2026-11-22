@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../i18n.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
 
@@ -85,7 +86,7 @@ class AuthShell extends StatelessWidget {
                             children: [
                               if (showBack)
                                 IconButton(
-                                  tooltip: 'Kembali',
+                                  tooltip: tr('Kembali'),
                                   color: AppColors.white,
                                   onPressed: () => Navigator.maybePop(context),
                                   icon: const Icon(Icons.arrow_back),
@@ -398,8 +399,8 @@ class _AuthFieldState extends State<AuthField> {
                       if (widget.password)
                         IconButton(
                           tooltip: _shown
-                              ? 'Sembunyikan password'
-                              : 'Tampilkan password',
+                              ? tr('Sembunyikan password')
+                              : tr('Tampilkan password'),
                           onPressed: () => setState(() => _shown = !_shown),
                           icon: Icon(
                             _shown
@@ -470,7 +471,7 @@ class AuthButton extends StatelessWidget {
           disabledForegroundColor: AppColors.white,
           textStyle: sans(size: 16, weight: FontWeight.w600),
         ),
-        child: Text(busy ? 'Tunggu sebentar…' : label),
+        child: Text(busy ? tr('Tunggu sebentar…') : label),
       ),
     );
   }

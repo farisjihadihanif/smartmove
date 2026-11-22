@@ -5,6 +5,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../api.dart';
+import '../../i18n.dart';
 import '../../pembayaran.dart';
 import '../../state.dart';
 import '../../theme.dart';
@@ -156,9 +157,9 @@ class PaymentStatusScreenState extends State<PaymentStatusScreen>
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           NebulaHeader(
-            title: lunas ? 'E-tiket' : 'Pembayaran',
+            title: lunas ? tr('E-tiket') : tr('Pembayaran'),
             leading: IconButton(
-              tooltip: 'Kembali',
+              tooltip: tr('Kembali'),
               onPressed: () => Navigator.of(context).maybePop(),
               icon: const Icon(Icons.arrow_back_rounded),
             ),
@@ -194,7 +195,7 @@ class PaymentStatusScreenState extends State<PaymentStatusScreen>
         child: Semantics(
           liveRegion: true,
           child: Text(
-            'Pembayaran diterima. Ini e-tiketmu.',
+            tr('Pembayaran diterima. Ini e-tiketmu.'),
             textAlign: TextAlign.center,
             style: titleSerif(size: 20, color: AppColors.teksHijau),
           ),
@@ -213,7 +214,7 @@ class PaymentStatusScreenState extends State<PaymentStatusScreen>
           ),
           const SizedBox(width: AppSizes.s2),
           Text(
-            '+${p['poin']} poin masuk ke Rewards',
+            tr('+{0} poin masuk ke Rewards', [p['poin']]),
             style: sans(
               size: 15,
               weight: FontWeight.w600,
@@ -229,7 +230,7 @@ class PaymentStatusScreenState extends State<PaymentStatusScreen>
         onPressed: () =>
             SharePlus.instance.share(ShareParams(text: teksBagikan(p))),
         icon: const Icon(Icons.share_rounded, size: 18),
-        label: const Text('Bagikan'),
+        label: Text(tr('Bagikan')),
         style: FilledButton.styleFrom(
           backgroundColor: AppColors.pillVia,
           minimumSize: const Size(160, AppSizes.touch),
@@ -266,7 +267,7 @@ class PaymentStatusScreenState extends State<PaymentStatusScreen>
           ),
           const SizedBox(height: AppSizes.s2),
           Text(
-            'No. pesanan ${p['orderId']}',
+            tr('No. pesanan {0}', [p['orderId']]),
             style: sans(size: 13, color: AppColors.ink.withValues(alpha: 0.6)),
           ),
         ],
@@ -282,11 +283,16 @@ class PaymentStatusScreenState extends State<PaymentStatusScreen>
     final redup = sans(size: 13, color: AppColors.ink.withValues(alpha: 0.55));
     final isi = sans(size: 14, weight: FontWeight.w600);
     final pesan = menunggu
-        ? 'Selesaikan pembayaran di halaman Midtrans (sandbox), lalu cek status di sini. '
-              'E-tiket muncul setelah pembayaran lunas.'
+        ? tr(
+            'Selesaikan pembayaran di halaman Midtrans (sandbox), lalu cek status di sini. E-tiket muncul setelah pembayaran lunas.',
+          )
         : p['status'] == 'kedaluwarsa'
-        ? 'Batas waktu pembayaran sudah lewat. Buat pesanan baru kalau masih mau berangkat.'
-        : 'Pembayaran tidak berhasil. Buat pesanan baru untuk mencoba lagi.';
+        ? tr(
+            'Batas waktu pembayaran sudah lewat. Buat pesanan baru kalau masih mau berangkat.',
+          )
+        : tr(
+            'Pembayaran tidak berhasil. Buat pesanan baru untuk mencoba lagi.',
+          );
     return Container(
       padding: const EdgeInsets.all(AppSizes.s6),
       decoration: BoxDecoration(
@@ -323,7 +329,7 @@ class PaymentStatusScreenState extends State<PaymentStatusScreen>
             style: sans(size: 14, color: AppColors.ink.withValues(alpha: 0.65)),
           ),
           const SizedBox(height: AppSizes.s3),
-          Text('Jadwal', style: redup),
+          Text(tr('Jadwal'), style: redup),
           Text(jadwal == null ? '—' : waktuLengkap(jadwal), style: isi),
           const SizedBox(height: AppSizes.s2),
           Row(
@@ -332,7 +338,7 @@ class PaymentStatusScreenState extends State<PaymentStatusScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Jumlah', style: redup),
+                    Text(tr('Jumlah'), style: redup),
                     Text('${p['penumpang']} ${satuan(l)}', style: isi),
                   ],
                 ),
@@ -341,7 +347,7 @@ class PaymentStatusScreenState extends State<PaymentStatusScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Total', style: redup),
+                    Text(tr('Total'), style: redup),
                     Text(rupiah(p['jumlah'] as num? ?? 0), style: isi),
                   ],
                 ),
@@ -349,7 +355,7 @@ class PaymentStatusScreenState extends State<PaymentStatusScreen>
             ],
           ),
           const SizedBox(height: AppSizes.s2),
-          Text('No. pesanan', style: redup),
+          Text(tr('No. pesanan'), style: redup),
           Text('${p['orderId']}', style: isi),
           const SizedBox(height: AppSizes.s4),
           Text(
@@ -381,7 +387,7 @@ class PaymentStatusScreenState extends State<PaymentStatusScreen>
                           ),
                         )
                       : const Icon(Icons.refresh_rounded, size: 18),
-                  label: const Text('Cek status'),
+                  label: Text(tr('Cek status')),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.pillVia,
                     minimumSize: const Size(0, AppSizes.touch),
@@ -394,7 +400,7 @@ class PaymentStatusScreenState extends State<PaymentStatusScreen>
                       mode: LaunchMode.externalApplication,
                     ),
                     icon: const Icon(Icons.open_in_new_rounded, size: 18),
-                    label: const Text('Lanjutkan bayar'),
+                    label: Text(tr('Lanjutkan bayar')),
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size(0, AppSizes.touch),
                     ),
@@ -406,7 +412,7 @@ class PaymentStatusScreenState extends State<PaymentStatusScreen>
                     backgroundColor: AppColors.pillVia,
                     minimumSize: const Size(0, AppSizes.touch),
                   ),
-                  child: const Text('Pesan lagi'),
+                  child: Text(tr('Pesan lagi')),
                 ),
             ],
           ),

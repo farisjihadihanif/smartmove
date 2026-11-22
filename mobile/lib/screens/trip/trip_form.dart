@@ -2,6 +2,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../api.dart';
+import '../../i18n.dart';
 import '../../navigasi.dart';
 import '../../state.dart';
 import '../../theme.dart';
@@ -137,7 +138,7 @@ class TripFormState extends State<TripForm> {
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (_) => PilihTempatScreen(
-          judul: isAsal ? 'Titik asal' : 'Tujuan',
+          judul: isAsal ? tr('Titik asal') : tr('Tujuan'),
           locate: isAsal ? widget.locate : null,
           near: (isAsal ? tujuan : asal)?.lokasi,
         ),
@@ -154,7 +155,7 @@ class TripFormState extends State<TripForm> {
       initialDate: _tanggal ?? kini.tanggal,
       firstDate: kini.tanggal.subtract(const Duration(days: 365)),
       lastDate: kini.tanggal.add(const Duration(days: 365)),
-      helpText: 'Tanggal berangkat',
+      helpText: tr('Tanggal berangkat'),
     );
     if (d != null) setState(() => _tanggal = d);
   }
@@ -163,7 +164,7 @@ class TripFormState extends State<TripForm> {
     final j = await showTimePicker(
       context: context,
       initialTime: _jam ?? const TimeOfDay(hour: 7, minute: 0),
-      helpText: 'Jam berangkat (WIB)',
+      helpText: tr('Jam berangkat (WIB)'),
       builder: (ctx, child) => MediaQuery(
         data: MediaQuery.of(ctx).copyWith(alwaysUse24HourFormat: true),
         child: child!,
@@ -176,7 +177,8 @@ class TripFormState extends State<TripForm> {
     final a = asal, b = tujuan;
     if (a == null || b == null) {
       setState(
-        () => _galat = a == null ? 'Pilih titik asal.' : 'Pilih tujuan.',
+        () =>
+            _galat = a == null ? tr('Pilih titik asal.') : tr('Pilih tujuan.'),
       );
       return;
     }
@@ -234,14 +236,14 @@ class TripFormState extends State<TripForm> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              edit ? 'Ubah rencana' : 'Rencana baru',
+              edit ? tr('Ubah rencana') : tr('Rencana baru'),
               style: titleSerif(size: 24),
             ),
             const SizedBox(height: AppSizes.s1),
             Text(
               edit
-                  ? 'Perubahan langsung dipakai saat kamu mulai navigasi.'
-                  : 'Pilih asal, tujuan, dan cara berangkat.',
+                  ? tr('Perubahan langsung dipakai saat kamu mulai navigasi.')
+                  : tr('Pilih asal, tujuan, dan cara berangkat.'),
               style: sans(
                 size: 14,
                 color: AppColors.ink.withValues(alpha: 0.65),
@@ -254,16 +256,16 @@ class TripFormState extends State<TripForm> {
                   child: Column(
                     children: [
                       _KolomTempat(
-                        label: 'Dari',
+                        label: tr('Dari'),
                         nilai: asal?.nama,
-                        hint: 'Pilih titik asal',
+                        hint: tr('Pilih titik asal'),
                         onTap: () => _pilihTempat(true),
                       ),
                       const SizedBox(height: AppSizes.s2),
                       _KolomTempat(
-                        label: 'Ke',
+                        label: tr('Ke'),
                         nilai: tujuan?.nama,
-                        hint: 'Pilih tujuan',
+                        hint: tr('Pilih tujuan'),
                         onTap: () => _pilihTempat(false),
                       ),
                     ],
@@ -271,7 +273,7 @@ class TripFormState extends State<TripForm> {
                 ),
                 const SizedBox(width: AppSizes.s2),
                 IconButton.outlined(
-                  tooltip: 'Tukar asal dan tujuan',
+                  tooltip: tr('Tukar asal dan tujuan'),
                   onPressed: () => _ubah(() {
                     final a = asal;
                     asal = tujuan;
@@ -285,7 +287,7 @@ class TripFormState extends State<TripForm> {
               ],
             ),
             const SizedBox(height: AppSizes.s6 - AppSizes.s1),
-            Text('Naik apa?', style: label),
+            Text(tr('Naik apa?'), style: label),
             const SizedBox(height: AppSizes.s2),
             GridView.count(
               crossAxisCount: 2,
@@ -308,7 +310,9 @@ class TripFormState extends State<TripForm> {
                 !_memuatEstimasi) ...[
               const SizedBox(height: AppSizes.s2),
               Text(
-                'Belum ada angkot atau bus yang lewat dekat titik asal dan tujuan. Rencana tetap bisa disimpan.',
+                tr(
+                  'Belum ada angkot atau bus yang lewat dekat titik asal dan tujuan. Rencana tetap bisa disimpan.',
+                ),
                 style: sans(
                   size: 14,
                   color: AppColors.ink.withValues(alpha: 0.7),
@@ -316,7 +320,7 @@ class TripFormState extends State<TripForm> {
               ),
             ],
             const SizedBox(height: AppSizes.s6 - AppSizes.s1),
-            Text('Berangkat (WIB)', style: label),
+            Text(tr('Berangkat (WIB)'), style: label),
             const SizedBox(height: AppSizes.s2),
             Row(
               children: [
@@ -325,7 +329,7 @@ class TripFormState extends State<TripForm> {
                   child: _KotakPilih(
                     icon: Icons.calendar_today_rounded,
                     teks: _tanggal == null
-                        ? 'Hari ini'
+                        ? tr('Hari ini')
                         : labelTanggal(_tanggal!),
                     redup: _tanggal == null,
                     onTap: _pilihTanggal,
@@ -336,7 +340,7 @@ class TripFormState extends State<TripForm> {
                   flex: 2,
                   child: _KotakPilih(
                     icon: Icons.schedule_rounded,
-                    teks: _jam == null ? 'Jam' : labelJam(_jam!),
+                    teks: _jam == null ? tr('Jam') : labelJam(_jam!),
                     redup: _jam == null,
                     onTap: _pilihJam,
                   ),
@@ -348,8 +352,8 @@ class TripFormState extends State<TripForm> {
                 Expanded(
                   child: Text(
                     _jam == null
-                        ? 'Kosongkan jam bila belum tahu kapan berangkat.'
-                        : 'Terjadwal',
+                        ? tr('Kosongkan jam bila belum tahu kapan berangkat.')
+                        : tr('Terjadwal'),
                     style: sans(
                       size: 12,
                       color: AppColors.ink.withValues(alpha: 0.6),
@@ -362,18 +366,18 @@ class TripFormState extends State<TripForm> {
                       _jam = null;
                       _tanggal = null;
                     }),
-                    child: const Text('Kosongkan'),
+                    child: Text(tr('Kosongkan')),
                   ),
               ],
             ),
             const SizedBox(height: AppSizes.s3),
-            Text('Nama rencana (opsional)', style: label),
+            Text(tr('Nama rencana (opsional)'), style: label),
             const SizedBox(height: AppSizes.s2),
             TextField(
               controller: _judul,
               maxLength: 100,
               decoration: InputDecoration(
-                hintText: 'mis. Berangkat kuliah',
+                hintText: tr('mis. Berangkat kuliah'),
                 counterText: '',
                 filled: true,
                 fillColor: AppColors.search,
@@ -386,7 +390,9 @@ class TripFormState extends State<TripForm> {
             if (_memuatEstimasi || ringkas != null) ...[
               const SizedBox(height: AppSizes.s4),
               Text(
-                _memuatEstimasi ? 'Menghitung estimasi…' : 'Estimasi $ringkas',
+                _memuatEstimasi
+                    ? tr('Menghitung estimasi…')
+                    : tr('Estimasi {0}', [ringkas]),
                 style: sans(
                   size: 14,
                   weight: _memuatEstimasi ? FontWeight.w400 : FontWeight.w600,
@@ -409,7 +415,7 @@ class TripFormState extends State<TripForm> {
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size(0, AppSizes.touch),
                     ),
-                    child: const Text('Batal'),
+                    child: Text(tr('Batal')),
                   ),
                 ),
                 const SizedBox(width: AppSizes.s2),
@@ -421,7 +427,9 @@ class TripFormState extends State<TripForm> {
                       backgroundColor: AppColors.loginButton,
                       minimumSize: const Size(0, AppSizes.touch),
                     ),
-                    child: Text(edit ? 'Simpan perubahan' : 'Simpan rencana'),
+                    child: Text(
+                      edit ? tr('Simpan perubahan') : tr('Simpan rencana'),
+                    ),
                   ),
                 ),
               ],
@@ -646,7 +654,7 @@ class _PilihTempatScreenState extends State<PilihTempatScreen> {
   Future<void> _cari(String q) async {
     final s = q.trim();
     if (s.length < 2) {
-      setState(() => _galat = 'Ketik minimal 2 huruf.');
+      setState(() => _galat = tr('Ketik minimal 2 huruf.'));
       return;
     }
     final req = ++_req;
@@ -687,12 +695,12 @@ class _PilihTempatScreenState extends State<PilihTempatScreen> {
       setState(() {
         _memuat = false;
         _galat = h.status == 'luar'
-            ? 'SmartMove baru melayani Medan dan sekitarnya.'
-            : 'Lokasi belum bisa dibaca. Ketik nama tempatnya.';
+            ? tr('SmartMove baru melayani Medan dan sekitarnya.')
+            : tr('Lokasi belum bisa dibaca. Ketik nama tempatnya.');
       });
       return;
     }
-    var nama = 'Lokasi saya';
+    var nama = tr('Lokasi saya');
     try {
       final r = await _api.get(
         '/places/reverse',
@@ -713,7 +721,7 @@ class _PilihTempatScreenState extends State<PilihTempatScreen> {
           NebulaHeader(
             title: widget.judul,
             leading: IconButton(
-              tooltip: 'Tutup',
+              tooltip: tr('Tutup'),
               onPressed: () => Navigator.of(context).pop(),
               icon: const Icon(Icons.close_rounded),
             ),
@@ -721,8 +729,8 @@ class _PilihTempatScreenState extends State<PilihTempatScreen> {
               SearchField(
                 controller: _q,
                 autofocus: true,
-                hint: 'Cari nama tempat',
-                label: 'Cari ${widget.judul.toLowerCase()}',
+                hint: tr('Cari nama tempat'),
+                label: tr('Cari {0}', [widget.judul.toLowerCase()]),
                 onSubmitted: _cari,
               ),
             ],
@@ -739,7 +747,7 @@ class _PilihTempatScreenState extends State<PilihTempatScreen> {
                       color: AppColors.inkViolet,
                     ),
                     title: Text(
-                      'Pakai lokasi saat ini',
+                      tr('Pakai lokasi saat ini'),
                       style: sans(
                         size: 15,
                         weight: FontWeight.w600,
@@ -764,7 +772,9 @@ class _PilihTempatScreenState extends State<PilihTempatScreen> {
                   Padding(
                     padding: const EdgeInsets.all(AppSizes.s4),
                     child: Text(
-                      'Tidak ditemukan di Medan dan sekitarnya. Coba nama lain.',
+                      tr(
+                        'Tidak ditemukan di Medan dan sekitarnya. Coba nama lain.',
+                      ),
                       style: sans(
                         size: 14,
                         color: AppColors.ink.withValues(alpha: 0.7),

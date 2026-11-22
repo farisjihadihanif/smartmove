@@ -1,6 +1,7 @@
 import 'package:flutter/painting.dart';
 
 import 'config.dart';
+import 'i18n.dart';
 import 'wib.dart';
 
 // Traffic Mitigation Campaign (T-207). Samakan dengan web/src/lib/kampanye.js.
@@ -11,33 +12,33 @@ class InfoJenisEvent {
   final Color warna;
 }
 
-const jenisEvent = {
-  'cfd': InfoJenisEvent('Car Free Day', Color(0xFF2E9E5B)),
-  'rekayasa_arus': InfoJenisEvent('Rekayasa arus', Color(0xFFFFA000)),
-  'acara': InfoJenisEvent('Acara', Color(0xFFA2028A)),
-  'lainnya': InfoJenisEvent('Lainnya', Color(0xFF41396F)),
+Map<String, InfoJenisEvent> get jenisEvent => {
+  'cfd': InfoJenisEvent(tr('Car Free Day'), Color(0xFF2E9E5B)),
+  'rekayasa_arus': InfoJenisEvent(tr('Rekayasa arus'), Color(0xFFFFA000)),
+  'acara': InfoJenisEvent(tr('Acara'), Color(0xFFA2028A)),
+  'lainnya': InfoJenisEvent(tr('Lainnya'), Color(0xFF41396F)),
 };
 
 InfoJenisEvent infoJenisEvent(String? j) =>
     jenisEvent[j] ?? jenisEvent['lainnya']!;
 
-const fiturUmpanBalik = [
+List<(String, String)> get fiturUmpanBalik => [
   ('navigasi', 'Smart Navigation'),
   ('lalu_lintas', 'Live Traffic'),
   ('trip_planner', 'Trip Planner'),
   ('pembayaran', 'Digital Payment'),
   ('rewards', 'Rewards'),
-  ('kampanye', 'Kampanye'),
-  ('lainnya', 'Lainnya'),
+  ('kampanye', tr('Kampanye')),
+  ('lainnya', tr('Lainnya')),
 ];
 
-const labelRating = [
+List<String> get labelRating => [
   '',
-  'Kurang sekali',
-  'Kurang',
-  'Cukup',
-  'Bagus',
-  'Bagus sekali',
+  tr('Kurang sekali'),
+  tr('Kurang'),
+  tr('Cukup'),
+  tr('Bagus'),
+  tr('Bagus sekali'),
 ];
 
 DateTime _waktu(Object? v) => DateTime.parse('$v');
@@ -47,9 +48,14 @@ String rentangEvent(Map e, DateTime now) {
   final mulai = _waktu(e['mulai']), selesai = _waktu(e['selesai']);
   final hMulai = hariWib(mulai, now), hSelesai = hariWib(selesai, now);
   if (hMulai == hSelesai) {
-    return '$hMulai, ${jamWib(mulai)}–${jamWib(selesai)} WIB';
+    return tr('{0}, {1}–{2} WIB', [hMulai, jamWib(mulai), jamWib(selesai)]);
   }
-  return '$hMulai, ${jamWib(mulai)} – $hSelesai, ${jamWib(selesai)} WIB';
+  return tr('{0}, {1} – {2}, {3} WIB', [
+    hMulai,
+    jamWib(mulai),
+    hSelesai,
+    jamWib(selesai),
+  ]);
 }
 
 /// Cocokkan kata kunci ke beberapa teks (tanpa beda huruf besar-kecil).

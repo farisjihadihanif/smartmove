@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../i18n.dart';
 import '../../notifications.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
@@ -66,11 +67,14 @@ Future<void> showNotificationSheet(
                   Expanded(
                     child: Semantics(
                       header: true,
-                      child: Text('Notifikasi', style: titleSerif(size: 20)),
+                      child: Text(
+                        tr('Notifikasi'),
+                        style: titleSerif(size: 20),
+                      ),
                     ),
                   ),
                   IconButton(
-                    tooltip: 'Tutup',
+                    tooltip: tr('Tutup'),
                     onPressed: () => Navigator.of(sheetContext).pop(),
                     icon: const Icon(Icons.close_rounded),
                   ),
@@ -78,10 +82,12 @@ Future<void> showNotificationSheet(
               ),
             ),
             if (list.isEmpty)
-              const EmptyState(
+              EmptyState(
                 icon: Icons.notifications_none_rounded,
-                title: 'Belum ada notifikasi',
-                message: 'Pengingat perjalanan dan event lalu lintas dalam 24 jam ke depan akan muncul di sini.',
+                title: tr('Belum ada notifikasi'),
+                message: tr(
+                  'Pengingat perjalanan dan event lalu lintas dalam 24 jam ke depan akan muncul di sini.',
+                ),
               )
             else
               Flexible(
@@ -142,7 +148,7 @@ class _NotifTile extends StatelessWidget {
 
     return Semantics(
       button: true,
-      label: '${baru ? 'Baru. ' : ''}$judul. $isi. $kapan',
+      label: '${baru ? tr('Baru. ') : ''}$judul. $isi. $kapan',
       excludeSemantics: true,
       child: Material(
         color: baru

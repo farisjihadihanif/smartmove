@@ -1,20 +1,24 @@
 import 'package:material_ui/material_ui.dart';
 
+import 'i18n.dart';
+
+export 'i18n.dart' show rupiah;
 import 'trip.dart';
 import 'theme.dart';
 
 // Pemesanan & Digital Payment — SELALU simulasi (T-302, PRD §6.3).
 // Sama dengan web lib/pembayaran.js.
 
-const labelSimulasi = 'Simulasi – bukan tiket resmi';
+String get labelSimulasi => tr('Simulasi – bukan tiket resmi');
 
-const jenisLayanan = <(String, String, IconData)>[
-  ('kereta', 'Kereta', Icons.train_rounded),
-  ('bus', 'Bus', Icons.directions_bus_rounded),
-  ('bus_antarkota', 'Antarkota', Icons.airport_shuttle_rounded),
-  ('travel', 'Travel', Icons.directions_car_rounded),
-  ('parkir', 'Parkir', Icons.local_parking_rounded),
-];
+List<(String, String, IconData)> get jenisLayanan =>
+    <(String, String, IconData)>[
+      ('kereta', tr('Kereta'), Icons.train_rounded),
+      ('bus', tr('Bus'), Icons.directions_bus_rounded),
+      ('bus_antarkota', tr('Antarkota'), Icons.airport_shuttle_rounded),
+      ('travel', tr('Travel'), Icons.directions_car_rounded),
+      ('parkir', tr('Parkir'), Icons.local_parking_rounded),
+    ];
 
 String labelJenis(String? v) =>
     jenisLayanan.where((j) => j.$1 == v).firstOrNull?.$2 ?? (v ?? '');
@@ -33,31 +37,31 @@ class GrupMetode {
   final List<(String, String)> pilihan;
 }
 
-const grupMetode = <GrupMetode>[
+List<GrupMetode> get grupMetode => <GrupMetode>[
   GrupMetode(
     'qris',
     'QRIS',
-    'Pindai kode QR dari aplikasi bank atau e-wallet mana pun',
+    tr('Pindai kode QR dari aplikasi bank atau e-wallet mana pun'),
     Icons.qr_code_2_rounded,
     [('qris', 'QRIS')],
   ),
   GrupMetode(
     'va',
-    'Virtual account',
-    'Transfer dari m-banking, internet banking, atau ATM',
+    tr('Virtual account'),
+    tr('Transfer dari m-banking, internet banking, atau ATM'),
     Icons.account_balance_rounded,
     [
       ('bca', 'BCA'),
       ('bni', 'BNI'),
       ('bri', 'BRI'),
-      ('mandiri', 'Mandiri'),
-      ('permata', 'Permata'),
+      ('mandiri', tr('Mandiri')),
+      ('permata', tr('Permata')),
     ],
   ),
   GrupMetode(
     'ewallet',
-    'E-wallet',
-    'Bayar langsung di aplikasi GoPay atau ShopeePay',
+    tr('E-wallet'),
+    tr('Bayar langsung di aplikasi GoPay atau ShopeePay'),
     Icons.account_balance_wallet_rounded,
     [('gopay', 'GoPay'), ('shopeepay', 'ShopeePay')],
   ),
@@ -66,21 +70,21 @@ const grupMetode = <GrupMetode>[
 /// Simulator sandbox Midtrans untuk "membayar" transaksi simulasi saat uji coba.
 const simulatorMidtrans = 'https://simulator.sandbox.midtrans.com/';
 
-const _namaMetode = {
+Map<String, String> get _namaMetode => {
   'qris': 'QRIS',
-  'bca': 'Virtual account BCA',
-  'bni': 'Virtual account BNI',
-  'bri': 'Virtual account BRI',
-  'mandiri': 'Mandiri Bill',
-  'permata': 'Virtual account Permata',
-  'ewallet': 'E-Wallet',
-  'transfer': 'Transfer bank',
-  'credit_card': 'Kartu kredit',
+  'bca': tr('Virtual account BCA'),
+  'bni': tr('Virtual account BNI'),
+  'bri': tr('Virtual account BRI'),
+  'mandiri': tr('Mandiri Bill'),
+  'permata': tr('Virtual account Permata'),
+  'ewallet': tr('E-Wallet'),
+  'transfer': tr('Transfer bank'),
+  'credit_card': tr('Kartu kredit'),
   'gopay': 'GoPay',
   'shopeepay': 'ShopeePay',
-  'bank_transfer': 'Transfer bank',
-  'echannel': 'Transfer bank (Mandiri)',
-  'cstore': 'Gerai ritel',
+  'bank_transfer': tr('Transfer bank'),
+  'echannel': tr('Transfer bank (Mandiri)'),
+  'cstore': tr('Gerai ritel'),
 };
 String? namaMetode(String? m) =>
     m == null ? null : (_namaMetode[m] ?? m.replaceAll('_', ' '));
@@ -93,29 +97,18 @@ String sisaWaktu(Duration d) {
   final j = d.inHours;
   final m = d.inMinutes % 60;
   final s = d.inSeconds % 60;
-  return j > 0 ? '$j j ${_dua2(m)} m' : '${_dua2(m)}:${_dua2(s)}';
+  return j > 0 ? tr('{0} j {1} m', [j, _dua2(m)]) : '${_dua2(m)}:${_dua2(s)}';
 }
 
 /// Label + warna status (warna selalu disertai teks).
 (String, Color) statusPembayaran(String? s) => switch (s) {
-  'menunggu' => ('Menunggu pembayaran', AppColors.teksKuning),
-  'lunas' => ('Lunas', AppColors.teksHijau),
-  'gagal' => ('Gagal', AppColors.teksMerah),
-  'kedaluwarsa' => ('Kedaluwarsa', AppColors.teksAbu),
-  'dibatalkan' => ('Dibatalkan', AppColors.teksAbu),
+  'menunggu' => (tr('Menunggu pembayaran'), AppColors.teksKuning),
+  'lunas' => (tr('Lunas'), AppColors.teksHijau),
+  'gagal' => (tr('Gagal'), AppColors.teksMerah),
+  'kedaluwarsa' => (tr('Kedaluwarsa'), AppColors.teksAbu),
+  'dibatalkan' => (tr('Dibatalkan'), AppColors.teksAbu),
   _ => (s ?? '', AppColors.teksAbu),
 };
-
-/// "Rp35.000"
-String rupiah(num n) {
-  final s = n.round().toString();
-  final b = StringBuffer();
-  for (var i = 0; i < s.length; i++) {
-    if (i > 0 && (s.length - i) % 3 == 0) b.write('.');
-    b.write(s[i]);
-  }
-  return 'Rp$b';
-}
 
 bool adalahParkir(Map l) => l['jenis'] == 'parkir';
 String satuan(Map l) => adalahParkir(l) ? 'jam' : 'orang';
@@ -130,11 +123,6 @@ String ruteLayanan(Map l) {
 
 const _wib = Duration(hours: 7);
 String _dua(int n) => n.toString().padLeft(2, '0');
-const _hari = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
-const _bulan = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', //
-  'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
-];
 
 /// Tanggal WIB "YYYY-MM-DD" untuk [offset] hari dari [now].
 String tanggalWib(DateTime now, [int offset = 0]) {
@@ -145,14 +133,14 @@ String tanggalWib(DateTime now, [int offset = 0]) {
 /// "2026-11-20" → ("Jum", 20, "Nov")
 (String, int, String) pecahTanggal(String iso) {
   final d = DateTime.parse('${iso}T00:00:00Z');
-  return (_hari[d.weekday - 1], d.day, _bulan[d.month - 1]);
+  return (hariPendek(d.weekday), d.day, bulanPendek(d.month));
 }
 
 /// "Jum, 20 Nov 2026, 06.40 WIB"
 String waktuLengkap(DateTime t) {
   final w = t.toUtc().add(_wib);
-  return '${_hari[w.weekday - 1]}, ${w.day} ${_bulan[w.month - 1]} ${w.year}, '
-      '${_dua(w.hour)}.${_dua(w.minute)} WIB';
+  return '${hariPendek(w.weekday)}, ${tanggalBulanTahun(w.day, w.month, w.year)}, '
+      '${jamMenit(w.hour, w.minute)} WIB';
 }
 
 /// Slot jam layanan: dari API (`slot`), atau tiap 30 menit untuk parkir.
@@ -192,8 +180,8 @@ String teksBagikan(Map p) {
     ruteLayanan(l),
     if (jadwal != null) waktuLengkap(jadwal),
     '${p['penumpang']} ${satuan(l)} · ${rupiah(p['jumlah'] as num? ?? 0)}',
-    if (kode != null) 'Kode: $kode',
-    'Dipesan lewat SmartMove Medan',
+    if (kode != null) tr('Kode: {0}', [kode]),
+    tr('Dipesan lewat SmartMove Medan'),
   ].join('\n');
 }
 

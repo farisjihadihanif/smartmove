@@ -1,19 +1,24 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../api.dart';
+import '../i18n.dart';
 import '../theme.dart';
 
 // Pemetaan galat → teks pengguna (DESIGN §5). Samakan dengan web/src/lib/errors.js.
-const _byCode = {
-  kOffline: 'Kamu sedang offline',
-  kServerUnreachable:
-      'Tidak bisa terhubung ke server SmartMove. Coba lagi sebentar.',
-  'DI_LUAR_WILAYAH': 'SmartMove baru melayani Medan dan sekitarnya.',
-  'LAYANAN_PETA_GAGAL':
-      'Rute belum bisa dihitung. Coba lagi atau buka di OpenStreetMap.',
-  'POIN_KURANG': 'Poinmu belum cukup untuk voucher ini.',
-  'RUTE_TIDAK_ADA': 'Tidak ada jalan untuk moda ini di antara kedua titik. Coba moda lain atau geser titiknya.',
-  'FOTO_JALAN_NONAKTIF': 'Foto jalan belum tersedia saat ini.',
+Map<String, String> get _byCode => {
+  kOffline: tr('Kamu sedang offline'),
+  kServerUnreachable: tr(
+    'Tidak bisa terhubung ke server SmartMove. Coba lagi sebentar.',
+  ),
+  'DI_LUAR_WILAYAH': tr('SmartMove baru melayani Medan dan sekitarnya.'),
+  'LAYANAN_PETA_GAGAL': tr(
+    'Rute belum bisa dihitung. Coba lagi atau buka di OpenStreetMap.',
+  ),
+  'POIN_KURANG': tr('Poinmu belum cukup untuk voucher ini.'),
+  'RUTE_TIDAK_ADA': tr(
+    'Tidak ada jalan untuk moda ini di antara kedua titik. Coba moda lain atau geser titiknya.',
+  ),
+  'FOTO_JALAN_NONAKTIF': tr('Foto jalan belum tersedia saat ini.'),
 };
 
 /// True bila perangkat tidak punya internet.
@@ -33,7 +38,7 @@ String errorMessageFor(Object? error) {
     }
     return _byCode[error.code] ?? error.message;
   }
-  return 'Terjadi kesalahan. Coba lagi.';
+  return tr('Terjadi kesalahan. Coba lagi.');
 }
 
 /// Banner galat. Isi [error] (mis. ApiException) atau [message].
@@ -44,14 +49,14 @@ class ErrorBanner extends StatelessWidget {
     this.error,
     this.message,
     this.onRetry,
-    this.retryLabel = 'Coba lagi',
+    this.retryLabel,
     this.onDismiss,
   });
 
   final Object? error;
   final String? message;
   final VoidCallback? onRetry;
-  final String retryLabel;
+  final String? retryLabel;
   final VoidCallback? onDismiss;
 
   @override
@@ -119,11 +124,11 @@ class ErrorBanner extends StatelessWidget {
                     foregroundColor: AppColors.inkViolet,
                     textStyle: sans(size: 14, weight: FontWeight.w600),
                   ),
-                  child: Text(retryLabel),
+                  child: Text(retryLabel ?? tr('Coba lagi')),
                 ),
               if (onDismiss != null)
                 IconButton(
-                  tooltip: 'Tutup',
+                  tooltip: tr('Tutup'),
                   onPressed: onDismiss,
                   icon: Icon(
                     Icons.close,

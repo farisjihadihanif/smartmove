@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:material_ui/material_ui.dart';
 
+import '../i18n.dart';
 import '../navigasi.dart';
 import '../theme.dart';
 import 'error_banner.dart';
@@ -36,7 +37,7 @@ class PlaceResults extends StatelessWidget {
               child: CircularProgressIndicator(strokeWidth: 2),
             ),
             const SizedBox(width: AppSizes.s2),
-            Text('Mencari tempat…', style: sans(size: 14, color: muted)),
+            Text(tr('Mencari tempat…'), style: sans(size: 14, color: muted)),
           ],
         ),
       );
@@ -46,7 +47,9 @@ class PlaceResults extends StatelessWidget {
       isi = Padding(
         padding: const EdgeInsets.all(AppSizes.s3),
         child: Text(
-          'Tempat tidak ditemukan di Medan dan sekitarnya. Coba nama lain atau ketuk peta.',
+          tr(
+            'Tempat tidak ditemukan di Medan dan sekitarnya. Coba nama lain atau ketuk peta.',
+          ),
           style: sans(size: 14, color: muted, height: 1.4),
         ),
       );

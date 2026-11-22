@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../i18n.dart';
 import '../theme.dart';
 
 /// Header bertekstur cat air lilac (mockup hal. 3–7), sudut bawah membulat
@@ -135,8 +136,8 @@ class NotificationButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final label = unread > 0
-        ? 'Notifikasi, $unread belum dibaca'
-        : 'Notifikasi';
+        ? tr('Notifikasi, {0} belum dibaca', [unread])
+        : tr('Notifikasi');
     return Semantics(
       button: true,
       label: label,

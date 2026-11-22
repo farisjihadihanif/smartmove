@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../api.dart';
 import '../../auth_rules.dart';
+import '../../i18n.dart';
 import '../../state.dart';
 import '../../theme.dart';
 import 'auth_shell.dart';
@@ -71,12 +72,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return AuthShell(
-      title: 'Buat akun',
-      subtitle: 'Simpan rencana perjalanan, kumpulkan poin, dan pesan tiket simulasi.',
+      title: tr('Buat akun'),
+      subtitle: tr(
+        'Simpan rencana perjalanan, kumpulkan poin, dan pesan tiket simulasi.',
+      ),
       showBack: true,
       footer: AuthFooter(
-        text: 'Sudah punya akun?',
-        link: AuthLink(label: 'Masuk', onTap: () => Navigator.pop(context)),
+        text: tr('Sudah punya akun?'),
+        link: AuthLink(label: tr('Masuk'), onTap: () => Navigator.pop(context)),
       ),
       children: [
         const SizedBox(height: 28),
@@ -85,8 +88,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
             children: [
               AuthField(
                 icon: Icons.badge,
-                label: 'Nama lengkap',
-                placeholder: 'mis. Budi Siregar',
+                label: tr('Nama lengkap'),
+                placeholder: tr('mis. Budi Siregar'),
                 controller: _nama,
                 keyboardType: TextInputType.name,
                 autofillHints: const [AutofillHints.name],
@@ -94,17 +97,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: AppSizes.s4),
               AuthField(
                 icon: Icons.person,
-                label: 'Username',
-                placeholder: 'mis. budi_medan',
-                helper: 'Huruf kecil, angka, titik, atau garis bawah.',
+                label: tr('Username'),
+                placeholder: tr('mis. budi_medan'),
+                helper: tr('Huruf kecil, angka, titik, atau garis bawah.'),
                 controller: _username,
                 autofillHints: const [AutofillHints.newUsername],
               ),
               const SizedBox(height: AppSizes.s4),
               AuthField(
                 icon: Icons.email,
-                label: 'Email',
-                placeholder: 'nama@email.com',
+                label: tr('Email'),
+                placeholder: tr('nama@email.com'),
                 controller: _email,
                 keyboardType: TextInputType.emailAddress,
                 autofillHints: const [AutofillHints.email],
@@ -112,8 +115,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: AppSizes.s4),
               AuthField(
                 icon: Icons.lock,
-                label: 'Password',
-                helper: 'Minimal 8 karakter.',
+                label: tr('Password'),
+                helper: tr('Minimal 8 karakter.'),
                 controller: _password,
                 password: true,
                 autofillHints: const [AutofillHints.newPassword],
@@ -125,7 +128,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
         AuthError(_error),
         const SizedBox(height: AppSizes.s6),
-        AuthButton(label: 'Buat akun', busy: _busy, onPressed: _submit),
+        AuthButton(label: tr('Buat akun'), busy: _busy, onPressed: _submit),
       ],
     );
   }

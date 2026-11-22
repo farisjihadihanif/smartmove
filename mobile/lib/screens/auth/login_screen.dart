@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../../api.dart';
+import '../../i18n.dart';
 import '../../state.dart';
 import '../../theme.dart';
 import 'auth_shell.dart';
@@ -38,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _submit() async {
     final id = _username.text.trim();
     if (id.isEmpty || _password.text.isEmpty) {
-      setState(() => _error = 'Isi username/email dan password dulu.');
+      setState(() => _error = tr('Isi username/email dan password dulu.'));
       return;
     }
     FocusScope.of(context).unfocus();
@@ -72,9 +73,9 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return AuthShell(
-      title: 'Member Login',
+      title: tr('Member Login'),
       showBack: ModalRoute.of(context)?.canPop ?? false,
-      subtitle: 'Masuk untuk melanjutkan rencana perjalananmu di Medan.',
+      subtitle: tr('Masuk untuk melanjutkan rencana perjalananmu di Medan.'),
       footer: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -84,7 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSizes.s3),
                 child: Text(
-                  'Belum punya akun?',
+                  tr('Belum punya akun?'),
                   style: sans(
                     size: 14,
                     color: AppColors.ink.withValues(alpha: 0.55),
@@ -96,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           const SizedBox(height: AppSizes.s3),
           AuthSecondary(
-            label: 'Buat akun',
+            label: tr('Buat akun'),
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const RegisterScreen()),
@@ -111,8 +112,8 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               AuthField(
                 icon: Icons.person,
-                label: 'Username atau email',
-                placeholder: 'mis. budi_medan',
+                label: tr('Username atau email'),
+                placeholder: tr('mis. budi_medan'),
                 controller: _username,
                 keyboardType: TextInputType.emailAddress,
                 autofillHints: const [AutofillHints.username],
@@ -120,7 +121,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: AppSizes.s4),
               AuthField(
                 icon: Icons.lock,
-                label: 'Password',
+                label: tr('Password'),
                 controller: _password,
                 password: true,
                 autofillHints: const [AutofillHints.password],
@@ -157,7 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         Flexible(
                           child: Text(
-                            'Ingat saya',
+                            tr('Ingat saya'),
                             overflow: TextOverflow.ellipsis,
                             style: sans(
                               color: AppColors.ink.withValues(alpha: 0.8),
@@ -172,7 +173,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             AuthLink(
-              label: 'Lupa password?',
+              label: tr('Lupa password?'),
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
@@ -182,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         AuthError(_error),
         const SizedBox(height: AppSizes.s4),
-        AuthButton(label: 'Masuk', busy: _busy, onPressed: _submit),
+        AuthButton(label: tr('Masuk'), busy: _busy, onPressed: _submit),
       ],
     );
   }

@@ -4,15 +4,19 @@ import 'package:material_ui/material_ui.dart';
 
 import 'api.dart';
 import 'fonts.dart';
+import 'i18n.dart';
 import 'screens/home/home_shell.dart';
 import 'screens/splash_screen.dart';
 import 'state.dart';
 import 'theme.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setupFonts();
-  final state = AppState(ApiClient())
+  final state = AppState(ApiClient());
+  // Bahasa dipasang sebelum layar pertama supaya teks (dan Accept-Language) langsung benar.
+  await state.muatBahasa();
+  state
     ..muatTema()
     ..bootstrap();
   runApp(SmartMoveApp(state: state));
@@ -34,10 +38,12 @@ class SmartMoveApp extends StatefulWidget {
   State<SmartMoveApp> createState() => _SmartMoveAppState();
 }
 
-/// Tema mengikuti pilihan pengguna (Sistem / Terang / Gelap) dan setelan sistem.
+/// Tema mengikuti pilihan pengguna (Sistem / Terang / Gelap) dan setelan sistem;
+/// bahasa mengikuti pilihan pengguna atau bahasa perangkat (T-111).
 class _SmartMoveAppState extends State<SmartMoveApp>
     with WidgetsBindingObserver {
   bool? _gelapSebelum;
+  String? _bahasaSebelum;
 
   @override
   void initState() {
@@ -56,6 +62,9 @@ class _SmartMoveAppState extends State<SmartMoveApp>
   @override
   void didChangePlatformBrightness() => _cekTema();
 
+  @override
+  void didChangeLocales(List<Locale>? locales) => widget.state.terapkanBahasa();
+
   bool get _gelap {
     final t = widget.state.tema;
     if (t == 'gelap') return true;
@@ -65,10 +74,10 @@ class _SmartMoveAppState extends State<SmartMoveApp>
   }
 
   void _cekTema() {
-    if (_gelap == _gelapSebelum) return;
+    if (_gelap == _gelapSebelum && bahasa == _bahasaSebelum) return;
     setState(() {});
-    // Banyak widget membaca AppColors langsung (bukan lewat Theme): tandai seluruh pohon
-    // untuk dibangun ulang tanpa membuang state (tumpukan layar & isian tetap).
+    // Banyak widget membaca AppColors / tr() langsung (bukan lewat Theme/Localizations):
+    // tandai seluruh pohon untuk dibangun ulang tanpa membuang state (tumpukan layar & isian tetap).
     WidgetsBinding.instance.addPostFrameCallback((_) {
       void bangun(Element e) {
         e.markNeedsBuild();
@@ -83,12 +92,16 @@ class _SmartMoveAppState extends State<SmartMoveApp>
   Widget build(BuildContext context) {
     final gelap = _gelap;
     _gelapSebelum = gelap;
+    _bahasaSebelum = bahasa;
     return AppScope(
       state: widget.state,
       child: MaterialApp(
         title: 'SmartMove Medan',
         debugShowCheckedModeBanner: false,
         theme: buildTheme(gelap: gelap),
+        locale: localeAktif,
+        supportedLocales: const [Locale('id', 'ID'), Locale('en', 'US')],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
         home: RootGate(splashDuration: widget.splashDuration),
       ),
     );

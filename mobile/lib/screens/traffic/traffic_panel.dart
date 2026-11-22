@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../i18n.dart';
 import '../../lalulintas.dart';
 import '../../theme.dart';
 import '../../wib.dart';
@@ -38,7 +39,7 @@ class DaftarKoridor extends StatelessWidget {
             const SizedBox(width: AppSizes.s2),
             Expanded(
               child: Text(
-                'Menghitung waktu tempuh jalan utama…',
+                tr('Menghitung waktu tempuh jalan utama…'),
                 style: sans(size: 14, color: muted),
               ),
             ),
@@ -56,7 +57,7 @@ class DaftarKoridor extends StatelessWidget {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: AppSizes.s6),
         child: Text(
-          'Data jalan utama belum tersedia. Coba lagi nanti.',
+          tr('Data jalan utama belum tersedia. Coba lagi nanti.'),
           style: sans(size: 14, color: muted, height: 1.45),
         ),
       );
@@ -69,7 +70,10 @@ class DaftarKoridor extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: AppSizes.s3),
             child: Text(
-              'Diperbarui ${jamWib(data.diperbaruiPada!)} WIB. Waktu dihitung dari laporan warga dan waktu tempuh normal.',
+              tr(
+                'Diperbarui {0} WIB. Waktu dihitung dari laporan warga dan waktu tempuh normal.',
+                [jamWib(data.diperbaruiPada!)],
+              ),
               style: sans(
                 size: 12,
                 color: AppColors.ink.withValues(alpha: 0.55),
@@ -172,7 +176,9 @@ class DaftarKoridor extends StatelessWidget {
                             ),
                             if (tunda.isNotEmpty)
                               Text(
-                                'biasanya ${formatMenit(k['durasiNormalS'] as num?)}',
+                                tr('biasanya {0}', [
+                                  formatMenit(k['durasiNormalS'] as num?),
+                                ]),
                                 style: sans(
                                   size: 12,
                                   color: AppColors.ink.withValues(alpha: 0.55),
@@ -181,7 +187,7 @@ class DaftarKoridor extends StatelessWidget {
                           ]
                         : [
                             Text(
-                              'Belum bisa dihitung',
+                              tr('Belum bisa dihitung'),
                               style: sans(
                                 size: 12,
                                 color: AppColors.ink.withValues(alpha: 0.55),
@@ -211,14 +217,16 @@ class RingkasanPeta extends StatelessWidget {
       children: [
         _judul(
           jumlah > 0
-              ? '$jumlah laporan warga di area ini'
-              : 'Belum ada laporan di area ini',
+              ? tr('{0} laporan warga di area ini', [jumlah])
+              : tr('Belum ada laporan di area ini'),
         ),
         const SizedBox(height: 4),
         Text(
           jumlah > 0
-              ? 'Ketuk penanda untuk melihat detail atau mengonfirmasi.'
-              : 'Lihat kemacetan, banjir, atau penutupan jalan? Ketuk Laporkan supaya warga lain tahu.',
+              ? tr('Ketuk penanda untuk melihat detail atau mengonfirmasi.')
+              : tr(
+                  'Lihat kemacetan, banjir, atau penutupan jalan? Ketuk Laporkan supaya warga lain tahu.',
+                ),
           style: sans(
             size: 14,
             color: AppColors.ink.withValues(alpha: 0.65),
@@ -302,9 +310,9 @@ class DetailLaporan extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Dilaporkan ${sejak(dibuat, now).toLowerCase()}'
-                      '${konfirmasi > 0 ? ', dikonfirmasi $konfirmasi warga' : ''}.'
-                      '${habis != null ? ' Hilang otomatis pukul ${jamWib(habis)}.' : ''}',
+                      '${tr('Dilaporkan {0}', [sejak(dibuat, now).toLowerCase()])}'
+                      '${konfirmasi > 0 ? tr(', dikonfirmasi {0} warga', [konfirmasi]) : ''}.'
+                      '${habis != null ? tr(' Hilang otomatis pukul {0}.', [jamWib(habis)]) : ''}',
                       style: sans(
                         size: 13,
                         color: AppColors.ink.withValues(alpha: 0.6),
@@ -323,7 +331,7 @@ class DetailLaporan extends StatelessWidget {
                 ),
               ),
               IconButton(
-                tooltip: 'Tutup detail laporan',
+                tooltip: tr('Tutup detail laporan'),
                 onPressed: onTutup,
                 icon: Icon(
                   Icons.close,
@@ -349,7 +357,7 @@ class DetailLaporan extends StatelessWidget {
                       dimension: 18,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Masih begini di sini'),
+                  : Text(tr('Masih begini di sini')),
             ),
           ),
         ],
@@ -426,10 +434,12 @@ class _FormLaporanState extends State<FormLaporan> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _judul('Laporkan kondisi jalan'),
+                  _judul(tr('Laporkan kondisi jalan')),
                   const SizedBox(height: 4),
                   Text(
-                    'Ketuk peta untuk memindahkan titik. Laporan hilang sendiri setelah 2 jam.',
+                    tr(
+                      'Ketuk peta untuk memindahkan titik. Laporan hilang sendiri setelah 2 jam.',
+                    ),
                     style: sans(
                       size: 13,
                       color: AppColors.ink.withValues(alpha: 0.65),
@@ -440,7 +450,7 @@ class _FormLaporanState extends State<FormLaporan> {
               ),
             ),
             IconButton(
-              tooltip: 'Batal melapor',
+              tooltip: tr('Batal melapor'),
               onPressed: widget.onBatal,
               icon: Icon(
                 Icons.close,
@@ -472,9 +482,9 @@ class _FormLaporanState extends State<FormLaporan> {
                 child: Text(
                   widget.adaTitik
                       ? (widget.namaTitik.isEmpty
-                            ? 'Titik di peta'
+                            ? tr('Titik di peta')
                             : widget.namaTitik)
-                      : 'Ketuk peta untuk memilih titik',
+                      : tr('Ketuk peta untuk memilih titik'),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: sans(size: 15),
@@ -483,7 +493,7 @@ class _FormLaporanState extends State<FormLaporan> {
               TextButton.icon(
                 onPressed: widget.onLokasiSaya,
                 icon: const Icon(Icons.my_location_rounded, size: 18),
-                label: const Text('Lokasiku'),
+                label: Text(tr('Lokasiku')),
                 style: TextButton.styleFrom(
                   foregroundColor: AppColors.inkViolet,
                   minimumSize: const Size(0, AppSizes.touch),
@@ -494,7 +504,7 @@ class _FormLaporanState extends State<FormLaporan> {
           ),
         ),
         const SizedBox(height: AppSizes.s4),
-        Text('Seberapa ramai?', style: label),
+        Text(tr('Seberapa ramai?'), style: label),
         const SizedBox(height: AppSizes.s2),
         Row(
           children: [
@@ -509,7 +519,7 @@ class _FormLaporanState extends State<FormLaporan> {
           ],
         ),
         const SizedBox(height: AppSizes.s4),
-        Text('Ada kejadian?', style: label),
+        Text(tr('Ada kejadian?'), style: label),
         const SizedBox(height: AppSizes.s2),
         Wrap(
           spacing: 8,
@@ -541,7 +551,7 @@ class _FormLaporanState extends State<FormLaporan> {
           ],
         ),
         const SizedBox(height: AppSizes.s4),
-        Text('Catatan (boleh kosong)', style: label),
+        Text(tr('Catatan (boleh kosong)'), style: label),
         const SizedBox(height: AppSizes.s2),
         TextField(
           controller: _catatan,
@@ -550,7 +560,7 @@ class _FormLaporanState extends State<FormLaporan> {
           maxLines: 3,
           style: sans(size: 15),
           decoration: InputDecoration(
-            hintText: 'Mis. lajur kiri tergenang',
+            hintText: tr('Mis. lajur kiri tergenang'),
             filled: true,
             fillColor: AppColors.search,
             border: OutlineInputBorder(
@@ -577,7 +587,7 @@ class _FormLaporanState extends State<FormLaporan> {
                   ),
                 )
               : const Icon(Icons.send_rounded, size: 18),
-          label: const Text('Kirim laporan'),
+          label: Text(tr('Kirim laporan')),
           style: FilledButton.styleFrom(
             backgroundColor: AppColors.loginButton,
             minimumSize: const Size.fromHeight(AppSizes.touch),

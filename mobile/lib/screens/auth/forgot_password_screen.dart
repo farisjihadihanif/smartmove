@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../api.dart';
 import '../../auth_rules.dart';
+import '../../i18n.dart';
 import '../../state.dart';
 import '../../theme.dart';
 import 'auth_shell.dart';
@@ -30,7 +31,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   Future<void> _submit() async {
     final email = _email.text.trim().toLowerCase();
     if (!emailRe.hasMatch(email)) {
-      setState(() => _error = 'Format email belum benar.');
+      setState(() => _error = tr('Format email belum benar.'));
       return;
     }
     FocusScope.of(context).unfocus();
@@ -46,7 +47,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         setState(
           () => _sent = (
             to: email,
-            message: msg is String ? msg : 'Tautan reset password sudah dikirim. Cek kotak masuk email kamu.',
+            message: msg is String
+                ? msg
+                : tr(
+                    'Tautan reset password sudah dikirim. Cek kotak masuk email kamu.',
+                  ),
           ),
         );
       }
@@ -60,13 +65,15 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return AuthShell(
-      title: 'Lupa password',
-      subtitle: 'Masukkan email akunmu. Kami kirim tautan untuk membuat password baru.',
+      title: tr('Lupa password'),
+      subtitle: tr(
+        'Masukkan email akunmu. Kami kirim tautan untuk membuat password baru.',
+      ),
       showBack: true,
       footer: AuthFooter(
-        text: 'Sudah ingat?',
+        text: tr('Sudah ingat?'),
         link: AuthLink(
-          label: 'Kembali ke Masuk',
+          label: tr('Kembali ke Masuk'),
           onTap: () => Navigator.pop(context),
         ),
       ),
@@ -74,8 +81,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         const SizedBox(height: 28),
         AuthField(
           icon: Icons.email,
-          label: 'Email',
-          placeholder: 'nama@email.com',
+          label: tr('Email'),
+          placeholder: tr('nama@email.com'),
           controller: _email,
           keyboardType: TextInputType.emailAddress,
           autofillHints: const [AutofillHints.email],
@@ -88,13 +95,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           AuthNotice(
             _sent!.message,
             icon: Icons.mark_email_read_outlined,
-            title: 'Cek kotak masuk',
+            title: tr('Cek kotak masuk'),
             detail: _sent!.to,
           ),
         ],
         const SizedBox(height: AppSizes.s6),
         AuthButton(
-          label: _sent == null ? 'Kirim tautan' : 'Kirim ulang tautan',
+          label: _sent == null ? tr('Kirim tautan') : tr('Kirim ulang tautan'),
           busy: _busy,
           onPressed: _submit,
         ),

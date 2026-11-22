@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../../i18n.dart';
 import '../../pembayaran.dart';
 import '../../theme.dart';
 
@@ -39,7 +40,7 @@ class PitaSimulasi extends StatelessWidget {
             child: Text(
               gelap
                   ? labelSimulasi
-                  : '$labelSimulasi. Tidak ada uang sungguhan.',
+                  : tr('{0}. Tidak ada uang sungguhan.', [labelSimulasi]),
               textAlign: TextAlign.center,
               style: sans(
                 size: gelap ? 12 : 13,
@@ -90,7 +91,8 @@ class PitaTanggal extends StatelessWidget {
             selected: on,
             inMutuallyExclusiveGroup: true,
             button: true,
-            label: '${t == hariIni ? 'Hari ini, ' : ''}$hari $tgl $bulan',
+            label:
+                '${t == hariIni ? '${tr('Hari ini')}, ' : ''}$hari, ${bahasa == 'en' ? '$bulan $tgl' : '$tgl $bulan'}',
             excludeSemantics: true,
             child: Material(
               color: Colors.transparent,
@@ -112,7 +114,7 @@ class PitaTanggal extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(t == hariIni ? 'Ini' : hari, style: kecil),
+                      Text(t == hariIni ? tr('Ini') : hari, style: kecil),
                       Text(
                         '$tgl',
                         style: titleSerif(
@@ -241,7 +243,7 @@ class BarisLayanan extends StatelessWidget {
                         style: titleSerif(size: 17, color: AppColors.inkViolet),
                       ),
                       Text(
-                        'per ${satuan(l)}',
+                        tr('per {0}', [satuan(l)]),
                         style: sans(size: 12, color: redup),
                       ),
                     ],
@@ -262,13 +264,17 @@ class BarisLayanan extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${parkir ? 'Mulai parkir' : 'Jam keberangkatan'} (WIB)',
+                    tr('{0} (WIB)', [
+                      parkir ? tr('Mulai parkir') : tr('Jam keberangkatan'),
+                    ]),
                     style: sans(size: 14, weight: FontWeight.w600),
                   ),
                   const SizedBox(height: AppSizes.s2),
                   if (!slot.any((s) => s.tersedia))
                     Text(
-                      'Semua jadwal di tanggal ini sudah lewat. Pilih tanggal lain.',
+                      tr(
+                        'Semua jadwal di tanggal ini sudah lewat. Pilih tanggal lain.',
+                      ),
                       style: sans(size: 14, color: redup),
                     )
                   else
@@ -310,7 +316,7 @@ class _ChipJam extends StatelessWidget {
       selected: aktif,
       enabled: slot.tersedia,
       button: true,
-      label: slot.tersedia ? teks : '$teks, sudah lewat',
+      label: slot.tersedia ? teks : tr('{0}, sudah lewat', [teks]),
       excludeSemantics: true,
       child: Material(
         color: aktif ? AppColors.inkVioletIsi : AppColors.card,
@@ -526,7 +532,7 @@ class ETiket extends StatelessWidget {
     );
 
     return Semantics(
-      label: 'E-tiket simulasi ${l['nama']}',
+      label: tr('E-tiket simulasi {0}', [l['nama']]),
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.card,
@@ -643,7 +649,7 @@ class ETiket extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   detail(
-                    parkir ? 'Mulai parkir' : 'Berangkat',
+                    parkir ? tr('Mulai parkir') : tr('Berangkat'),
                     jadwal == null ? '—' : waktuLengkap(jadwal),
                   ),
                   const SizedBox(height: AppSizes.s3),
@@ -651,13 +657,13 @@ class ETiket extends StatelessWidget {
                     children: [
                       Expanded(
                         child: detail(
-                          parkir ? 'Lama' : 'Penumpang',
+                          parkir ? tr('Lama') : tr('Penumpang'),
                           '${p['penumpang']} ${satuan(l)}',
                         ),
                       ),
                       Expanded(
                         child: detail(
-                          'Total',
+                          tr('Total'),
                           rupiah(p['jumlah'] as num? ?? 0),
                         ),
                       ),
@@ -665,10 +671,10 @@ class ETiket extends StatelessWidget {
                   ),
                   if (p['metode'] != null) ...[
                     const SizedBox(height: AppSizes.s3),
-                    detail('Metode', namaMetode('${p['metode']}')!),
+                    detail(tr('Metode'), namaMetode('${p['metode']}')!),
                   ],
                   const SizedBox(height: AppSizes.s3),
-                  detail('No. pesanan', '${p['orderId']}'),
+                  detail(tr('No. pesanan'), '${p['orderId']}'),
                   const SizedBox(height: AppSizes.s6),
                   // Cap karet: besar & miring supaya tidak bisa dikira tiket resmi.
                   Center(
@@ -689,14 +695,14 @@ class ETiket extends StatelessWidget {
                         child: Column(
                           children: [
                             Text(
-                              'SIMULASI',
+                              tr('SIMULASI'),
                               style: titleSerif(
                                 size: 30,
                                 color: AppColors.pillVia,
                               ).copyWith(letterSpacing: 3.6, height: 1),
                             ),
                             Text(
-                              'bukan tiket resmi',
+                              tr('bukan tiket resmi'),
                               style: sans(
                                 size: 13,
                                 weight: FontWeight.w700,
@@ -711,7 +717,7 @@ class ETiket extends StatelessWidget {
                   const SizedBox(height: AppSizes.s4),
                   Center(
                     child: Semantics(
-                      label: 'Kode QR e-tiket simulasi $kode',
+                      label: tr('Kode QR e-tiket simulasi {0}', [kode]),
                       excludeSemantics: true,
                       child: QrImageView(
                         data: '$kode|${p['orderId']}|SIMULASI',

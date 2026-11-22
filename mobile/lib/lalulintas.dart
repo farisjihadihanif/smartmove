@@ -6,6 +6,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'api.dart';
+import 'i18n.dart';
 import 'theme.dart';
 import 'navigasi.dart';
 
@@ -18,24 +19,25 @@ class InfoTingkat {
   final Color warna;
 }
 
-const tingkatLaluLintas = {
-  'lancar': InfoTingkat('Lancar', Color(0xFF2E9E5B)),
-  'padat': InfoTingkat('Padat', Color(0xFFFFA000)),
-  'macet': InfoTingkat('Macet', Color(0xFFF44336)),
+Map<String, InfoTingkat> get tingkatLaluLintas => {
+  'lancar': InfoTingkat(tr('Lancar'), Color(0xFF2E9E5B)),
+  'padat': InfoTingkat(tr('Padat'), Color(0xFFFFA000)),
+  'macet': InfoTingkat(tr('Macet'), Color(0xFFF44336)),
 };
 
 /// Koridor tanpa laporan: warna garis rute mockup, waktu = waktu tempuh normal.
-const tanpaLaporan = InfoTingkat('Belum ada laporan', Color(0xFF0F53FF));
+InfoTingkat get tanpaLaporan =>
+    InfoTingkat(tr('Belum ada laporan'), Color(0xFF0F53FF));
 
 /// Teks "Padat" di atas putih memakai oranye gelap agar kontras cukup.
 Color get warnaTeksPadat => AppColors.teksKuning;
 
-const kejadianLaluLintas = {
-  'none': 'Tidak ada',
-  'kecelakaan': 'Kecelakaan',
-  'banjir': 'Banjir',
-  'penutupan': 'Penutupan jalan',
-  'perbaikan_jalan': 'Perbaikan jalan',
+Map<String, String> get kejadianLaluLintas => {
+  'none': tr('Tidak ada'),
+  'kecelakaan': tr('Kecelakaan'),
+  'banjir': tr('Banjir'),
+  'penutupan': tr('Penutupan jalan'),
+  'perbaikan_jalan': tr('Perbaikan jalan'),
 };
 
 InfoTingkat infoTingkat(String? t) => tingkatLaluLintas[t] ?? tanpaLaporan;
@@ -57,7 +59,7 @@ String teksTunda(Map k) {
   final d = k['durasiS'], n = k['durasiNormalS'];
   if (d is! num || n is! num) return '';
   final m = ((d - n) / 60).round();
-  return m >= 1 ? '+$m mnt' : '';
+  return m >= 1 ? tr('+{0} mnt', [m]) : '';
 }
 
 LatLng _keLatLng(Object? c) {
@@ -108,16 +110,19 @@ String teksBagikanLaluLintas(List<Map> koridor) {
       if (k['tersedia'] == true)
         '• ${k['nama']}: ${formatMenit(k['durasiS'] as num?)}'
             '${teksTunda(k).isNotEmpty ? ' (${teksTunda(k)})' : ''}, '
-            '${k['tingkat'] == null ? 'belum ada laporan' : infoTingkat(k['tingkat'] as String).label.toLowerCase()}'
-            '${k['ditutup'] == true ? ', ada penutupan' : ''}',
+            '${k['tingkat'] == null ? tr('belum ada laporan') : infoTingkat(k['tingkat'] as String).label.toLowerCase()}'
+            '${k['ditutup'] == true ? tr(', ada penutupan') : ''}',
   ];
-  return ['Lalu lintas Medan sekarang (SmartMove Medan):', ...baris].join('\n');
+  return [
+    tr('Lalu lintas Medan sekarang (SmartMove Medan):'),
+    ...baris,
+  ].join('\n');
 }
 
-const pesanLaporanTerkirim =
-    'Laporan terkirim. Terima kasih sudah membantu warga Medan!';
-const pesanLaporanDigabung =
-    'Laporanmu menguatkan laporan warga lain di dekat situ. Terima kasih!';
+String get pesanLaporanTerkirim =>
+    tr('Laporan terkirim. Terima kasih sudah membantu warga Medan!');
+String get pesanLaporanDigabung =>
+    tr('Laporanmu menguatkan laporan warga lain di dekat situ. Terima kasih!');
 
 /// Data lalu lintas untuk peta: koridor jalan utama (GET /traffic/corridors)
 /// dan laporan warga di area peta (GET /traffic?bbox), disegarkan tiap 2 menit.

@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../api.dart';
 import '../../config.dart';
+import '../../i18n.dart';
 import '../../notifications.dart';
 import '../../state.dart';
 import '../../theme.dart';
@@ -114,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           ? DateTime.tryParse('${(d['sapaan'] as Map?)?['waktuServer']}')
           : null;
       if (server == null) {
-        throw ApiException(500, 'Respons Beranda tidak valid');
+        throw ApiException(500, tr('Respons Beranda tidak valid'));
       }
       if (!mounted) return;
       setState(() {
@@ -163,7 +164,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           'Live Traffic Information' => const TrafficScreen(),
           'Traffic Mitigation Campaign' => const CampaignScreen(),
           'EventAlert' => const EventAlertScreen(),
-          _ => ComingSoonScreen(title: title),
+          _ => ComingSoonScreen(title: tr(title)),
         },
       ),
     );
@@ -305,7 +306,7 @@ class _Header extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Medan, $jam WIB',
+                          tr('Medan, {0} WIB', [jam]),
                           style: sans(
                             size: 13,
                             weight: FontWeight.w600,
@@ -315,7 +316,9 @@ class _Header extends StatelessWidget {
                         Semantics(
                           header: true,
                           child: Text(
-                            nama.isEmpty ? 'Hallo! $salam' : 'Hallo! $salam,',
+                            nama.isEmpty
+                                ? tr('Hallo! {0}', [salam])
+                                : tr('Hallo! {0},', [salam]),
                             style: titleSerif(size: 22),
                           ),
                         ),
@@ -333,7 +336,7 @@ class _Header extends StatelessWidget {
                     FilledButton.icon(
                       onPressed: onSignIn,
                       icon: const Icon(Icons.login_rounded, size: 18),
-                      label: const Text('Masuk'),
+                      label: Text(tr('Masuk')),
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
                           horizontal: AppSizes.s4 + AppSizes.s1,
@@ -352,7 +355,7 @@ class _Header extends StatelessWidget {
               SearchField(
                 leading: const Icon(Icons.search, size: 24),
                 showSubmit: false,
-                label: 'Cari tempat atau tujuan',
+                label: tr('Cari tempat atau tujuan'),
                 onSubmitted: onSearch,
               ),
             ],
@@ -384,7 +387,7 @@ class _Avatar extends StatelessWidget {
 
     return Semantics(
       button: true,
-      label: user == null ? 'Masuk' : 'Akun',
+      label: user == null ? tr('Masuk') : tr('Akun'),
       excludeSemantics: true,
       child: GestureDetector(
         onTap: onTap,
@@ -487,7 +490,9 @@ class _TripPlannerCard extends StatelessWidget {
     ];
     return Semantics(
       button: true,
-      label: 'Trip Planner. Buat perencanaan terbaik untuk setiap perjalananmu',
+      label: tr(
+        'Trip Planner. Buat perencanaan terbaik untuk setiap perjalananmu',
+      ),
       excludeSemantics: true,
       child: DecoratedBox(
         decoration: BoxDecoration(
@@ -542,7 +547,9 @@ class _TripPlannerCard extends StatelessWidget {
                           ),
                           const SizedBox(height: AppSizes.s1),
                           Text(
-                            'Buat perencanaan terbaik untuk setiap perjalananmu',
+                            tr(
+                              'Buat perencanaan terbaik untuk setiap perjalananmu',
+                            ),
                             style: titleSerif(
                               size: 15,
                               color: AppColors.white,
@@ -596,13 +603,15 @@ class _GuestCard extends StatelessWidget {
           Semantics(
             header: true,
             child: Text(
-              'Simpan perjalanan & kumpulkan poin',
+              tr('Simpan perjalanan & kumpulkan poin'),
               style: titleSerif(size: 20),
             ),
           ),
           const SizedBox(height: AppSizes.s1 + 2),
           Text(
-            'Masuk untuk memakai Trip Planner, Rewards, dan pembayaran tiket.',
+            tr(
+              'Masuk untuk memakai Trip Planner, Rewards, dan pembayaran tiket.',
+            ),
             style: sans(
               size: 15,
               height: 1.5,
@@ -615,7 +624,7 @@ class _GuestCard extends StatelessWidget {
               Expanded(
                 child: FilledButton(
                   onPressed: () => pushLogin(context),
-                  child: const Text('Masuk'),
+                  child: Text(tr('Masuk')),
                 ),
               ),
               const SizedBox(width: AppSizes.s2),
@@ -633,7 +642,7 @@ class _GuestCard extends StatelessWidget {
                       width: 2,
                     ),
                   ),
-                  child: const Text('Buat akun'),
+                  child: Text(tr('Buat akun')),
                 ),
               ),
             ],
@@ -703,11 +712,14 @@ class _PointsTile extends StatelessWidget {
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('$saldo poin', style: titleSerif(size: 24)),
+                          Text(
+                            tr('{0} poin', [angka(saldo)]),
+                            style: titleSerif(size: 24),
+                          ),
                           Text(
                             bulanIni > 0
-                                ? '+$bulanIni bulan ini'
-                                : 'Kumpulkan dari perjalanan & pembayaran',
+                                ? tr('+{0} bulan ini', [bulanIni])
+                                : tr('Kumpulkan dari perjalanan & pembayaran'),
                             style: sans(
                               size: 14,
                               color: AppColors.ink.withValues(alpha: 0.65),
@@ -744,7 +756,7 @@ class _OngoingEvents extends StatelessWidget {
           child: Semantics(
             header: true,
             child: Text(
-              'Sedang berlangsung',
+              tr('Sedang berlangsung'),
               style: sans(size: 16, weight: FontWeight.w700),
             ),
           ),
@@ -817,7 +829,7 @@ class _EventRow extends StatelessWidget {
                 ),
                 if (selesai != null)
                   Text(
-                    'Sampai ${jamAtauTanggal(selesai, now)} WIB',
+                    tr('Sampai {0} WIB', [jamAtauTanggal(selesai, now)]),
                     style: sans(
                       size: 14,
                       color: AppColors.ink.withValues(alpha: 0.65),

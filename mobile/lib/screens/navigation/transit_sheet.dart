@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../i18n.dart';
 import '../../navigasi.dart';
 import '../../theme.dart';
 import '../../transit.dart';
@@ -36,7 +37,7 @@ class TransitRingkasan extends StatelessWidget {
     final d = data;
     if (memuat || d == null) {
       return Semantics(
-        label: 'Mencari rute transportasi umum',
+        label: tr('Mencari rute transportasi umum'),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -57,13 +58,15 @@ class TransitRingkasan extends StatelessWidget {
           Semantics(
             header: true,
             child: Text(
-              'Belum ada angkot atau bus di rute ini',
+              tr('Belum ada angkot atau bus di rute ini'),
               style: titleSerif(size: 24),
             ),
           ),
           const SizedBox(height: AppSizes.s1),
           Text(
-            'Tidak ada trayek yang lewat dalam jarak jalan kaki dari titik asal dan tujuan. Geser titiknya ke jalan besar terdekat, atau pilih Mobil, Motor, atau Jalan kaki.',
+            tr(
+              'Tidak ada trayek yang lewat dalam jarak jalan kaki dari titik asal dan tujuan. Geser titiknya ke jalan besar terdekat, atau pilih Mobil, Motor, atau Jalan kaki.',
+            ),
             style: sans(size: 15, color: _muted, height: 1.45),
           ),
         ],
@@ -86,7 +89,9 @@ class TransitRingkasan extends StatelessWidget {
                 style: titleSerif(size: 36).copyWith(height: 1),
               ),
               Text(
-                tarifKosong ? 'Tarif belum tersedia' : teksTarif(o['tarif']),
+                tarifKosong
+                    ? tr('Tarif belum tersedia')
+                    : teksTarif(o['tarif']),
                 style: sans(
                   size: 15,
                   weight: FontWeight.w600,
@@ -101,8 +106,15 @@ class TransitRingkasan extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         Text(
-          '${transfer > 0 ? '$transfer× pindah' : 'Tanpa pindah'}, jalan kaki ${formatJarak(o['jalanM'] as num? ?? 0)}'
-          '${o['perkiraan'] == true ? '. Jarak jalan kaki masih perkiraan.' : '.'}',
+          tr('{0}, jalan kaki {1}', [
+                transfer > 0
+                    ? tr('{0}× pindah', [transfer])
+                    : tr('Tanpa pindah'),
+                formatJarak(o['jalanM'] as num? ?? 0),
+              ]) +
+              (o['perkiraan'] == true
+                  ? tr('. Jarak jalan kaki masih perkiraan.')
+                  : '.'),
           style: sans(size: 14, color: _muted),
         ),
         if (opsi.length > 1) ...[
@@ -178,7 +190,7 @@ class _KartuOpsi extends StatelessWidget {
       inMutuallyExclusiveGroup: true,
       checked: aktif,
       button: true,
-      label: '$durasi, ${naik.join(', lalu ')}. ${ringkasOpsi(opsi)}',
+      label: '$durasi, ${naik.join(tr(', lalu '))}. ${ringkasOpsi(opsi)}',
       excludeSemantics: true,
       child: Material(
         color: aktif ? AppColors.white : AppColors.search,
@@ -253,7 +265,7 @@ class _GarisPerjalanan extends StatelessWidget {
   Widget build(BuildContext context) {
     final urut = indeksNaik(bagian);
     return Semantics(
-      label: 'Langkah perjalanan',
+      label: tr('Langkah perjalanan'),
       container: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -326,7 +338,7 @@ class _BarisJalan extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${formatDurasi(b['durasiS'] as num? ?? 0)}${b['perkiraan'] == true ? ', perkiraan' : ''}',
+                    '${formatDurasi(b['durasiS'] as num? ?? 0)}${b['perkiraan'] == true ? tr(', perkiraan') : ''}',
                     style: sans(
                       size: 14,
                       color: AppColors.ink.withValues(alpha: 0.6),
@@ -359,7 +371,7 @@ class _BarisNaik extends StatelessWidget {
       formatJarak(b['jarakM'] as num? ?? 0),
       formatDurasi(b['durasiS'] as num? ?? 0),
       if (b['jumlahHalte'] is num && (b['jumlahHalte'] as num) > 0)
-        '${b['jumlahHalte']} halte',
+        tr('{0} halte', [b['jumlahHalte']]),
     ].join(', ');
     final tarifKosong = b['tarif'] is! num;
     Widget simpul() => Container(
@@ -445,7 +457,7 @@ class _BarisNaik extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    labelJenis[k?['jenis']] ?? 'Kendaraan',
+                                    labelJenis[k?['jenis']] ?? tr('Kendaraan'),
                                     style: sans(
                                       size: 12,
                                       weight: FontWeight.w700,
@@ -509,7 +521,7 @@ class _BarisNaik extends StatelessWidget {
                           const SizedBox(height: 6),
                           Text.rich(
                             TextSpan(
-                              text: 'Juga lewat sini: ',
+                              text: tr('Juga lewat sini: '),
                               children: [
                                 TextSpan(
                                   text: lain.join(', '),
@@ -597,7 +609,7 @@ class TransitPanduan extends StatelessWidget {
               child: Semantics(
                 liveRegion: true,
                 child: Text(
-                  'Bagian ${idx + 1} dari $total',
+                  tr('Bagian {0} dari {1}', [idx + 1, total]),
                   style: sans(size: 14, weight: FontWeight.w600, color: _muted),
                 ),
               ),
@@ -605,7 +617,7 @@ class TransitPanduan extends StatelessWidget {
             TextButton.icon(
               onPressed: () => onPlay(null),
               icon: const Icon(Icons.close_rounded, size: 18),
-              label: const Text('Selesai'),
+              label: Text(tr('Selesai')),
             ),
           ],
         ),
@@ -640,7 +652,9 @@ class TransitPanduan extends StatelessWidget {
                         ),
                         const SizedBox(height: AppSizes.s1),
                         Text(
-                          'Sekitar ${formatDurasi(b['durasiS'] as num? ?? 0)}',
+                          tr('Sekitar {0}', [
+                            formatDurasi(b['durasiS'] as num? ?? 0),
+                          ]),
                           style: sans(size: 15, color: _muted),
                         ),
                       ]
@@ -705,7 +719,7 @@ class TransitPanduan extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                 ),
                 icon: const Icon(Icons.chevron_left_rounded),
-                label: const Text('Sebelumnya'),
+                label: Text(tr('Sebelumnya')),
               ),
             ),
             const SizedBox(width: AppSizes.s3),
@@ -721,7 +735,7 @@ class TransitPanduan extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(terakhir ? 'Selesai' : 'Berikutnya'),
+                    Text(terakhir ? tr('Selesai') : tr('Berikutnya')),
                     if (!terakhir) const Icon(Icons.chevron_right_rounded),
                   ],
                 ),
@@ -741,7 +755,9 @@ class _LabelPerkiraan extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: 'Tarif bawaan sesuai jenis angkutan, belum dikonfirmasi admin',
+      message: tr(
+        'Tarif bawaan sesuai jenis angkutan, belum dikonfirmasi admin',
+      ),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
         decoration: BoxDecoration(
@@ -749,7 +765,7 @@ class _LabelPerkiraan extends StatelessWidget {
           border: Border.all(color: AppColors.ink.withValues(alpha: 0.2)),
         ),
         child: Text(
-          'Tarif perkiraan',
+          tr('Tarif perkiraan'),
           style: sans(
             size: 12,
             weight: FontWeight.w600,

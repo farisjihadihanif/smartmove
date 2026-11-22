@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'api.dart';
+import 'i18n.dart';
 
 /// Status sesi aplikasi.
 enum AuthStatus { unknown, signedOut, signedIn }
@@ -48,6 +49,46 @@ class AppState extends ChangeNotifier {
     } catch (_) {}
   }
 
+  /// Bahasa (T-111): 'sistem' (ikut perangkat) | 'id' | 'en', disimpan di perangkat.
+  static const kunciBahasa = 'smartmove-bahasa';
+  String _pilihanBahasa = 'sistem';
+  String get pilihanBahasa => _pilihanBahasa;
+
+  /// Muat kamus + pilihan tersimpan, lalu pasang bahasa aktif. Dipanggil sebelum runApp.
+  Future<void> muatBahasa() async {
+    await muatKamus();
+    try {
+      final v = (await SharedPreferences.getInstance()).getString(kunciBahasa);
+      if (v == 'id' || v == 'en') _pilihanBahasa = v!;
+    } catch (_) {
+      // Penyimpanan tidak tersedia: ikut perangkat.
+    }
+    terapkanBahasa();
+  }
+
+  /// Hitung ulang bahasa aktif (mis. bahasa perangkat berganti). Memberi tahu bila berubah.
+  void terapkanBahasa() {
+    final b = bahasaDari(_pilihanBahasa);
+    if (b == bahasa) return;
+    aturBahasa(b);
+    notifyListeners();
+  }
+
+  Future<void> setBahasa(String v) async {
+    if (v != 'sistem' && v != 'id' && v != 'en') return;
+    _pilihanBahasa = v;
+    terapkanBahasa();
+    notifyListeners();
+    try {
+      final p = await SharedPreferences.getInstance();
+      if (v == 'sistem') {
+        await p.remove(kunciBahasa);
+      } else {
+        await p.setString(kunciBahasa, v);
+      }
+    } catch (_) {}
+  }
+
   AuthStatus get status => _status;
   Map<String, dynamic>? get user => _user;
   bool get isSignedIn => _status == AuthStatus.signedIn;
@@ -89,7 +130,7 @@ class AppState extends ChangeNotifier {
     final token = response['token'];
     final user = _extractUser(response);
     if (token is! String || token.isEmpty || user == null) {
-      throw ApiException(500, 'Respons masuk tidak valid');
+      throw ApiException(500, tr('Respons masuk tidak valid'));
     }
     if (remember) {
       api.sessionToken = null;

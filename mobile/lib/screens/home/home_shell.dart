@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../i18n.dart';
 import '../../state.dart';
 import '../../theme.dart';
 import '../auth/login_screen.dart';
@@ -58,11 +59,11 @@ class _HomeShellState extends State<HomeShell> {
                   color: AppColors.ink.withValues(alpha: 0.65),
                 ),
         ),
-        destinations: const [
+        destinations: [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home_rounded),
-            label: 'Beranda',
+            label: tr('Beranda'),
           ),
           NavigationDestination(
             icon: Icon(Icons.card_giftcard_outlined),
@@ -72,7 +73,7 @@ class _HomeShellState extends State<HomeShell> {
           NavigationDestination(
             icon: Icon(Icons.person_outline_rounded),
             selectedIcon: Icon(Icons.person_rounded),
-            label: 'Akun',
+            label: tr('Akun'),
           ),
         ],
       ),
