@@ -1,3 +1,4 @@
+import { tr } from '../lib/i18n.js'
 import 'leaflet/dist/leaflet.css'
 import { AttributionControl, MapContainer, TileLayer } from 'react-leaflet'
 import { MEDAN_CENTER } from '../lib/geo.js'
@@ -16,7 +17,7 @@ export default function MapView({
   center = MEDAN_CENTER,
   zoom = 14,
   tucked = false,
-  label = 'Peta',
+  label = tr('Peta'),
   attribution = 'bottomright',
   className = '',
   children,

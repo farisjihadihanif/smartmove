@@ -5,6 +5,7 @@ import SiteBar from './SiteBar.jsx'
 import NotificationSheet from './home/NotificationSheet.jsx'
 import { useAuth } from '../lib/useAuth.js'
 import { useMediaQuery, useNotifications } from '../lib/useNotifications.js'
+import { tr } from '../lib/i18n.js'
 
 const DESKTOP = '(min-width: 64rem)'
 
@@ -17,7 +18,7 @@ const DESKTOP = '(min-width: 64rem)'
  * `map`: layar peta — tinggi tepat satu layar, `children` mengisi sisa tinggi selebar layar,
  *   tanpa navigasi bawah (layar peta punya bar aksi sendiri).
  */
-export default function PageShell({ title, backTo = '/', backLabel = 'Kembali ke Beranda', toolbar, map = false, children }) {
+export default function PageShell({ title, backTo = '/', backLabel = tr('Kembali ke Beranda'), toolbar, map = false, children }) {
   const { user } = useAuth()
   const desktop = useMediaQuery(DESKTOP)
   const notif = useNotifications(user, null, { fetchOwn: desktop })

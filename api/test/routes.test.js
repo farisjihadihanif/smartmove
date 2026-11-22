@@ -150,7 +150,7 @@ describe('GET /api/routes', () => {
     const res = await request(a).get('/api/routes').query({ from: '3.56169,98.65659', to: MERDEKA }).expect(200);
     assert.equal(panggilan.length, 1);
     assert.equal(res.body.jarakM, 4900);
-    assert.ok(await GeoCache.findOne({ kunci: 'routes:driving:3.5617,98.6566;3.5913,98.6782' }));
+    assert.ok(await GeoCache.findOne({ kunci: 'routes:id:driving:3.5617,98.6566;3.5913,98.6782' }));
 
     // Moda lain = kunci cache lain.
     await request(a).get('/api/routes').query({ from: USU, to: MERDEKA, mode: 'walking' }).expect(200);

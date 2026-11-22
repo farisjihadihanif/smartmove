@@ -3,13 +3,14 @@ import { Megaphone, Route, Ticket, TrafficCone } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import logo from '../assets/brand/logo.webp'
 import { markWelcomeSeen } from '../lib/welcome.js'
+import { tr } from '../lib/i18n.js'
 
 // Fitur unggulan, teks dari poster (mockup hal. 1); ikon garis menggantikan centang clip-art.
 const FITUR = [
-  [Route, 'Navigasi rute alternatif'],
-  [TrafficCone, 'Pemantau lalu lintas real time'],
-  [Ticket, 'Sistem pembayaran terintegrasi transportasi umum'],
-  [Megaphone, 'Kampanye kesadaran penggunaan transportasi umum'],
+  [Route, tr('Navigasi rute alternatif')],
+  [TrafficCone, tr('Pemantau lalu lintas real time')],
+  [Ticket, tr('Sistem pembayaran terintegrasi transportasi umum')],
+  [Megaphone, tr('Kampanye kesadaran penggunaan transportasi umum')],
 ]
 
 /** Garis daun dekoratif dari poster: tepi daun + tulang daun + urat yang menyebar dari pangkal. */
@@ -45,20 +46,20 @@ export default function Splash() {
         <div className="flex items-center gap-3 lg:col-start-1">
           <img src={logo} alt="" width="72" height="56" className="h-auto w-[72px]" />
           <p className="font-serif text-xl leading-[1.05] text-olive-soft">
-            SmartMove
+            {tr('SmartMove')}
             <br />
-            Medan
+            {tr('Medan')}
           </p>
         </div>
 
         <div className="mt-10 lg:col-start-1 lg:mt-12">
           <h1 className="text-[clamp(2.6rem,13vw,4rem)] font-extrabold lg:text-[clamp(3rem,5vw,4.5rem)] uppercase leading-[0.9] tracking-[-0.025em]">
-            Permudah
+            {tr('Permudah')}
             <br />
-            Kegiatanmu
+            {tr('Kegiatanmu')}
           </h1>
           <p className="mt-4 max-w-[30ch] text-[clamp(1.05rem,4.2vw,1.35rem)] leading-snug text-olive-soft">
-            Rute, lalu lintas, dan tiket transportasi umum Medan dalam satu aplikasi.
+            {tr('Rute, lalu lintas, dan tiket transportasi umum Medan dalam satu aplikasi.')}
           </p>
         </div>
 
@@ -78,19 +79,19 @@ export default function Splash() {
             to="/masuk"
             className="flex min-h-[3.25rem] flex-1 items-center justify-center rounded-full bg-olive px-8 text-base font-semibold text-white transition hover:brightness-110 lg:flex-none"
           >
-            Masuk
+            {tr('Masuk')}
           </Link>
           <Link
             to="/daftar"
             className="flex min-h-[3.25rem] flex-1 items-center justify-center rounded-full border-2 border-olive px-8 text-base font-semibold transition hover:bg-olive/10 lg:flex-none"
           >
-            Buat akun
+            {tr('Buat akun')}
           </Link>
           <Link
             to="/"
             className="flex min-h-[3.25rem] items-center justify-center rounded-full px-6 text-base font-semibold underline decoration-olive/40 underline-offset-4 transition hover:decoration-olive lg:flex-none"
           >
-            Lihat Beranda dulu
+            {tr('Lihat Beranda dulu')}
           </Link>
         </div>
       </main>

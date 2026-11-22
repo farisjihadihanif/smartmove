@@ -27,10 +27,11 @@ import {
 import { useApiGet } from '../lib/useApiGet.js'
 import { useAuth } from '../lib/useAuth.js'
 import { useMediaQuery } from '../lib/useNotifications.js'
+import { tr } from '../lib/i18n.js'
 
 const LANGKAH = [
-  { value: 'pilih', label: 'Pilih transportasi' },
-  { value: 'biaya', label: 'Estimasi biaya' },
+  { value: 'pilih', label: tr('Pilih transportasi') },
+  { value: 'biaya', label: tr('Estimasi biaya') },
 ]
 const JUMLAH_HARI = 14
 
@@ -103,7 +104,7 @@ export default function Pembayaran() {
     }
     if (!metode) {
       setLangkah('biaya')
-      setKirim({ jalan: false, error: { message: 'Pilih cara bayar dulu: QRIS, virtual account, atau e-wallet.' } })
+      setKirim({ jalan: false, error: { message: tr('Pilih cara bayar dulu: QRIS, virtual account, atau e-wallet.') } })
       return
     }
     if (!user) {
@@ -126,10 +127,10 @@ export default function Pembayaran() {
 
   async function bagi() {
     const teks = layanan
-      ? `${layanan.nama} (simulasi)\n${ruteLayanan(layanan)}\n${pilihan?.waktu ? waktuLengkap(pilihan.waktu) : ''}\nEstimasi ${rupiah(total)} untuk ${jumlah} ${satuanLabel(layanan)}\nSmartMove Medan`
-      : 'Pesan tiket transportasi & parkir (simulasi) di SmartMove Medan'
+      ? tr("{0} (simulasi)\n{1}\n{2}\nEstimasi {3} untuk {4} {5}\nSmartMove Medan", { 0: layanan.nama, 1: ruteLayanan(layanan), 2: pilihan?.waktu ? waktuLengkap(pilihan.waktu) : '', 3: rupiah(total), 4: jumlah, 5: satuanLabel(layanan) })
+      : tr('Pesan tiket transportasi & parkir (simulasi) di SmartMove Medan')
     const hasil = await bagikan(teks)
-    if (hasil === 'disalin') setPesan('Ringkasan disalin.')
+    if (hasil === 'disalin') setPesan(tr('Ringkasan disalin.'))
   }
 
   const toolbar = (
@@ -137,27 +138,27 @@ export default function Pembayaran() {
       <SearchField
         value={cari}
         onChange={setCari}
-        placeholder="Cari layanan atau tujuan"
-        label="Cari layanan"
+        placeholder={tr('Cari layanan atau tujuan')}
+        label={tr('Cari layanan')}
         leading={<Search size={20} className="text-ink-violet" aria-hidden="true" />}
         showSubmit={false}
         className="lg:w-80"
       />
-      <PillToggle options={LANGKAH} value={langkah} onChange={setLangkah} label="Langkah pemesanan" className="lg:hidden" />
+      <PillToggle options={LANGKAH} value={langkah} onChange={setLangkah} label={tr('Langkah pemesanan')} className="lg:hidden" />
     </>
   )
 
   const pilihPanel = (
     <section aria-labelledby="judul-pilih" className={!desktop && langkah !== 'pilih' ? 'hidden' : ''}>
       <h2 id="judul-pilih" className="sr-only">
-        Pilih transportasi
+        {tr('Pilih transportasi')}
       </h2>
       {user && (
         <Link
           to="/pembayaran/riwayat"
           className="mb-1 flex min-h-touch items-center gap-2 text-sm font-semibold text-ink-violet hover:underline"
         >
-          <History size={18} aria-hidden="true" /> Riwayat pemesanan
+          <History size={18} aria-hidden="true" /> {tr('Riwayat pemesanan')}
           <ChevronRight size={16} aria-hidden="true" />
         </Link>
       )}
@@ -174,20 +175,20 @@ export default function Pembayaran() {
 
       {ruteTakCocok && (
         <p className="mt-4 rounded-2xl bg-lilac-wash/30 px-4 py-3 text-sm leading-relaxed text-ink/80">
-          Belum ada layanan untuk rute {asalTrip || '…'} → {tujuanTrip || '…'}. Pilih dari semua layanan di bawah.
+          {tr('Belum ada layanan untuk rute')} {asalTrip || '…'} → {tujuanTrip || '…'}{tr('. Pilih dari semua layanan di bawah.')}
         </p>
       )}
       {ruteCocok && (
         <p className="mt-4 flex flex-wrap items-center gap-x-3 rounded-2xl bg-lilac-wash/30 px-4 py-2 text-sm text-ink/80">
           <span className="flex-1 py-1">
-            {semuaLayanan ? 'Menampilkan semua layanan.' : `Layanan untuk rute ${asalTrip || '…'} → ${tujuanTrip || '…'}.`}
+            {semuaLayanan ? tr('Menampilkan semua layanan.') : tr("Layanan untuk rute {0} → {1}.", { 0: asalTrip || '…', 1: tujuanTrip || '…' })}
           </span>
           <button
             type="button"
             onClick={() => setSemuaLayanan(!semuaLayanan)}
             className="min-h-touch font-semibold text-ink-violet hover:underline"
           >
-            {semuaLayanan ? 'Hanya rute ini' : 'Lihat semua'}
+            {semuaLayanan ? tr('Hanya rute ini') : tr('Lihat semua')}
           </button>
         </p>
       )}
@@ -197,8 +198,8 @@ export default function Pembayaran() {
       {status === 'ok' && items.length === 0 && (
         <EmptyState
           icon={TicketX}
-          title="Layanan tidak ditemukan"
-          message="Coba jenis lain atau hapus kata pencarian."
+          title={tr('Layanan tidak ditemukan')}
+          message={tr('Coba jenis lain atau hapus kata pencarian.')}
           className="mt-8"
         />
       )}
@@ -226,18 +227,18 @@ export default function Pembayaran() {
       className={`${!desktop && langkah !== 'biaya' ? 'hidden' : ''} lg:sticky lg:top-6 lg:self-start lg:rounded-[1.75rem] lg:bg-card lg:p-6 lg:shadow-[0_16px_40px_-24px_rgb(65_57_111/0.6)] lg:ring-1 lg:ring-ink-violet/10`}
     >
       <h2 id="judul-biaya" className="font-serif text-[1.5rem] leading-tight">
-        Estimasi biaya
+        {tr('Estimasi biaya')}
       </h2>
       {!layanan || !pilihan?.waktu ? (
         <p className="mt-2 text-[15px] leading-relaxed text-ink/65">
-          {layanan ? 'Pilih jam keberangkatan dulu.' : 'Pilih layanan dan jamnya dulu, totalnya muncul di sini.'}
+          {layanan ? tr('Pilih jam keberangkatan dulu.') : tr('Pilih layanan dan jamnya dulu, totalnya muncul di sini.')}
         </p>
       ) : (
         <Ringkasan layanan={layanan} waktu={pilihan.waktu} jumlah={jumlah} setJumlah={setJumlah} total={total} />
       )}
 
       <fieldset className="mt-7 min-w-0">
-        <legend className="text-sm font-semibold">Metode pembayaran</legend>
+        <legend className="text-sm font-semibold">{tr('Metode pembayaran')}</legend>
         <ul className="mt-1">
           {GRUP_METODE.map((g) => (
             <li key={g.value}>
@@ -252,7 +253,7 @@ export default function Pembayaran() {
               {grupMetode === g.value && g.pilihan.length > 1 && (
                 <div
                   role="radiogroup"
-                  aria-label={`Pilih ${g.label.toLowerCase()}`}
+                  aria-label={tr('Pilih {0}', { 0: g.label.toLowerCase() })}
                   className="sheet-fade flex flex-wrap gap-2 pb-3 pl-[3.75rem]"
                 >
                   {g.pilihan.map((p) => (
@@ -289,14 +290,14 @@ export default function Pembayaran() {
                 <ParkirIcon size={22} aria-hidden="true" />
               </span>
               <span className="flex-1">
-                <span className="block font-semibold">Bayar parkir</span>
-                <span className="block text-[13px] text-ink/60">Pesan tempat parkir per jam</span>
+                <span className="block font-semibold">{tr('Bayar parkir')}</span>
+                <span className="block text-[13px] text-ink/60">{tr('Pesan tempat parkir per jam')}</span>
               </span>
               <ChevronRight size={18} className="text-ink/40" aria-hidden="true" />
             </button>
           </li>
         </ul>
-        {!metode && <p className="mt-2 text-[13px] text-ink/55">Pilih cara bayar dulu. Kartu kredit tidak tersedia.</p>}
+        {!metode && <p className="mt-2 text-[13px] text-ink/55">{tr('Pilih cara bayar dulu. Kartu kredit tidak tersedia.')}</p>}
       </fieldset>
 
       {kirim.error && <ErrorBanner error={kirim.error} className="mt-4" />}
@@ -315,14 +316,14 @@ export default function Pembayaran() {
             ) : (
               <Play size={18} className="fill-current" aria-hidden="true" />
             )}
-            {user ? 'Bayar sekarang' : 'Masuk untuk bayar'}
+            {user ? tr('Bayar sekarang') : tr('Masuk untuk bayar')}
           </button>
           <button
             type="button"
             onClick={bagi}
             className="flex min-h-touch items-center gap-2 rounded-full px-5 font-semibold text-ink-violet ring-1 ring-ink-violet/30 hover:bg-ink-violet/5"
           >
-            <Share2 size={18} aria-hidden="true" /> Bagikan
+            <Share2 size={18} aria-hidden="true" /> {tr('Bagikan')}
           </button>
         </div>
         {pesan && (
@@ -335,7 +336,7 @@ export default function Pembayaran() {
   )
 
   return (
-    <PageShell title="Digital Payment" toolbar={toolbar}>
+    <PageShell title={tr('Digital Payment')} toolbar={toolbar}>
       <div className="grid grid-cols-[minmax(0,1fr)] gap-8 pt-5 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-10 lg:pt-8">
         {pilihPanel}
         {biayaPanel}
@@ -347,17 +348,17 @@ export default function Pembayaran() {
           actions={[
             {
               label: kirim.jalan
-                ? 'Membuka…'
+                ? tr('Membuka…')
                 : user
-                  ? `Bayar${siapBayar ? ` ${rupiah(total)}` : ' sekarang'}`
-                  : 'Masuk untuk bayar',
-              short: kirim.jalan ? 'Membuka…' : 'Bayar',
+                  ? `Bayar${siapBayar ? ` ${rupiah(total)}` : tr(' sekarang')}`
+                  : tr('Masuk untuk bayar'),
+              short: kirim.jalan ? tr('Membuka…') : tr('Bayar'),
               icon: Play,
               variant: 'pill',
               onClick: bayar,
               disabled: kirim.jalan,
             },
-            { label: 'Bagikan', icon: Share2, variant: 'pill', onClick: bagi },
+            { label: tr('Bagikan'), icon: Share2, variant: 'pill', onClick: bagi },
           ]}
         >
           <PitaSimulasi gelap className="-mt-1 mb-3" />
@@ -373,11 +374,11 @@ export default function Pembayaran() {
 }
 
 function JenisChips({ value, onChange }) {
-  const opsi = [{ value: null, label: 'Semua' }, ...JENIS]
+  const opsi = [{ value: null, label: tr('Semua') }, ...JENIS]
   return (
     <div
       role="group"
-      aria-label="Jenis layanan"
+      aria-label={tr('Jenis layanan')}
       className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] lg:mx-0 lg:flex-wrap lg:px-0"
     >
       {opsi.map((j) => {
@@ -409,11 +410,11 @@ function PitaTanggal({ value, onChange, hariIni }) {
   return (
     <div className="mt-4">
       <p className="flex items-center gap-2 text-sm font-semibold">
-        <CalendarDays size={16} className="text-ink-violet" aria-hidden="true" /> Tanggal
+        <CalendarDays size={16} className="text-ink-violet" aria-hidden="true" /> {tr('Tanggal')}
       </p>
       <div
         role="radiogroup"
-        aria-label="Tanggal"
+        aria-label={tr('Tanggal')}
         className="-mx-4 mt-2 flex gap-2 overflow-x-auto px-4 pb-2 [scrollbar-width:none] lg:mx-0 lg:px-0"
       >
         {hari.map((t) => {
@@ -425,7 +426,7 @@ function PitaTanggal({ value, onChange, hariIni }) {
               type="button"
               role="radio"
               aria-checked={on}
-              aria-label={`${t === hariIni ? 'Hari ini, ' : ''}${h} ${tgl} ${bulan}`}
+              aria-label={`${t === hariIni ? tr('Hari ini, ') : ''}${h} ${tgl} ${bulan}`}
               onClick={() => onChange(t)}
               className={`flex w-[3.75rem] shrink-0 flex-col items-center rounded-2xl py-2 transition ${
                 on
@@ -434,7 +435,7 @@ function PitaTanggal({ value, onChange, hariIni }) {
               }`}
             >
               <span className={`text-[12px] font-semibold ${on ? 'text-white/85' : 'text-ink/55'}`}>
-                {t === hariIni ? 'Ini' : h}
+                {t === hariIni ? tr('Ini') : h}
               </span>
               <span className="font-serif text-[1.375rem] leading-tight">{tgl}</span>
               <span className={`text-[12px] ${on ? 'text-white/85' : 'text-ink/55'}`}>{bulan}</span>
@@ -473,17 +474,17 @@ function BarisLayanan({ layanan, tanggal, terpilih, jam, onPilih, onJam }) {
         </span>
         <span className="text-right">
           <span className="block font-serif text-[1.125rem] leading-tight text-ink-violet">{rupiah(layanan.harga)}</span>
-          <span className="block text-[12px] text-ink/55">per {satuanLabel(layanan)}</span>
+          <span className="block text-[12px] text-ink/55">{tr('per')} {satuanLabel(layanan)}</span>
         </span>
       </button>
 
       {terpilih && (
         <div className="sheet-fade pb-4 pl-[3.5rem]">
-          <p className="text-sm font-semibold">{parkir ? 'Mulai parkir' : 'Jam keberangkatan'} (WIB)</p>
+          <p className="text-sm font-semibold">{parkir ? tr('Mulai parkir') : tr('Jam keberangkatan')} {tr('(WIB)')}</p>
           {adaSlot ? (
             <div
               role="radiogroup"
-              aria-label={parkir ? 'Jam mulai parkir' : 'Jam keberangkatan'}
+              aria-label={parkir ? tr('Jam mulai parkir') : tr('Jam keberangkatan')}
               className="mt-2 flex flex-wrap gap-2"
             >
               {slot
@@ -506,7 +507,7 @@ function BarisLayanan({ layanan, tanggal, terpilih, jam, onPilih, onJam }) {
                 ))}
             </div>
           ) : (
-            <p className="mt-1 text-sm text-ink/60">Semua jadwal di tanggal ini sudah lewat. Pilih tanggal lain.</p>
+            <p className="mt-1 text-sm text-ink/60">{tr('Semua jadwal di tanggal ini sudah lewat. Pilih tanggal lain.')}</p>
           )}
         </div>
       )}
@@ -524,12 +525,12 @@ function Ringkasan({ layanan, waktu, jumlah, setJumlah, total }) {
 
       <div className="mt-5 flex items-center justify-between gap-4">
         <span className="text-sm font-semibold" id="label-jumlah">
-          {layanan.jenis === 'parkir' ? 'Lama parkir' : 'Penumpang'}
+          {layanan.jenis === 'parkir' ? tr('Lama parkir') : tr('Penumpang')}
         </span>
         <div className="flex items-center gap-1" role="group" aria-labelledby="label-jumlah">
           <button
             type="button"
-            aria-label={`Kurangi ${satuan}`}
+            aria-label={tr('Kurangi {0}', { 0: satuan })}
             disabled={jumlah <= 1}
             onClick={() => setJumlah(jumlah - 1)}
             className="grid size-touch place-items-center rounded-full text-ink-violet ring-1 ring-ink-violet/25 disabled:opacity-35"
@@ -541,7 +542,7 @@ function Ringkasan({ layanan, waktu, jumlah, setJumlah, total }) {
           </output>
           <button
             type="button"
-            aria-label={`Tambah ${satuan}`}
+            aria-label={tr('Tambah {0}', { 0: satuan })}
             disabled={jumlah >= maks}
             onClick={() => setJumlah(jumlah + 1)}
             className="grid size-touch place-items-center rounded-full text-ink-violet ring-1 ring-ink-violet/25 disabled:opacity-35"
@@ -592,7 +593,7 @@ function BarisMetode({ grup: metode, on, onPilih }) {
 
 function KerangkaDaftar() {
   return (
-    <div className="mt-4 space-y-3" aria-busy="true" aria-label="Memuat layanan">
+    <div className="mt-4 space-y-3" aria-busy="true" aria-label={tr('Memuat layanan')}>
       {[0, 1, 2, 3].map((i) => (
         <div key={i} className="flex items-center gap-3">
           <span className="size-11 animate-pulse rounded-full bg-ink/10" />

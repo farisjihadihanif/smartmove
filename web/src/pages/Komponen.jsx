@@ -23,12 +23,13 @@ import BottomActionBar from '../components/BottomActionBar.jsx'
 import EmptyState from '../components/EmptyState.jsx'
 import ErrorBanner from '../components/ErrorBanner.jsx'
 import { ApiError } from '../lib/api.js'
+import { tr } from '../lib/i18n.js'
 
 // Pratinjau komponen bersama (hanya mode dev) – dibandingkan dengan docs/mockup/halaman-3,4,6,7.
 const LAYERS = [
-  { value: 'traffic', label: 'Traffic' },
-  { value: 'transit', label: 'Transportasi umum' },
-  { value: 'street', label: 'Street view' },
+  { value: 'traffic', label: tr('Traffic') },
+  { value: 'transit', label: tr('Transportasi umum') },
+  { value: 'street', label: tr('Street view') },
 ]
 const SAMPLE_ROUTE = [
   [3.5652, 98.6566],
@@ -51,12 +52,12 @@ export default function Komponen() {
       <section className="flex h-dvh flex-col">
         <NebulaHeader
           leading={<MapIcon size={26} className="text-ink-violet" />}
-          title="Smart Navigation"
+          title={tr('Smart Navigation')}
           unread={2}
           onNotifications={noop}
         >
           <SearchField value={q} onChange={setQ} onSubmit={noop} />
-          <PillToggle options={LAYERS} value={layers} onChange={setLayers} multiple label="Lapisan peta" />
+          <PillToggle options={LAYERS} value={layers} onChange={setLayers} multiple label={tr('Lapisan peta')} />
         </NebulaHeader>
         <MapView tucked className="flex-1">
           <Polyline positions={SAMPLE_ROUTE} pathOptions={{ color: '#0A11D8', weight: 9 }} />
@@ -64,9 +65,9 @@ export default function Komponen() {
         </MapView>
         <BottomActionBar
           actions={[
-            { label: 'Rute', icon: Route, onClick: noop },
-            { label: 'Play', icon: Play, onClick: noop },
-            { label: 'Share', icon: Share2, onClick: noop },
+            { label: tr('Rute'), icon: Route, onClick: noop },
+            { label: tr('Play'), icon: Play, onClick: noop },
+            { label: tr('Share'), icon: Share2, onClick: noop },
           ]}
         />
       </section>
@@ -75,7 +76,7 @@ export default function Komponen() {
       <section>
         <NebulaHeader
           leading={<span className="grid size-12 place-items-center rounded-full bg-login-avatar font-serif text-lg">S</span>}
-          title={<>Hallo! Selamat pagi<br />Sarah</>}
+          title={<>{tr('Hallo! Selamat pagi')}<br />{tr('Sarah')}</>}
           serif
           unread={2}
           onNotifications={noop}
@@ -83,10 +84,10 @@ export default function Komponen() {
           <SearchField value={q} onChange={setQ} leading={<Search size={26} strokeWidth={2.5} />} showSubmit={false} />
         </NebulaHeader>
         <div className="grid grid-cols-2 gap-y-2 bg-surface-menu px-4 py-5 shadow-[0_4px_6px_-2px_rgb(0_0_0/0.12)]">
-          <MenuTile icon={<MapIcon size={30} />} label="Smart Navigation" iconClass="bg-white text-ink-violet ring-2 ring-ink-violet" onClick={noop} />
-          <MenuTile icon={<Clock size={30} />} label="Live Traffic Information" iconClass="bg-white text-icon-blue ring-4 ring-icon-blue" onClick={noop} />
-          <MenuTile icon={<CreditCard size={30} />} label="Digital Payment" onClick={noop} />
-          <MenuTile icon={<Megaphone size={30} />} label="Traffic Mitigation Campaign" iconClass="bg-trip-1 text-white" onClick={noop} />
+          <MenuTile icon={<MapIcon size={30} />} label={tr('Smart Navigation')} iconClass="bg-white text-ink-violet ring-2 ring-ink-violet" onClick={noop} />
+          <MenuTile icon={<Clock size={30} />} label={tr('Live Traffic Information')} iconClass="bg-white text-icon-blue ring-4 ring-icon-blue" onClick={noop} />
+          <MenuTile icon={<CreditCard size={30} />} label={tr('Digital Payment')} onClick={noop} />
+          <MenuTile icon={<Megaphone size={30} />} label={tr('Traffic Mitigation Campaign')} iconClass="bg-trip-1 text-white" onClick={noop} />
         </div>
       </section>
 
@@ -94,21 +95,21 @@ export default function Komponen() {
       <section className="bg-lilac-wash px-4 py-5">
         <PillToggle
           options={[
-            { value: 'eta', label: 'Estimasi Waktu' },
-            { value: 'map', label: 'Peta Interaktif' },
+            { value: 'eta', label: tr('Estimasi Waktu') },
+            { value: 'map', label: tr('Peta Interaktif') },
           ]}
           value={tab}
           onChange={setTab}
-          label="Tampilan"
+          label={tr('Tampilan')}
         />
       </section>
 
       {/* Campaign (hal. 7) */}
       <section className="grid grid-cols-2 gap-6 px-4 py-8">
-        <MenuTile variant="pill" icon={<ShieldAlert size={72} className="text-traffic-padat" />} label="Tips Keselamatan" onClick={noop} />
-        <MenuTile variant="pill" icon={<ImageIcon size={72} className="text-indigo" />} label="Poster" onClick={noop} />
-        <MenuTile variant="pill" icon={<CalendarClock size={72} className="text-traffic-macet" />} label="EventAlert" onClick={noop} />
-        <MenuTile variant="pill" icon={<ClipboardList size={72} className="text-icon-blue" />} label="Umpan Balik" onClick={noop} />
+        <MenuTile variant="pill" icon={<ShieldAlert size={72} className="text-traffic-padat" />} label={tr('Tips Keselamatan')} onClick={noop} />
+        <MenuTile variant="pill" icon={<ImageIcon size={72} className="text-indigo" />} label={tr('Poster')} onClick={noop} />
+        <MenuTile variant="pill" icon={<CalendarClock size={72} className="text-traffic-macet" />} label={tr('EventAlert')} onClick={noop} />
+        <MenuTile variant="pill" icon={<ClipboardList size={72} className="text-icon-blue" />} label={tr('Umpan Balik')} onClick={noop} />
       </section>
 
       {/* Galat & kosong */}
@@ -119,14 +120,14 @@ export default function Komponen() {
       </section>
       <EmptyState
         icon={Route}
-        title="Belum ada rencana perjalanan"
-        message="Simpan rute ke kantor atau kampus supaya bisa dibuka sekali ketuk."
-        action={{ label: 'Buat rencana', onClick: noop }}
+        title={tr('Belum ada rencana perjalanan')}
+        message={tr('Simpan rute ke kantor atau kampus supaya bisa dibuka sekali ketuk.')}
+        action={{ label: tr('Buat rencana'), onClick: noop }}
       />
       <BottomActionBar
         actions={[
-          { label: 'Pay Now', variant: 'pill', onClick: noop },
-          { label: 'Share', icon: Share2, variant: 'pill', onClick: noop },
+          { label: tr('Pay Now'), variant: 'pill', onClick: noop },
+          { label: tr('Share'), icon: Share2, variant: 'pill', onClick: noop },
         ]}
       />
     </>

@@ -5,6 +5,7 @@ import ErrorBanner from '../../components/ErrorBanner.jsx'
 import PageShell from '../../components/PageShell.jsx'
 import { fileUrl } from '../../lib/api.js'
 import { useApiGet } from '../../lib/useApiGet.js'
+import { tr } from '../../lib/i18n.js'
 
 // Poster kampanye (T-207): galeri poster aktif; ketuk → tampilan penuh + Bagikan / Unduh.
 export default function Poster() {
@@ -13,12 +14,12 @@ export default function Poster() {
   const items = data?.items ?? []
 
   return (
-    <PageShell title="Poster" backTo="/kampanye" backLabel="Kembali ke Kampanye">
+    <PageShell title={tr('Poster')} backTo="/kampanye" backLabel={tr('Kembali ke Kampanye')}>
       <div className="pt-6 lg:pt-10">
-        {status === 'memuat' && <p className="py-6 text-sm text-ink/70">Memuat poster…</p>}
+        {status === 'memuat' && <p className="py-6 text-sm text-ink/70">{tr('Memuat poster…')}</p>}
         {status === 'galat' && <ErrorBanner error={error} onRetry={muatUlang} />}
         {status === 'ok' && items.length === 0 && (
-          <EmptyState icon={ImageIcon} title="Belum ada poster" message="Poster kampanye keselamatan dari pengelola SmartMove akan muncul di sini." />
+          <EmptyState icon={ImageIcon} title={tr('Belum ada poster')} message={tr('Poster kampanye keselamatan dari pengelola SmartMove akan muncul di sini.')} />
         )}
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 lg:gap-6">
           {items.map((p) => (
@@ -59,13 +60,13 @@ function Penampil({ poster, onTutup }) {
   }, [onTutup])
 
   async function bagikan() {
-    const teks = `${poster.judul}${poster.isi ? `\n${poster.isi}` : ''}\n\nKampanye keselamatan SmartMove Medan`
+    const teks = tr("{0}{1}\n\nKampanye keselamatan SmartMove Medan", { 0: poster.judul, 1: poster.isi ? `\n${poster.isi}` : '' })
     try {
       if (navigator.share) return await navigator.share({ title: poster.judul, text: teks, url: url ?? undefined })
       await navigator.clipboard.writeText(url ? `${teks}\n${url}` : teks)
-      setPesan('Tautan poster disalin.')
+      setPesan(tr('Tautan poster disalin.'))
     } catch (e) {
-      if (e?.name !== 'AbortError') setPesan('Belum bisa dibagikan dari peramban ini.')
+      if (e?.name !== 'AbortError') setPesan(tr('Belum bisa dibagikan dari peramban ini.'))
     }
   }
 
@@ -77,7 +78,7 @@ function Penampil({ poster, onTutup }) {
           ref={tutup}
           type="button"
           onClick={onTutup}
-          aria-label="Tutup poster"
+          aria-label={tr('Tutup poster')}
           className="grid size-touch shrink-0 place-items-center rounded-full bg-white/10 hover:bg-white/20"
         >
           <X size={22} aria-hidden="true" />
@@ -102,7 +103,7 @@ function Penampil({ poster, onTutup }) {
           onClick={bagikan}
           className="flex h-12 min-w-[8rem] items-center justify-center gap-2 rounded-full bg-action-pill px-5 font-semibold text-ink-violet"
         >
-          Share <Share2 size={18} aria-hidden="true" />
+          {tr('Share')} <Share2 size={18} aria-hidden="true" />
         </button>
         {url && (
           <a
@@ -112,7 +113,7 @@ function Penampil({ poster, onTutup }) {
             rel="noreferrer"
             className="bg-pill flex h-12 min-w-[8rem] items-center justify-center gap-2 rounded-full px-5 font-semibold text-white"
           >
-            Unduh <Download size={18} aria-hidden="true" />
+            {tr('Unduh')} <Download size={18} aria-hidden="true" />
           </a>
         )}
       </div>

@@ -1,6 +1,7 @@
 import { Loader2, MapPin } from 'lucide-react'
 import ErrorBanner from './ErrorBanner.jsx'
 import { formatJarak } from '../lib/navigasi.js'
+import { tr } from '../lib/i18n.js'
 
 /** Daftar hasil GET /places/search di bawah kolom cari (Smart Navigation, Live Traffic). */
 export default function HasilCari({ hasil, onPilih, onTutup }) {
@@ -9,15 +10,15 @@ export default function HasilCari({ hasil, onPilih, onTutup }) {
       {hasil.status === 'memuat' && (
         <p className="flex items-center gap-2 px-3 py-3 text-sm text-ink/70">
           <Loader2 size={18} className="animate-spin" aria-hidden="true" />
-          Mencari tempat…
+          {tr('Mencari tempat…')}
         </p>
       )}
       {hasil.status === 'galat' && <ErrorBanner error={hasil.error} onDismiss={onTutup} />}
       {hasil.status === 'ok' && hasil.items.length === 0 && (
-        <p className="px-3 py-3 text-sm text-ink/70">Tempat tidak ditemukan di Medan dan sekitarnya. Coba nama lain atau ketuk peta.</p>
+        <p className="px-3 py-3 text-sm text-ink/70">{tr('Tempat tidak ditemukan di Medan dan sekitarnya. Coba nama lain atau ketuk peta.')}</p>
       )}
       {hasil.status === 'ok' && hasil.items.length > 0 && (
-        <ul aria-label="Hasil pencarian">
+        <ul aria-label={tr('Hasil pencarian')}>
           {hasil.items.map((t) => (
             <li key={t.id}>
               <button

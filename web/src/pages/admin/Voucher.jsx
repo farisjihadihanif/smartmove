@@ -5,6 +5,7 @@ import { Chip, Field, Halaman, Judul, Tombol, TombolHapus, kelasInput } from '..
 import { api } from '../../lib/api.js'
 import { useApiGet } from '../../lib/useApiGet.js'
 import { dariInputWib, keInputWib, jamAtauTanggal } from '../../lib/wib.js'
+import { tr, locale } from '../../lib/i18n.js'
 
 // Kelola voucher Rewards (PRD §6.4, T-304): nama, poin, stok, masa berlaku, syarat.
 export default function Voucher() {
@@ -17,7 +18,7 @@ export default function Voucher() {
 
   return (
     <>
-      <Judul aksi={!edit && <Tombol onClick={() => setEdit('baru')}>Tambah voucher</Tombol>}>Voucher</Judul>
+      <Judul aksi={!edit && <Tombol onClick={() => setEdit('baru')}>{tr('Tambah voucher')}</Tombol>}>{tr('Voucher')}</Judul>
       {edit ? (
         <FormVoucher
           key={edit === 'baru' ? 'baru' : edit.id}
@@ -31,16 +32,16 @@ export default function Voucher() {
         <>
           <PillToggle
             options={[
-              { value: 'semua', label: 'Semua' },
-              { value: 'true', label: 'Aktif' },
-              { value: 'false', label: 'Nonaktif' },
+              { value: 'semua', label: tr('Semua') },
+              { value: 'true', label: tr('Aktif') },
+              { value: 'false', label: tr('Nonaktif') },
             ]}
             value={aktif}
             onChange={(v) => {
               setAktif(v)
               setPage(1)
             }}
-            label="Saring voucher"
+            label={tr('Saring voucher')}
             fitDesktop
             className="mb-4"
           />
@@ -51,21 +52,21 @@ export default function Voucher() {
               return (
                 <li key={v.id} className="flex flex-wrap items-center gap-3 py-3">
                   <span className="w-20 shrink-0 font-serif text-[1.25rem] leading-none text-ink-violet tabular-nums">
-                    {v.poin.toLocaleString('id-ID')}
-                    <span className="block font-sans text-[11px] font-semibold text-ink/50">poin</span>
+                    {v.poin.toLocaleString(locale)}
+                    <span className="block font-sans text-[11px] font-semibold text-ink/50">{tr('poin')}</span>
                   </span>
                   <div className="min-w-0 flex-1 basis-56">
                     <p className="font-semibold">{v.nama}</p>
                     <p className="text-xs text-ink/60">
-                      Stok {v.stok}, ditukar {v.ditukar}
-                      {v.berlakuSampai ? `, berlaku sampai ${jamAtauTanggal(v.berlakuSampai, now)}` : ', tanpa batas waktu'}
+                      {tr('Stok')} {v.stok}{tr(', ditukar')} {v.ditukar}
+                      {v.berlakuSampai ? tr(", berlaku sampai {0}", { 0: jamAtauTanggal(v.berlakuSampai, now) }) : tr(', tanpa batas waktu')}
                     </p>
                   </div>
-                  {!v.aktif && <Chip>Nonaktif</Chip>}
-                  {lewat && <Chip nada="kuning">Lewat masa berlaku</Chip>}
-                  {v.aktif && v.stok === 0 && <Chip nada="merah">Stok habis</Chip>}
+                  {!v.aktif && <Chip>{tr('Nonaktif')}</Chip>}
+                  {lewat && <Chip nada="kuning">{tr('Lewat masa berlaku')}</Chip>}
+                  {v.aktif && v.stok === 0 && <Chip nada="merah">{tr('Stok habis')}</Chip>}
                   <Tombol jenis="biasa" onClick={() => setEdit(v)}>
-                    Ubah
+                    {tr('Ubah')}
                   </Tombol>
                   {v.ditukar === 0 && (
                     <TombolHapus
@@ -84,9 +85,9 @@ export default function Voucher() {
               )
             })}
           </ul>
-          {data && data.items.length === 0 && <p className="mt-4 text-sm text-ink/60">Belum ada voucher. Tambahkan supaya poin pengguna bisa ditukar.</p>}
+          {data && data.items.length === 0 && <p className="mt-4 text-sm text-ink/60">{tr('Belum ada voucher. Tambahkan supaya poin pengguna bisa ditukar.')}</p>}
           {data && <Halaman page={data.page} total={data.total} limit={50} onPage={setPage} />}
-          <p className="mt-6 text-xs text-ink/55">Voucher yang sudah pernah ditukar tidak bisa dihapus; nonaktifkan supaya tidak tampil di katalog.</p>
+          <p className="mt-6 text-xs text-ink/55">{tr('Voucher yang sudah pernah ditukar tidak bisa dihapus; nonaktifkan supaya tidak tampil di katalog.')}</p>
         </>
       )}
     </>
@@ -129,35 +130,35 @@ function FormVoucher({ awal, onSelesai }) {
 
   return (
     <form onSubmit={simpan} className="grid max-w-2xl gap-4 sm:grid-cols-2">
-      <Field label="Nama voucher" className="sm:col-span-2">
-        <input value={f.nama} onChange={ubah('nama')} required maxLength={120} className={kelasInput} placeholder="Gratis 1 jam parkir" />
+      <Field label={tr('Nama voucher')} className="sm:col-span-2">
+        <input value={f.nama} onChange={ubah('nama')} required maxLength={120} className={kelasInput} placeholder={tr('Gratis 1 jam parkir')} />
       </Field>
-      <Field label="Harga (poin)">
+      <Field label={tr('Harga (poin)')}>
         <input type="number" min={1} step={1} value={f.poin} onChange={ubah('poin')} required className={kelasInput} />
       </Field>
-      <Field label="Stok" hint={awal ? `Sudah ditukar ${awal.ditukar} kali.` : undefined}>
+      <Field label={tr('Stok')} hint={awal ? tr("Sudah ditukar {0} kali.", { 0: awal.ditukar }) : undefined}>
         <input type="number" min={0} step={1} value={f.stok} onChange={ubah('stok')} required className={kelasInput} />
       </Field>
-      <Field label="Berlaku sampai (WIB)" hint="Kosongkan bila tanpa batas waktu.">
+      <Field label={tr('Berlaku sampai (WIB)')} hint={tr('Kosongkan bila tanpa batas waktu.')}>
         <input type="datetime-local" value={f.berlakuSampai} onChange={ubah('berlakuSampai')} className={kelasInput} />
       </Field>
       <label className="flex min-h-touch items-center gap-3 self-end text-sm font-semibold">
         <input type="checkbox" checked={f.aktif} onChange={ubah('aktif')} className="size-5 accent-[color:var(--color-pill-via)]" />
-        Tampil di katalog
+        {tr('Tampil di katalog')}
       </label>
-      <Field label="Deskripsi (opsional)" className="sm:col-span-2">
+      <Field label={tr('Deskripsi (opsional)')} className="sm:col-span-2">
         <textarea value={f.deskripsi} onChange={ubah('deskripsi')} maxLength={500} rows={2} className={`${kelasInput} py-2.5`} />
       </Field>
-      <Field label="Syarat & ketentuan (opsional)" className="sm:col-span-2">
+      <Field label={tr('Syarat & ketentuan (opsional)')} className="sm:col-span-2">
         <textarea value={f.syarat} onChange={ubah('syarat')} maxLength={1000} rows={3} className={`${kelasInput} py-2.5`} />
       </Field>
       {kirim.error && <ErrorBanner error={kirim.error} className="sm:col-span-2" />}
       <div className="flex gap-3 sm:col-span-2">
         <Tombol type="submit" memuat={kirim.jalan}>
-          {awal ? 'Simpan perubahan' : 'Tambah voucher'}
+          {awal ? tr('Simpan perubahan') : tr('Tambah voucher')}
         </Tombol>
         <Tombol jenis="biasa" onClick={onSelesai}>
-          Batal
+          {tr('Batal')}
         </Tombol>
       </div>
     </form>

@@ -1,6 +1,7 @@
 import { Moon, MonitorSmartphone, Palette, Sun } from 'lucide-react'
 import Dropdown from './Dropdown.jsx'
 import { PILIHAN_TEMA, useTema } from '../lib/tema.js'
+import { tr } from '../lib/i18n.js'
 
 const IKON = { sistem: MonitorSmartphone, terang: Sun, gelap: Moon }
 
@@ -14,10 +15,10 @@ export default function PilihTema({ className = '' }) {
     <div className={`flex flex-wrap items-center gap-x-4 gap-y-2 ${className}`}>
       <span className="flex flex-1 items-center gap-3 text-[15px] font-semibold">
         <Palette size={20} className="text-ink-violet" aria-hidden="true" />
-        Tampilan
+        {tr('Tampilan')}
       </span>
       <Dropdown
-        label="Tampilan"
+        label={tr('Tampilan')}
         value={pilihan}
         onChange={setPilihan}
         options={PILIHAN_TEMA.map((o) => ({ ...o, icon: IKON[o.value] }))}

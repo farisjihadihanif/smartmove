@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
+import { tr } from '../../lib/i18n.js'
 
 // Komponen kecil dasbor admin (T-208).
 
@@ -57,7 +58,7 @@ export function Tombol({ jenis = 'utama', memuat = false, children, className = 
 }
 
 /** Tombol hapus dua langkah: ketuk "Hapus" → "Yakin hapus?". */
-export function TombolHapus({ onHapus, label = 'Hapus', className = '' }) {
+export function TombolHapus({ onHapus, label = tr('Hapus'), className = '' }) {
   const [yakin, setYakin] = useState(false)
   const [memuat, setMemuat] = useState(false)
   if (!yakin) {
@@ -82,10 +83,10 @@ export function TombolHapus({ onHapus, label = 'Hapus', className = '' }) {
           }
         }}
       >
-        Yakin {label.toLowerCase()}?
+        {tr('Yakin')} {label.toLowerCase()}?
       </Tombol>
       <Tombol jenis="biasa" onClick={() => setYakin(false)}>
-        Batal
+        {tr('Batal')}
       </Tombol>
     </span>
   )
@@ -95,15 +96,15 @@ export function Halaman({ page, total, limit = 20, onPage }) {
   const akhir = Math.max(1, Math.ceil(total / limit))
   if (akhir <= 1) return null
   return (
-    <nav aria-label="Halaman" className="mt-4 flex items-center gap-3 text-sm">
+    <nav aria-label={tr('Halaman')} className="mt-4 flex items-center gap-3 text-sm">
       <Tombol jenis="biasa" disabled={page <= 1} onClick={() => onPage(page - 1)}>
-        Sebelumnya
+        {tr('Sebelumnya')}
       </Tombol>
       <span className="tabular-nums text-ink/70">
         {page} / {akhir}
       </span>
       <Tombol jenis="biasa" disabled={page >= akhir} onClick={() => onPage(page + 1)}>
-        Berikutnya
+        {tr('Berikutnya')}
       </Tombol>
     </nav>
   )

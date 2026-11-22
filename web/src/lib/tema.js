@@ -1,12 +1,13 @@
 // Mode gelap (T-110): pilihan Sistem / Terang / Gelap, disimpan per perangkat (localStorage).
 // `data-theme="dark|light"` dipasang di <html>; index.html memasangnya lebih dulu (tanpa kedip).
 import { useEffect, useState, useSyncExternalStore } from 'react'
+import { tr } from './i18n.js'
 
 export const KUNCI_TEMA = 'smartmove-tema'
 export const PILIHAN_TEMA = [
-  { value: 'sistem', label: 'Ikuti sistem' },
-  { value: 'terang', label: 'Terang' },
-  { value: 'gelap', label: 'Gelap' },
+  { value: 'sistem', label: tr('Ikuti sistem') },
+  { value: 'terang', label: tr('Terang') },
+  { value: 'gelap', label: tr('Gelap') },
 ]
 
 const media = () => (typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null)

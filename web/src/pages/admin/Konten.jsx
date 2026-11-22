@@ -6,6 +6,7 @@ import Rambu from '../../components/kampanye/Rambu.jsx'
 import { Chip, Field, Judul, Tombol, TombolHapus, kelasInput } from '../../components/admin/ui.jsx'
 import { api, fileUrl } from '../../lib/api.js'
 import { useApiGet } from '../../lib/useApiGet.js'
+import { tr } from '../../lib/i18n.js'
 
 // Kelola konten kampanye: tips keselamatan dan poster (gambar JPG/PNG/WEBP ≤ 3 MB).
 export default function Konten() {
@@ -16,18 +17,18 @@ export default function Konten() {
 
   return (
     <>
-      <Judul aksi={!edit && <Tombol onClick={() => setEdit('baru')}>{jenis === 'tips' ? 'Tambah tips' : 'Tambah poster'}</Tombol>}>
-        Tips & poster
+      <Judul aksi={!edit && <Tombol onClick={() => setEdit('baru')}>{jenis === 'tips' ? tr('Tambah tips') : tr('Tambah poster')}</Tombol>}>
+        {tr('Tips & poster')}
       </Judul>
       {!edit && (
         <PillToggle
           options={[
-            { value: 'tips', label: 'Tips Keselamatan' },
-            { value: 'poster', label: 'Poster' },
+            { value: 'tips', label: tr('Tips Keselamatan') },
+            { value: 'poster', label: tr('Poster') },
           ]}
           value={jenis}
           onChange={setJenis}
-          label="Jenis konten"
+          label={tr('Jenis konten')}
           fitDesktop
           className="mb-4"
         />
@@ -61,10 +62,10 @@ export default function Konten() {
                 <p className="font-semibold">{c.judul}</p>
                 {c.isi && <p className="line-clamp-1 text-xs text-ink/60">{c.isi}</p>}
               </div>
-              <Chip>Urutan {c.urutan}</Chip>
-              {!c.aktif && <Chip nada="kuning">Disembunyikan</Chip>}
+              <Chip>{tr('Urutan')} {c.urutan}</Chip>
+              {!c.aktif && <Chip nada="kuning">{tr('Disembunyikan')}</Chip>}
               <Tombol jenis="biasa" onClick={() => setEdit(c)}>
-                Ubah
+                {tr('Ubah')}
               </Tombol>
               <TombolHapus
                 onHapus={async () => {
@@ -76,7 +77,7 @@ export default function Konten() {
           ))}
         </ul>
       )}
-      {!edit && data && items.length === 0 && <p className="mt-2 text-sm text-ink/60">Belum ada {jenis === 'tips' ? 'tips' : 'poster'}.</p>}
+      {!edit && data && items.length === 0 && <p className="mt-2 text-sm text-ink/60">{tr('Belum ada')} {jenis === 'tips' ? 'tips' : 'poster'}.</p>}
     </>
   )
 }
@@ -114,11 +115,11 @@ function FormKonten({ jenis, awal, urutanBaru, onSelesai }) {
 
   return (
     <form onSubmit={simpan} className="flex max-w-xl flex-col gap-4">
-      <h2 className="font-serif text-xl">{awal ? 'Ubah' : 'Tambah'} {poster ? 'poster' : 'tips'}</h2>
-      <Field label="Judul">
+      <h2 className="font-serif text-xl">{awal ? tr('Ubah') : tr('Tambah')} {poster ? 'poster' : 'tips'}</h2>
+      <Field label={tr('Judul')}>
         <input required maxLength={150} value={f.judul} onChange={(e) => setF({ ...f, judul: e.target.value })} className={kelasInput} />
       </Field>
-      <Field label={poster ? 'Keterangan (boleh kosong)' : 'Isi tips'}>
+      <Field label={poster ? tr('Keterangan (boleh kosong)') : tr('Isi tips')}>
         <textarea
           required={!poster}
           maxLength={2000}
@@ -129,7 +130,7 @@ function FormKonten({ jenis, awal, urutanBaru, onSelesai }) {
         />
       </Field>
       {poster && (
-        <Field label="Gambar poster" hint="JPG, PNG, atau WEBP, maksimal 3 MB.">
+        <Field label={tr('Gambar poster')} hint={tr('JPG, PNG, atau WEBP, maksimal 3 MB.')}>
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp"
@@ -141,11 +142,11 @@ function FormKonten({ jenis, awal, urutanBaru, onSelesai }) {
             }}
             className="block w-full text-sm file:mr-3 file:min-h-touch file:rounded-full file:border-0 file:bg-lilac-wash/50 file:px-4 file:font-semibold file:text-ink-violet"
           />
-          {pratinjau && <img src={pratinjau} alt="Pratinjau poster" className="mt-3 max-h-64 rounded-xl ring-1 ring-ink/10" />}
+          {pratinjau && <img src={pratinjau} alt={tr('Pratinjau poster')} className="mt-3 max-h-64 rounded-xl ring-1 ring-ink/10" />}
         </Field>
       )}
       <div className="flex flex-wrap items-end gap-6">
-        <Field label="Urutan" className="w-28">
+        <Field label={tr('Urutan')} className="w-28">
           <input
             type="number"
             min={0}
@@ -157,16 +158,16 @@ function FormKonten({ jenis, awal, urutanBaru, onSelesai }) {
         </Field>
         <label className="flex min-h-touch items-center gap-2 text-sm font-semibold">
           <input type="checkbox" checked={f.aktif} onChange={(e) => setF({ ...f, aktif: e.target.checked })} className="size-5 accent-pill-via" />
-          Tampilkan di aplikasi
+          {tr('Tampilkan di aplikasi')}
         </label>
       </div>
       {status.error && <ErrorBanner error={status.error} />}
       <div className="flex flex-wrap gap-2">
         <Tombol type="submit" memuat={status.memuat}>
-          Simpan
+          {tr('Simpan')}
         </Tombol>
         <Tombol jenis="biasa" onClick={onSelesai}>
-          Batal
+          {tr('Batal')}
         </Tombol>
       </div>
     </form>

@@ -3,6 +3,7 @@ import express from 'express';
 import { rateLimit } from 'express-rate-limit';
 import User from '../models/User.js';
 import { httpError } from '../lib/httpError.js';
+import { tr } from '../lib/i18n.js';
 import { hashPassword, checkPassword as cocok, checkDummy } from '../lib/password.js';
 import { str, checkUsername, checkEmail, checkPassword } from '../lib/validate.js';
 import { signToken, setAuthCookie, clearAuthCookie, requireAuth, publicUser } from '../middleware/auth.js';
@@ -84,19 +85,22 @@ export function authRouter(cfg, { mailer }) {
       user.resetTokenExpires = new Date(Date.now() + RESET_TTL_MS);
       await user.save();
       const link = `${cfg.appUrl.replace(/\/$/, '')}/reset-password?token=${token}`;
+      // Bahasa email = bahasa permintaan lupa password (T-111).
+      const b = req.bahasa;
+      const nama = user.namaLengkap || user.username;
       try {
         await mailer.send({
           to: user.email,
-          subject: 'Reset password SmartMove Medan',
+          subject: tr(b, 'Reset password SmartMove Medan'),
           text:
-            `Halo ${user.namaLengkap || user.username},\n\n` +
-            `Buka tautan berikut untuk membuat password baru (berlaku 30 menit):\n${link}\n\n` +
-            'Abaikan email ini bila kamu tidak meminta reset password.',
+            `${tr(b, 'Halo {0},', [nama])}\n\n` +
+            `${tr(b, 'Buka tautan berikut untuk membuat password baru (berlaku 30 menit):')}\n${link}\n\n` +
+            tr(b, 'Abaikan email ini bila kamu tidak meminta reset password.'),
           html:
-            `<p>Halo ${escapeHtml(user.namaLengkap || user.username)},</p>` +
-            `<p>Klik tautan berikut untuk membuat password baru (berlaku 30 menit):</p>` +
-            `<p><a href="${link}">Reset password</a></p>` +
-            '<p>Abaikan email ini bila kamu tidak meminta reset password.</p>',
+            `<p>${tr(b, 'Halo {0},', [escapeHtml(nama)])}</p>` +
+            `<p>${tr(b, 'Klik tautan berikut untuk membuat password baru (berlaku 30 menit):')}</p>` +
+            `<p><a href="${link}">${tr(b, 'Reset password')}</a></p>` +
+            `<p>${tr(b, 'Abaikan email ini bila kamu tidak meminta reset password.')}</p>`,
         });
       } catch (err) {
         if (cfg.nodeEnv !== 'test') console.error('Gagal mengirim email reset:', err.message);

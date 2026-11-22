@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import BookableService from '../models/BookableService.js';
 import Payment from '../models/Payment.js';
 import { httpError } from '../lib/httpError.js';
+import { tr } from '../lib/i18n.js';
 import { METODE, signatureValid, statusDariMidtrans } from './midtrans.js';
 import { catatPoin, poinPembayaran } from './points.js';
 
@@ -38,8 +39,8 @@ export const dariWib = (tanggal, jam) => new Date(`${tanggal}T${jam}:00+07:00`);
  * admin → `{ id: null, username: null, label: "Pengguna dihapus" }`; transaksinya tetap utuh.
  * `p.user` boleh berupa id atau dokumen hasil populate('user', 'username').
  */
-export function pemilikPembayaran(p) {
-  if (p.penggunaDihapus || !p.user) return { id: null, username: null, label: LABEL_PENGGUNA_DIHAPUS };
+export function pemilikPembayaran(p, bahasa = 'id') {
+  if (p.penggunaDihapus || !p.user) return { id: null, username: null, label: tr(bahasa, LABEL_PENGGUNA_DIHAPUS) };
   const username = p.user.username ?? null;
   return { id: String(p.user._id ?? p.user), username, label: username };
 }
@@ -66,7 +67,7 @@ export function layananPublik(s, { tanggal, now = Date.now() } = {}) {
   return out;
 }
 
-export function pembayaranPublik(p) {
+export function pembayaranPublik(p, bahasa = 'id') {
   const lunas = p.status === 'lunas';
   return {
     orderId: p.orderId,
@@ -92,7 +93,7 @@ export function pembayaranPublik(p) {
     dibayarPada: p.dibayarPada ?? null,
     createdAt: p.createdAt,
     simulasi: true,
-    label: LABEL_SIMULASI,
+    label: tr(bahasa, LABEL_SIMULASI),
   };
 }
 

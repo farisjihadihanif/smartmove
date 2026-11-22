@@ -2,13 +2,14 @@
 import { formatDurasi, formatJarak } from './navigasi.js'
 import { teksTarifRingkas } from './transit.js'
 import { hariWib, jamWib } from './wib.js'
+import { tr } from './i18n.js'
 
 /** Moda rencana (API: driving | motorcycle | walking | transit). */
 export const MODA_TRIP = [
-  { value: 'driving', label: 'Mobil' },
-  { value: 'motorcycle', label: 'Motor' },
-  { value: 'walking', label: 'Jalan kaki' },
-  { value: 'transit', label: 'Transportasi umum' },
+  { value: 'driving', label: tr('Mobil') },
+  { value: 'motorcycle', label: tr('Motor') },
+  { value: 'walking', label: tr('Jalan kaki') },
+  { value: 'transit', label: tr('Transportasi umum') },
 ]
 export const labelModa = (v) => MODA_TRIP.find((m) => m.value === v)?.label ?? v
 
@@ -36,8 +37,8 @@ export function dariIsian({ tanggal, jam }, now = Date.now()) {
 /** "Berangkat dalam 25 mnt" / "Waktunya berangkat". */
 export function hitungMundur(iso, now) {
   const s = (new Date(iso).getTime() - now) / 1000
-  if (s < 60) return 'Waktunya berangkat'
-  return `Berangkat dalam ${formatDurasi(s)}`
+  if (s < 60) return tr('Waktunya berangkat')
+  return tr("Berangkat dalam {0}", { 0: formatDurasi(s) })
 }
 
 /** "12 mnt · 4,9 km" dari ringkasan tersimpan, atau null. Transit: + tarif ("tarif belum tersedia" bila kosong). */
@@ -75,7 +76,7 @@ export function kelompokkan(trips, now) {
     if (g?.judul === judul) g.items.push(t)
     else grup.push({ kunci: judul, judul, items: [t] })
   }
-  if (bebas.length) grup.push({ kunci: 'bebas', judul: 'Kapan saja', items: bebas })
+  if (bebas.length) grup.push({ kunci: 'bebas', judul: tr('Kapan saja'), items: bebas })
   return { berikutnya: akan[0] ?? null, grup, lewat }
 }
 

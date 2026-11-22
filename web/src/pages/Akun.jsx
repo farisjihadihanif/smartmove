@@ -3,12 +3,14 @@ import { Camera, Check, ChevronRight, Eye, EyeOff, LayoutDashboard, Loader2, Log
 import { Link, useNavigate } from 'react-router-dom'
 import ErrorBanner from '../components/ErrorBanner.jsx'
 import PageShell from '../components/PageShell.jsx'
+import PilihBahasa from '../components/PilihBahasa.jsx'
 import PilihTema from '../components/PilihTema.jsx'
 import { api, fileUrl } from '../lib/api.js'
 import { useAuth } from '../lib/useAuth.js'
+import { tr } from '../lib/i18n.js'
 
 const FOTO_MAKS = 2 * 1024 * 1024
-const BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+const BULAN = [tr('Januari'), tr('Februari'), tr('Maret'), tr('April'), tr('Mei'), tr('Juni'), tr('Juli'), tr('Agustus'), tr('September'), tr('Oktober'), tr('November'), tr('Desember')]
 const sejak = (iso) => {
   const d = new Date(new Date(iso).getTime() + 7 * 3600_000)
   return `${BULAN[d.getUTCMonth()]} ${d.getUTCFullYear()}`
@@ -24,7 +26,7 @@ export default function Akun() {
   const { user } = useAuth()
   if (!user) return null
   return (
-    <PageShell title="Akun">
+    <PageShell title={tr('Akun')}>
       <div className="grid grid-cols-[minmax(0,1fr)] gap-8 pt-6 lg:grid-cols-[20rem_minmax(0,1fr)] lg:gap-12 lg:pt-10">
         <aside className="lg:sticky lg:top-6 lg:self-start">
           <Identitas user={user} />
@@ -50,11 +52,11 @@ function Identitas({ user }) {
   async function unggah(file) {
     if (!file) return
     if (!/^image\/(jpeg|png|webp)$/.test(file.type)) {
-      setState({ jalan: false, error: { message: 'Foto harus berupa gambar JPG, PNG, atau WEBP.' } })
+      setState({ jalan: false, error: { message: tr('Foto harus berupa gambar JPG, PNG, atau WEBP.') } })
       return
     }
     if (file.size > FOTO_MAKS) {
-      setState({ jalan: false, error: { message: 'Ukuran foto maksimal 2 MB.' } })
+      setState({ jalan: false, error: { message: tr('Ukuran foto maksimal 2 MB.') } })
       return
     }
     setState({ jalan: true, error: null })
@@ -70,13 +72,13 @@ function Identitas({ user }) {
   }
 
   return (
-    <section aria-label="Profil" className="flex flex-col items-center text-center lg:items-start lg:text-left">
+    <section aria-label={tr('Profil')} className="flex flex-col items-center text-center lg:items-start lg:text-left">
       <div className="relative">
         <div className="grid size-28 place-items-center overflow-hidden rounded-full bg-login-avatar font-serif text-[2.75rem] text-white ring-4 ring-card shadow-[0_10px_24px_-12px_rgb(65_57_111/0.7)]">
           {foto ? <img src={foto} alt="" className="size-full object-cover" /> : <span aria-hidden="true">{inisial}</span>}
           {state.jalan && (
             <span className="absolute inset-0 grid place-items-center rounded-full bg-black/40">
-              <Loader2 size={28} className="animate-spin text-white" aria-label="Mengunggah foto" />
+              <Loader2 size={28} className="animate-spin text-white" aria-label={tr('Mengunggah foto')} />
             </span>
           )}
         </div>
@@ -84,7 +86,7 @@ function Identitas({ user }) {
           type="button"
           onClick={() => input.current?.click()}
           disabled={state.jalan}
-          aria-label={foto ? 'Ganti foto profil' : 'Tambah foto profil'}
+          aria-label={foto ? tr('Ganti foto profil') : tr('Tambah foto profil')}
           className="bg-pill absolute -bottom-1 -right-1 grid size-touch place-items-center rounded-full text-white ring-4 ring-surface disabled:opacity-60"
         >
           <Camera size={20} aria-hidden="true" />
@@ -104,8 +106,8 @@ function Identitas({ user }) {
       <h2 className="mt-4 font-serif text-[1.75rem] leading-tight">{nama}</h2>
       <p className="text-[15px] text-ink/65">@{user.username}</p>
       <p className="text-[14px] text-ink/55">{user.email}</p>
-      {user.createdAt && <p className="mt-1 text-[13px] text-ink/50">Bergabung {sejak(user.createdAt)}</p>}
-      <p className="mt-2 text-[12px] text-ink/50">Foto JPG, PNG, atau WEBP, maksimal 2 MB.</p>
+      {user.createdAt && <p className="mt-1 text-[13px] text-ink/50">{tr('Bergabung')} {sejak(user.createdAt)}</p>}
+      <p className="mt-2 text-[12px] text-ink/50">{tr('Foto JPG, PNG, atau WEBP, maksimal 2 MB.')}</p>
       {state.error && <ErrorBanner error={state.error} onDismiss={() => setState({ jalan: false, error: null })} className="mt-3 w-full" />}
     </section>
   )
@@ -125,17 +127,18 @@ function Pengaturan({ user }) {
   const { signOut } = useAuth()
   const navigate = useNavigate()
   return (
-    <section aria-label="Pengaturan" className="mt-8">
+    <section aria-label={tr('Pengaturan')} className="mt-8">
       <PilihTema className="pb-3" />
+      <PilihBahasa className="border-t border-ink/[0.07] py-3" />
       <BarisTautan to="/pembayaran/riwayat" icon={Receipt}>
-        Riwayat pemesanan
+        {tr('Riwayat pemesanan')}
       </BarisTautan>
       <BarisTautan to="/rewards" icon={Gift}>
-        Rewards
+        {tr('Rewards')}
       </BarisTautan>
       {user.role === 'admin' && (
         <BarisTautan to="/admin" icon={LayoutDashboard}>
-          Dasbor admin
+          {tr('Dasbor admin')}
         </BarisTautan>
       )}
       <button
@@ -147,7 +150,7 @@ function Pengaturan({ user }) {
         className="flex min-h-[3.5rem] w-full items-center gap-3 border-t border-ink/[0.07] text-left text-[15px] font-semibold text-[#B42318]"
       >
         <LogOut size={20} aria-hidden="true" />
-        Keluar
+        {tr('Keluar')}
       </button>
     </section>
   )
@@ -184,16 +187,16 @@ function FormProfil({ user }) {
   return (
     <form onSubmit={simpan} aria-labelledby="judul-profil" className="max-w-xl">
       <h2 id="judul-profil" className="font-serif text-[1.5rem] leading-tight">
-        Profil
+        {tr('Profil')}
       </h2>
       <div className="mt-4 space-y-4">
         <label className="block">
-          <span className="text-sm font-semibold">Nama lengkap</span>
+          <span className="text-sm font-semibold">{tr('Nama lengkap')}</span>
           <input value={nama} onChange={(e) => setNama(e.target.value)} maxLength={80} autoComplete="name" className={kelasIsian} />
         </label>
         <div>
           <label htmlFor="isian-username" className="text-sm font-semibold">
-            Username
+            {tr('Username')}
           </label>
           <span className="mt-1.5 flex min-h-touch items-center rounded-2xl bg-search ring-1 ring-ink/10 focus-within:ring-2 focus-within:ring-pill-via">
             <span className="pl-4 text-ink/50" aria-hidden="true">
@@ -213,7 +216,7 @@ function FormProfil({ user }) {
             />
           </span>
           <span id="petunjuk-username" className="mt-1 block text-[12px] text-ink/55">
-            3–30 karakter: huruf kecil, angka, titik, atau garis bawah. Dipakai untuk masuk.
+            {tr('3–30 karakter: huruf kecil, angka, titik, atau garis bawah. Dipakai untuk masuk.')}
           </span>
         </div>
       </div>
@@ -225,9 +228,9 @@ function FormProfil({ user }) {
           className="flex min-h-touch items-center gap-2 rounded-full bg-login-button px-6 font-semibold text-white disabled:opacity-50"
         >
           {state.jalan && <Loader2 size={18} className="animate-spin" aria-hidden="true" />}
-          Simpan profil
+          {tr('Simpan profil')}
         </button>
-        {state.ok && !berubah && <Berhasil>Profil disimpan.</Berhasil>}
+        {state.ok && !berubah && <Berhasil>{tr('Profil disimpan.')}</Berhasil>}
       </div>
     </form>
   )
@@ -294,19 +297,19 @@ function FormPassword() {
   return (
     <form onSubmit={simpan} aria-labelledby="judul-password" className="max-w-xl border-t border-ink/[0.07] pt-8">
       <h2 id="judul-password" className="font-serif text-[1.5rem] leading-tight">
-        Ganti password
+        {tr('Ganti password')}
       </h2>
-      <p className="mt-1 text-[14px] text-ink/60">Setelah diganti, perangkat lain yang masuk dengan akun ini otomatis keluar.</p>
+      <p className="mt-1 text-[14px] text-ink/60">{tr('Setelah diganti, perangkat lain yang masuk dengan akun ini otomatis keluar.')}</p>
       <div className="mt-4 space-y-4">
-        <IsianPassword label="Password lama" value={lama} onChange={setLama} autoComplete="current-password" />
-        <IsianPassword label="Password baru" value={baru} onChange={setBaru} autoComplete="new-password" describedBy="petunjuk-pw" />
+        <IsianPassword label={tr('Password lama')} value={lama} onChange={setLama} autoComplete="current-password" />
+        <IsianPassword label={tr('Password baru')} value={baru} onChange={setBaru} autoComplete="new-password" describedBy="petunjuk-pw" />
         <p id="petunjuk-pw" className={`-mt-2 text-[12px] ${pendek ? 'text-[#B42318]' : 'text-ink/55'}`}>
-          Minimal 8 karakter.
+          {tr('Minimal 8 karakter.')}
         </p>
-        <IsianPassword label="Ulangi password baru" value={ulang} onChange={setUlang} autoComplete="new-password" describedBy="petunjuk-ulang" />
+        <IsianPassword label={tr('Ulangi password baru')} value={ulang} onChange={setUlang} autoComplete="new-password" describedBy="petunjuk-ulang" />
         {beda && (
           <p id="petunjuk-ulang" className="-mt-2 text-[12px] text-[#B42318]">
-            Belum sama dengan password baru.
+            {tr('Belum sama dengan password baru.')}
           </p>
         )}
       </div>
@@ -318,9 +321,9 @@ function FormPassword() {
           className="flex min-h-touch items-center gap-2 rounded-full bg-login-button px-6 font-semibold text-white disabled:opacity-50"
         >
           {state.jalan && <Loader2 size={18} className="animate-spin" aria-hidden="true" />}
-          Simpan password
+          {tr('Simpan password')}
         </button>
-        {state.ok && <Berhasil>Password diganti.</Berhasil>}
+        {state.ok && <Berhasil>{tr('Password diganti.')}</Berhasil>}
       </div>
     </form>
   )

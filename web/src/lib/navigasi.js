@@ -1,21 +1,22 @@
+import { tr, locale } from './i18n.js'
 // Helper Smart Navigation (T-107). Sama dengan mobile/lib/navigasi.dart – ubah bersamaan.
 
 /** Pilihan moda di UI (API_SPECS §2: driving | motorcycle | walking; transit = GET /routes/transit). */
 export const MODA = [
-  { value: 'driving', label: 'Mobil' },
-  { value: 'motorcycle', label: 'Motor' },
-  { value: 'walking', label: 'Jalan kaki' },
-  { value: 'transit', label: 'Umum' },
+  { value: 'driving', label: tr('Mobil') },
+  { value: 'motorcycle', label: tr('Motor') },
+  { value: 'walking', label: tr('Jalan kaki') },
+  { value: 'transit', label: tr('Umum') },
 ]
 
 /** Durasi detik → "12 mnt", "1 j 5 mnt", "< 1 mnt". */
 export function formatDurasi(detik) {
   const menit = Math.round((Number(detik) || 0) / 60)
-  if (menit < 1) return '< 1 mnt'
+  if (menit < 1) return tr('< 1 mnt')
   if (menit < 60) return `${menit} mnt`
   const jam = Math.floor(menit / 60)
   const sisa = menit % 60
-  return sisa ? `${jam} j ${sisa} mnt` : `${jam} j`
+  return sisa ? tr("{0} j {1} mnt", { 0: jam, 1: sisa }) : `${jam} j`
 }
 
 /** Jarak meter → "350 m", "4,9 km", "12 km". */
@@ -40,7 +41,7 @@ export function tautanOsm(dari, ke, mode) {
 export function teksBagikan({ dari, ke, mode, rute }) {
   const moda = MODA.find((m) => m.value === mode)?.label.toLowerCase() ?? ''
   return [
-    `Rute ${moda} ke ${ke.nama}: ${ringkasRute(rute)}`,
+    tr("Rute {0} ke {1}: {2}", { 0: moda, 1: ke.nama, 2: ringkasRute(rute) }),
     `Dari ${dari.nama}`,
     tautanOsm(dari.lokasi, ke.lokasi, mode),
   ].join('\n')
@@ -56,7 +57,7 @@ export function titikFoto({ langkah, ke, tengah }) {
 /** Tanggal foto "28 Okt 2024" (WIB). */
 export function tanggalFoto(iso) {
   if (!iso) return ''
-  return new Date(iso).toLocaleDateString('id-ID', {
+  return new Date(iso).toLocaleDateString(locale, {
     day: 'numeric',
     month: 'short',
     year: 'numeric',

@@ -3,14 +3,15 @@ import ErrorBanner from '../ErrorBanner.jsx'
 import IkonLangkah from './IkonLangkah.jsx'
 import { TransitPanduan, TransitRingkasan } from './TransitSheet.jsx'
 import { MODA, formatDurasi, formatJarak, tanggalFoto } from '../../lib/navigasi.js'
+import { tr } from '../../lib/i18n.js'
 
 const IKON_MODA = { driving: Car, motorcycle: Motorbike, walking: Footprints, transit: Bus }
 
 const TEKS_LOKASI = {
-  mencari: 'Mencari lokasimu…',
-  ditolak: 'Izin lokasi ditolak. Ketuk Ganti, lalu cari alamat atau ketuk peta.',
-  luar: 'Lokasimu di luar Medan. Ketuk Ganti untuk memilih titik asal.',
-  tidak: 'Ketuk Ganti, lalu cari alamat atau ketuk peta.',
+  mencari: tr('Mencari lokasimu…'),
+  ditolak: tr('Izin lokasi ditolak. Ketuk Ganti, lalu cari alamat atau ketuk peta.'),
+  luar: tr('Lokasimu di luar Medan. Ketuk Ganti untuk memilih titik asal.'),
+  tidak: tr('Ketuk Ganti, lalu cari alamat atau ketuk peta.'),
 }
 
 /**
@@ -55,22 +56,22 @@ export default function RouteSheet({
     <div className="flex flex-col gap-4">
       {target === 'dari' && (
         <div className="flex items-center gap-3 rounded-2xl bg-[color:rgb(218_184_246/0.35)] py-1 pl-4 pr-1">
-          <p className="flex-1 py-2 text-sm leading-snug">Pilih titik asal: cari alamat di atas atau ketuk peta.</p>
+          <p className="flex-1 py-2 text-sm leading-snug">{tr('Pilih titik asal: cari alamat di atas atau ketuk peta.')}</p>
           <button
             type="button"
             onClick={() => onTarget('ke')}
             className="min-h-touch rounded-full px-3 text-sm font-semibold text-ink-violet hover:bg-ink-violet/10"
           >
-            Batal
+            {tr('Batal')}
           </button>
         </div>
       )}
 
       {!ke ? (
         <div>
-          <h2 className="font-serif text-[1.625rem] leading-tight">Mau ke mana?</h2>
+          <h2 className="font-serif text-[1.625rem] leading-tight">{tr('Mau ke mana?')}</h2>
           <p className="mt-1 text-[15px] leading-relaxed text-ink/70">
-            Cari tempat di kolom atas atau ketuk peta untuk memilih tujuan.
+            {tr('Cari tempat di kolom atas atau ketuk peta untuk memilih tujuan.')}
           </p>
         </div>
       ) : umum ? null : (
@@ -94,9 +95,9 @@ export default function RouteSheet({
             className="flex min-h-touch w-full items-center justify-between gap-2 rounded-xl text-left"
           >
             <h3 id="langkah-judul" className="text-[15px] font-bold">
-              {rute.langkah.length} langkah
+              {rute.langkah.length} {tr('langkah')}
             </h3>
-            <span className="text-sm font-semibold text-ink-violet">{buka ? 'Sembunyikan' : 'Lihat semua'}</span>
+            <span className="text-sm font-semibold text-ink-violet">{buka ? tr('Sembunyikan') : tr('Lihat semua')}</span>
           </button>
           {buka && <DaftarLangkah langkah={rute.langkah} onPilih={(i) => onPlay(i)} />}
         </section>
@@ -109,7 +110,7 @@ function Ringkasan({ rute, memuat, galat, onRetry }) {
   if (galat) return <ErrorBanner error={galat} onRetry={onRetry} />
   if (memuat || !rute) {
     return (
-      <div aria-busy="true" aria-label="Menghitung rute" className="animate-pulse">
+      <div aria-busy="true" aria-label={tr('Menghitung rute')} className="animate-pulse">
         <div className="h-9 w-32 rounded-lg bg-ink/10" />
         <div className="mt-2 h-4 w-44 rounded bg-ink/[0.07]" />
       </div>
@@ -121,14 +122,14 @@ function Ringkasan({ rute, memuat, galat, onRetry }) {
         <span className="font-serif text-[2.25rem] leading-none text-ink">{formatDurasi(rute.durasiS)}</span>
         <span className="text-lg font-semibold text-ink/65">{formatJarak(rute.jarakM)}</span>
       </p>
-      <p className="mt-1.5 text-sm text-ink/65">Perkiraan waktu tanpa macet.</p>
+      <p className="mt-1.5 text-sm text-ink/65">{tr('Perkiraan waktu tanpa macet.')}</p>
     </div>
   )
 }
 
 function PilihModa({ mode, onMode }) {
   return (
-    <div role="radiogroup" aria-label="Moda" className="grid grid-cols-4 gap-1 rounded-[1.25rem] bg-search p-1 ring-1 ring-ink/[0.06]">
+    <div role="radiogroup" aria-label={tr('Moda')} className="grid grid-cols-4 gap-1 rounded-[1.25rem] bg-search p-1 ring-1 ring-ink/[0.06]">
       {MODA.map((m) => {
         const Icon = IKON_MODA[m.value] ?? Bike
         const on = m.value === mode
@@ -157,17 +158,17 @@ function Rencana({ dari, ke, lokasiStatus, target, onTarget }) {
   const baris = [
     {
       key: 'dari',
-      label: 'Dari',
+      label: tr('Dari'),
       nama: dari?.nama,
       kosong: TEKS_LOKASI[lokasiStatus] ?? TEKS_LOKASI.tidak,
       titik: <span className="size-3.5 rounded-full border-[3px] border-ink-violet bg-white" />,
     },
     {
       key: 'ke',
-      label: 'Ke',
+      label: tr('Ke'),
       nama: ke?.nama,
       sub: ke?.alamat,
-      kosong: 'Belum dipilih',
+      kosong: tr('Belum dipilih'),
       titik: <span className="size-3.5 rounded-full bg-traffic-macet ring-[3px] ring-traffic-macet/25" />,
     },
   ]
@@ -191,10 +192,10 @@ function Rencana({ dari, ke, lokasiStatus, target, onTarget }) {
           <button
             type="button"
             onClick={() => onTarget(target === b.key && b.key === 'dari' ? 'ke' : b.key)}
-            aria-label={`Ganti titik ${b.label.toLowerCase()}`}
+            aria-label={tr("Ganti titik {0}", { 0: b.label.toLowerCase() })}
             className="min-h-touch shrink-0 rounded-full px-3 text-sm font-semibold text-ink-violet hover:bg-ink-violet/10"
           >
-            Ganti
+            {tr('Ganti')}
           </button>
         </li>
       ))}
@@ -235,7 +236,7 @@ function Panduan({ rute, idx, onPlay, foto, onTutupFoto }) {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm font-semibold text-ink/60" aria-live="polite">
-          Langkah {idx + 1} dari {total}
+          {tr('Langkah')} {idx + 1} {tr('dari')} {total}
         </p>
         <button
           type="button"
@@ -243,7 +244,7 @@ function Panduan({ rute, idx, onPlay, foto, onTutupFoto }) {
           className="flex min-h-touch items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-ink-violet hover:bg-ink-violet/10"
         >
           <X size={18} aria-hidden="true" />
-          Selesai
+          {tr('Selesai')}
         </button>
       </div>
       <div className="flex items-start gap-4">
@@ -253,7 +254,7 @@ function Panduan({ rute, idx, onPlay, foto, onTutupFoto }) {
         <div className="min-w-0">
           <p className="font-serif text-[1.5rem] leading-tight">{l.teks}</p>
           {!terakhir && l.jarakM > 0 && (
-            <p className="mt-1 text-[15px] text-ink/70">Lalu ikuti jalan {formatJarak(l.jarakM)}</p>
+            <p className="mt-1 text-[15px] text-ink/70">{tr('Lalu ikuti jalan')} {formatJarak(l.jarakM)}</p>
           )}
         </div>
       </div>
@@ -268,14 +269,14 @@ function Panduan({ rute, idx, onPlay, foto, onTutupFoto }) {
           className="flex min-h-touch items-center justify-center gap-1 rounded-full bg-search font-semibold text-ink-violet ring-1 ring-ink/[0.06] transition hover:bg-white disabled:opacity-40"
         >
           <ChevronLeft size={20} aria-hidden="true" />
-          Sebelumnya
+          {tr('Sebelumnya')}
         </button>
         <button
           type="button"
           onClick={() => onPlay(terakhir ? null : idx + 1)}
           className="flex min-h-touch items-center justify-center gap-1 rounded-full bg-login-button font-semibold text-white shadow-[0_6px_16px_-6px_rgb(115_36_169/0.8)] transition hover:brightness-110"
         >
-          {terakhir ? 'Selesai' : 'Berikutnya'}
+          {terakhir ? tr('Selesai') : tr('Berikutnya')}
           {!terakhir && <ChevronRight size={20} aria-hidden="true" />}
         </button>
       </div>
@@ -290,25 +291,25 @@ function FotoJalan({ foto, onTutup }) {
     <section aria-labelledby="foto-judul" className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <h3 id="foto-judul" className="text-[15px] font-bold">
-          Street view
+          {tr('Street view')}
         </h3>
         <button
           type="button"
           onClick={onTutup}
-          aria-label="Tutup Street view"
+          aria-label={tr('Tutup Street view')}
           className="grid size-touch place-items-center rounded-full text-ink/60 hover:bg-ink/5"
         >
           <X size={20} aria-hidden="true" />
         </button>
       </div>
-      {foto.status === 'memuat' && <div className="aspect-[16/10] animate-pulse rounded-2xl bg-ink/[0.08]" aria-label="Memuat foto jalan" />}
+      {foto.status === 'memuat' && <div className="aspect-[16/10] animate-pulse rounded-2xl bg-ink/[0.08]" aria-label={tr('Memuat foto jalan')} />}
       {foto.status === 'galat' && <ErrorBanner error={foto.error} />}
       {foto.status === 'kosong' && (
         <div className="flex items-center gap-3 rounded-2xl bg-search px-4 py-4">
           <ImageOff size={24} className="shrink-0 text-ink/50" aria-hidden="true" />
           <div>
-            <p className="text-[15px] font-semibold">Belum ada foto jalan di sini</p>
-            <p className="text-sm text-ink/65">Coba titik lain, mis. langkah berikutnya saat Play.</p>
+            <p className="text-[15px] font-semibold">{tr('Belum ada foto jalan di sini')}</p>
+            <p className="text-sm text-ink/65">{tr('Coba titik lain, mis. langkah berikutnya saat Play.')}</p>
           </div>
         </div>
       )}
@@ -316,13 +317,13 @@ function FotoJalan({ foto, onTutup }) {
         <figure>
           <img
             src={foto.data.url}
-            alt={`Foto jalan sekitar ${foto.nama || 'titik ini'}`}
+            alt={tr("Foto jalan sekitar {0}", { 0: foto.nama || tr('titik ini') })}
             className="aspect-[16/10] w-full rounded-2xl bg-ink/[0.08] object-cover"
           />
           <figcaption className="mt-2 flex items-start justify-between gap-3 text-xs leading-snug text-ink/65">
             <span>
-              ±{formatJarak(foto.data.jarakM)} dari titik, {tanggalFoto(foto.data.diambil)}
-              <br />© Mapillary{foto.data.pengunggah ? `, ${foto.data.pengunggah}` : ''} (CC BY-SA)
+              ±{formatJarak(foto.data.jarakM)} {tr('dari titik,')} {tanggalFoto(foto.data.diambil)}
+              <br />{tr('© Mapillary')}{foto.data.pengunggah ? `, ${foto.data.pengunggah}` : ''} {tr('(CC BY-SA)')}
             </span>
             <a
               href={foto.data.halaman}
@@ -330,7 +331,7 @@ function FotoJalan({ foto, onTutup }) {
               rel="noreferrer"
               className="flex min-h-10 shrink-0 items-center gap-1 rounded-full px-2 font-semibold text-ink-violet hover:bg-ink-violet/10"
             >
-              Buka
+              {tr('Buka')}
               <ExternalLink size={14} aria-hidden="true" />
             </a>
           </figcaption>

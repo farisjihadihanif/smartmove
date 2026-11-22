@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react'
 import L from 'leaflet'
 import { Marker, Polyline, useMap, useMapEvents } from 'react-leaflet'
 import MapView from '../MapView.jsx'
+import { tr } from '../../lib/i18n.js'
 
 // Peta dasbor admin (DESIGN §7): garis koridor yang titiknya bisa digeser,
 // penanda (halte / event) yang bisa digeser, dan ketukan peta untuk menambah.
@@ -56,7 +57,7 @@ export default function PetaAdmin({
   onPick,
   kunci,
   className = 'h-[22rem] lg:h-[30rem]',
-  label = 'Peta',
+  label = tr('Peta'),
 }) {
   const latlng = useMemo(() => garis.map(([lng, lat]) => [lat, lng]), [garis])
   const semua = useMemo(
@@ -82,8 +83,8 @@ export default function PetaAdmin({
               position={p}
               draggable
               icon={ikonTitik(warnaGaris, false)}
-              title={`Titik ${i + 1}`}
-              alt={`Titik garis ${i + 1}`}
+              title={tr('Titik {0}', { 0: i + 1 })}
+              alt={tr("Titik garis {0}", { 0: i + 1 })}
               eventHandlers={{
                 dragend: (e) => {
                   const { lat, lng } = e.target.getLatLng()

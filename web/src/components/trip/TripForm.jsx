@@ -6,6 +6,7 @@ import { IKON_MODA } from './ikonModa.js'
 import { api, latLng } from '../../lib/api.js'
 import { MODA_TRIP, dariIsian, keIsian, teksRingkasan } from '../../lib/trip.js'
 import { ringkasanTrip } from '../../lib/transit.js'
+import { tr } from '../../lib/i18n.js'
 
 /**
  * Form rencana perjalanan: asal & tujuan bertumpuk (seperti rute), moda, jam berangkat (WIB, opsional), nama.
@@ -46,7 +47,7 @@ export default function TripForm({ awal, onSimpan, onBatal, idJudul }) {
   async function simpan(e) {
     e.preventDefault()
     if (!asal || !tujuan) {
-      return setKirim({ status: 'galat', error: { message: !asal ? 'Pilih titik asal dari daftar saran.' : 'Pilih tujuan dari daftar saran.' } })
+      return setKirim({ status: 'galat', error: { message: !asal ? tr('Pilih titik asal dari daftar saran.') : tr('Pilih tujuan dari daftar saran.') } })
     }
     setKirim({ status: 'kirim', error: null })
     try {
@@ -69,17 +70,17 @@ export default function TripForm({ awal, onSimpan, onBatal, idJudul }) {
   return (
     <form onSubmit={simpan} noValidate className="flex flex-col gap-5" aria-labelledby={idJudul}>
       <fieldset className="relative">
-        <legend className="sr-only">Rute</legend>
+        <legend className="sr-only">{tr('Rute')}</legend>
         <div className="flex flex-col gap-2 pr-12">
           <TempatField
-            label="Dari"
+            label={tr('Dari')}
             value={asal}
             onChange={setAsal}
             lokasiSaya
-            placeholder="Cari titik asal"
+            placeholder={tr('Cari titik asal')}
             near={tujuan?.lokasi}
           />
-          <TempatField label="Ke" value={tujuan} onChange={setTujuan} placeholder="Cari tujuan" near={asal?.lokasi} />
+          <TempatField label={tr('Ke')} value={tujuan} onChange={setTujuan} placeholder={tr('Cari tujuan')} near={asal?.lokasi} />
         </div>
         <button
           type="button"
@@ -87,7 +88,7 @@ export default function TripForm({ awal, onSimpan, onBatal, idJudul }) {
             setAsal(tujuan)
             setTujuan(asal)
           }}
-          aria-label="Tukar asal dan tujuan"
+          aria-label={tr('Tukar asal dan tujuan')}
           className="absolute right-0 top-1/2 grid size-touch -translate-y-1/2 place-items-center rounded-full text-ink-violet ring-1 ring-ink-violet/20 transition hover:bg-ink-violet/[0.06]"
         >
           <ArrowUpDown size={20} aria-hidden="true" />
@@ -95,7 +96,7 @@ export default function TripForm({ awal, onSimpan, onBatal, idJudul }) {
       </fieldset>
 
       <fieldset>
-        <legend className="mb-2 text-sm font-semibold text-ink/75">Naik apa?</legend>
+        <legend className="mb-2 text-sm font-semibold text-ink/75">{tr('Naik apa?')}</legend>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
           {MODA_TRIP.map((m) => {
             const Ikon = IKON_MODA[m.value]
@@ -121,10 +122,10 @@ export default function TripForm({ awal, onSimpan, onBatal, idJudul }) {
       </fieldset>
 
       <fieldset>
-        <legend className="mb-2 text-sm font-semibold text-ink/75">Berangkat (WIB)</legend>
+        <legend className="mb-2 text-sm font-semibold text-ink/75">{tr('Berangkat (WIB)')}</legend>
         <div className="flex gap-2">
           <label className="flex min-h-touch flex-[3] items-center rounded-2xl bg-search px-3 ring-1 ring-ink/[0.06] focus-within:ring-2 focus-within:ring-ink-violet">
-            <span className="sr-only">Tanggal berangkat</span>
+            <span className="sr-only">{tr('Tanggal berangkat')}</span>
             <input
               type="date"
               value={waktu.tanggal}
@@ -133,7 +134,7 @@ export default function TripForm({ awal, onSimpan, onBatal, idJudul }) {
             />
           </label>
           <label className="flex min-h-touch flex-[2] items-center rounded-2xl bg-search px-3 ring-1 ring-ink/[0.06] focus-within:ring-2 focus-within:ring-ink-violet">
-            <span className="sr-only">Jam berangkat</span>
+            <span className="sr-only">{tr('Jam berangkat')}</span>
             <input
               type="time"
               value={waktu.jam}
@@ -143,22 +144,22 @@ export default function TripForm({ awal, onSimpan, onBatal, idJudul }) {
           </label>
         </div>
         <p className="mt-1.5 flex items-center justify-between gap-2 text-xs text-ink/60">
-          <span>{waktu.jam ? (waktu.tanggal ? 'Terjadwal' : 'Tanpa tanggal = hari ini') : 'Kosongkan jam bila belum tahu kapan berangkat.'}</span>
+          <span>{waktu.jam ? (waktu.tanggal ? tr('Terjadwal') : tr('Tanpa tanggal = hari ini')) : tr('Kosongkan jam bila belum tahu kapan berangkat.')}</span>
           {(waktu.jam || waktu.tanggal) && (
             <button type="button" onClick={() => setWaktu({ tanggal: '', jam: '' })} className="min-h-8 font-semibold text-ink-violet">
-              Kosongkan
+              {tr('Kosongkan')}
             </button>
           )}
         </p>
       </fieldset>
 
       <label className="block">
-        <span className="mb-2 block text-sm font-semibold text-ink/75">Nama rencana (opsional)</span>
+        <span className="mb-2 block text-sm font-semibold text-ink/75">{tr('Nama rencana (opsional)')}</span>
         <input
           value={judul}
           onChange={(e) => setJudul(e.target.value)}
           maxLength={100}
-          placeholder="mis. Berangkat kuliah"
+          placeholder={tr('mis. Berangkat kuliah')}
           className="h-12 w-full rounded-2xl bg-search px-4 text-[15px] outline-none ring-1 ring-ink/[0.06] placeholder:text-ink/50 focus:ring-2 focus:ring-ink-violet"
         />
       </label>
@@ -168,11 +169,11 @@ export default function TripForm({ awal, onSimpan, onBatal, idJudul }) {
           {memuatEstimasi ? (
             <>
               <Loader2 size={16} className="animate-spin" aria-hidden="true" />
-              Menghitung estimasi…
+              {tr('Menghitung estimasi…')}
             </>
           ) : (
             <>
-              Estimasi <strong className="font-semibold text-ink">{teksEstimasi}</strong>
+              {tr('Estimasi')} <strong className="font-semibold text-ink">{teksEstimasi}</strong>
             </>
           )}
         </p>
@@ -180,7 +181,7 @@ export default function TripForm({ awal, onSimpan, onBatal, idJudul }) {
 
       {tanpaRuteUmum && (
         <p className="text-sm leading-snug text-ink/70" aria-live="polite">
-          Belum ada angkot atau bus yang lewat dekat titik asal dan tujuan. Rencana tetap bisa disimpan.
+          {tr('Belum ada angkot atau bus yang lewat dekat titik asal dan tujuan. Rencana tetap bisa disimpan.')}
         </p>
       )}
 
@@ -193,7 +194,7 @@ export default function TripForm({ awal, onSimpan, onBatal, idJudul }) {
             onClick={onBatal}
             className="min-h-touch flex-1 rounded-full px-5 text-[15px] font-semibold text-ink-violet ring-1 ring-ink-violet/25 hover:bg-ink-violet/[0.05]"
           >
-            Batal
+            {tr('Batal')}
           </button>
         )}
         <button
@@ -202,7 +203,7 @@ export default function TripForm({ awal, onSimpan, onBatal, idJudul }) {
           className="flex min-h-touch flex-[2] items-center justify-center gap-2 rounded-full bg-login-button px-5 text-[15px] font-semibold text-white shadow-[0_6px_18px_-6px_rgb(115_36_169/0.7)] transition hover:brightness-110 disabled:opacity-70"
         >
           {kirim.status === 'kirim' && <Loader2 size={18} className="animate-spin" aria-hidden="true" />}
-          {awal ? 'Simpan perubahan' : 'Simpan rencana'}
+          {awal ? tr('Simpan perubahan') : tr('Simpan rencana')}
         </button>
       </div>
     </form>

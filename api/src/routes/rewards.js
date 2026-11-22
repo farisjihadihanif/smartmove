@@ -3,6 +3,7 @@ import PointLedger from '../models/PointLedger.js';
 import Redemption from '../models/Redemption.js';
 import Voucher from '../models/Voucher.js';
 import { requireAuth } from '../middleware/auth.js';
+import { tr } from '../lib/i18n.js';
 import { paginasi } from './admin/bantu.js';
 import { entriPublik } from '../services/points.js';
 import { filterVoucherBerlaku, redemptionPublik, tukarVoucher, voucherPublik } from '../services/rewards.js';
@@ -19,7 +20,15 @@ export function rewardsRouter() {
       PointLedger.find(filter).sort({ createdAt: -1, _id: -1 }).skip(skip).limit(limit).lean(),
       PointLedger.countDocuments(filter),
     ]);
-    res.json({ saldo: req.user.poin, items: items.map(entriPublik), page, total });
+    res.json({
+      saldo: req.user.poin,
+      items: items.map((l) => {
+        const e = entriPublik(l);
+        return { ...e, label: tr(req.bahasa, e.label) };
+      }),
+      page,
+      total,
+    });
   });
 
   // GET /rewards/vouchers → katalog voucher yang masih berlaku (termasuk yang stoknya habis).

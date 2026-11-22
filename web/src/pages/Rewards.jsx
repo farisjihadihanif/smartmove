@@ -8,14 +8,15 @@ import PillToggle from '../components/PillToggle.jsx'
 import { api } from '../lib/api.js'
 import { useApiGet } from '../lib/useApiGet.js'
 import { jamAtauTanggal } from '../lib/wib.js'
+import { tr, locale } from '../lib/i18n.js'
 
 const TAB = [
-  { value: 'tukar', label: 'Tukar poin' },
-  { value: 'saya', label: 'Voucher saya' },
-  { value: 'riwayat', label: 'Riwayat' },
+  { value: 'tukar', label: tr('Tukar poin') },
+  { value: 'saya', label: tr('Voucher saya') },
+  { value: 'riwayat', label: tr('Riwayat') },
 ]
-const poin = (n) => n.toLocaleString('id-ID')
-const BULAN = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
+const poin = (n) => n.toLocaleString(locale)
+const BULAN = [tr('Jan'), tr('Feb'), tr('Mar'), tr('Apr'), tr('Mei'), tr('Jun'), tr('Jul'), tr('Agu'), tr('Sep'), tr('Okt'), tr('Nov'), tr('Des')]
 const tanggal = (iso) => {
   const w = new Date(new Date(iso).getTime() + 7 * 3600_000)
   return `${w.getUTCDate()} ${BULAN[w.getUTCMonth()]} ${w.getUTCFullYear()}`
@@ -33,17 +34,17 @@ export default function Rewards() {
 
   return (
     <PageShell
-      title="Rewards"
-      toolbar={<PillToggle options={TAB} value={tab} onChange={setTab} label="Bagian Rewards" fitDesktop />}
+      title={tr('Rewards')}
+      toolbar={<PillToggle options={TAB} value={tab} onChange={setTab} label={tr('Bagian Rewards')} fitDesktop />}
     >
       <div className="grid grid-cols-[minmax(0,1fr)] gap-8 pt-5 lg:grid-cols-[20rem_minmax(0,1fr)] lg:gap-10 lg:pt-8">
         <aside className="lg:sticky lg:top-6 lg:self-start">
           <section aria-labelledby="judul-saldo" className="bg-trip-card grain relative overflow-hidden rounded-[1.75rem] px-5 py-5 text-white shadow-[0_14px_30px_-16px_rgb(95_63_115/0.9)] lg:px-6 lg:py-7">
             <h2 id="judul-saldo" className="font-serif text-[15px] text-white/90 drop-shadow-[0_1px_2px_rgb(65_57_111/0.35)]">
-              Poin kamu
+              {tr('Poin kamu')}
             </h2>
             {saldo === undefined ? (
-              <span className="mt-1 block h-14 w-32 animate-pulse rounded-xl bg-white/25" aria-label="Memuat saldo" />
+              <span className="mt-1 block h-14 w-32 animate-pulse rounded-xl bg-white/25" aria-label={tr('Memuat saldo')} />
             ) : (
               <p className="font-serif text-[3.5rem] leading-none tracking-tight drop-shadow-[0_1px_2px_rgb(65_57_111/0.35)] lg:text-[4.5rem]">
                 {poin(saldo)}
@@ -52,25 +53,25 @@ export default function Rewards() {
           </section>
           <section aria-labelledby="judul-cara" className="mt-5 px-1">
             <h2 id="judul-cara" className="text-sm font-bold">
-              Cara dapat poin
+              {tr('Cara dapat poin')}
             </h2>
             <ul className="mt-2 space-y-3 text-[14px] leading-snug text-ink/75">
               <li className="flex gap-3">
                 <TicketCheck size={20} className="mt-0.5 shrink-0 text-pill-via" aria-hidden="true" />
                 <span>
                   <Link to="/pembayaran" className="font-semibold text-ink-violet hover:underline">
-                    Pesan tiket atau parkir
+                    {tr('Pesan tiket atau parkir')}
                   </Link>
-                  : 1 poin tiap Rp1.000 setelah lunas (simulasi).
+                  {tr(': 1 poin tiap Rp1.000 setelah lunas (simulasi).')}
                 </span>
               </li>
               <li className="flex gap-3">
                 <MessageSquareHeart size={20} className="mt-0.5 shrink-0 text-pill-via" aria-hidden="true" />
                 <span>
                   <Link to="/kampanye/umpan-balik" className="font-semibold text-ink-violet hover:underline">
-                    Kirim umpan balik
+                    {tr('Kirim umpan balik')}
                   </Link>
-                  : 5 poin, sekali seminggu.
+                  {tr(': 5 poin, sekali seminggu.')}
                 </span>
               </li>
             </ul>
@@ -130,29 +131,29 @@ function Katalog({ saldo, onDitukar, onLihatSaya }) {
   return (
     <section aria-labelledby="judul-katalog">
       <h2 id="judul-katalog" className="font-serif text-[1.5rem] leading-tight">
-        Tukar poin
+        {tr('Tukar poin')}
       </h2>
       {hasil && (
         <div role="status" className="sheet-fade mt-4 rounded-[1.25rem] bg-traffic-lancar/10 px-4 py-4 ring-1 ring-traffic-lancar/35">
-          <p className="font-semibold text-[#1D6B3D]">Voucher ditukar: {hasil.voucher?.nama}</p>
+          <p className="font-semibold text-[#1D6B3D]">{tr('Voucher ditukar:')} {hasil.voucher?.nama}</p>
           <p className="mt-1 font-serif text-[1.5rem] tracking-[0.06em] text-ink-violet">{hasil.kode}</p>
           <button type="button" onClick={onLihatSaya} className="mt-1 min-h-touch text-sm font-semibold text-ink-violet hover:underline">
-            Lihat di Voucher saya
+            {tr('Lihat di Voucher saya')}
           </button>
         </div>
       )}
       {kirim.error && (
         <ErrorBanner
-          message={kirim.error.code === 'POIN_KURANG' ? 'Poinmu belum cukup untuk voucher ini.' : undefined}
+          message={kirim.error.code === 'POIN_KURANG' ? tr('Poinmu belum cukup untuk voucher ini.') : undefined}
           error={kirim.error.code === 'POIN_KURANG' ? undefined : kirim.error}
           onDismiss={() => setKirim({ id: null, error: null })}
           className="mt-4"
         />
       )}
       {status === 'galat' && <ErrorBanner error={error} onRetry={muatUlang} className="mt-4" />}
-      {status === 'memuat' && <div className="mt-4 h-40 animate-pulse rounded-[1.25rem] bg-ink/[0.06]" aria-label="Memuat voucher" />}
+      {status === 'memuat' && <div className="mt-4 h-40 animate-pulse rounded-[1.25rem] bg-ink/[0.06]" aria-label={tr('Memuat voucher')} />}
       {status === 'ok' && data.items.length === 0 && (
-        <EmptyState icon={Gift} title="Belum ada voucher" message="Voucher baru akan muncul di sini. Sambil menunggu, kumpulkan poinnya dulu." className="mt-6" />
+        <EmptyState icon={Gift} title={tr('Belum ada voucher')} message={tr('Voucher baru akan muncul di sini. Sambil menunggu, kumpulkan poinnya dulu.')} className="mt-6" />
       )}
       {status === 'ok' && data.items.length > 0 && (
         <ul className="mt-4 grid gap-4 xl:grid-cols-2">
@@ -166,19 +167,19 @@ function Katalog({ saldo, onDitukar, onLihatSaya }) {
                   kiri={
                     <>
                       <span className="font-serif text-[1.625rem] leading-none">{poin(v.poin)}</span>
-                      <span className="mt-1 text-[12px] font-semibold text-white/85">poin</span>
+                      <span className="mt-1 text-[12px] font-semibold text-white/85">{tr('poin')}</span>
                     </>
                   }
                 >
                   <p className="font-semibold leading-snug">{v.nama}</p>
                   {v.deskripsi && <p className="mt-0.5 text-[13px] leading-snug text-ink/65">{v.deskripsi}</p>}
                   <p className="mt-1 text-[12px] text-ink/55">
-                    {v.tersedia ? `Sisa ${v.stok}` : 'Stok habis'}
-                    {v.berlakuSampai ? `, berlaku sampai ${tanggal(v.berlakuSampai)}` : ''}
+                    {v.tersedia ? `Sisa ${v.stok}` : tr('Stok habis')}
+                    {v.berlakuSampai ? tr(", berlaku sampai {0}", { 0: tanggal(v.berlakuSampai) }) : ''}
                   </p>
                   {v.syarat && (
                     <details className="mt-1 text-[12px] text-ink/65">
-                      <summary className="cursor-pointer py-1 font-semibold text-ink-violet">Syarat</summary>
+                      <summary className="cursor-pointer py-1 font-semibold text-ink-violet">{tr('Syarat')}</summary>
                       <p className="whitespace-pre-line leading-snug">{v.syarat}</p>
                     </details>
                   )}
@@ -192,10 +193,10 @@ function Katalog({ saldo, onDitukar, onLihatSaya }) {
                           className="bg-pill inline-flex min-h-touch items-center gap-2 rounded-full px-4 text-sm font-semibold text-white disabled:opacity-60"
                         >
                           {kirim.id === v.id && <Loader2 size={16} className="animate-spin" aria-hidden="true" />}
-                          Tukar {poin(v.poin)} poin?
+                          {tr('Tukar')} {poin(v.poin)} {tr('poin?')}
                         </button>
                         <button type="button" onClick={() => setYakin(null)} className="min-h-touch rounded-full px-3 text-sm font-semibold text-ink/65 hover:bg-ink/5">
-                          Batal
+                          {tr('Batal')}
                         </button>
                       </span>
                     ) : (
@@ -205,7 +206,7 @@ function Katalog({ saldo, onDitukar, onLihatSaya }) {
                         onClick={() => setYakin(v.id)}
                         className="inline-flex min-h-touch items-center rounded-full px-4 text-sm font-semibold text-ink-violet ring-1 ring-ink-violet/30 transition hover:bg-ink-violet/5 disabled:text-ink/45 disabled:ring-ink/15 disabled:hover:bg-transparent"
                       >
-                        {!v.tersedia ? 'Habis' : kurang ? `Kurang ${poin(v.poin - saldo)} poin` : 'Tukar'}
+                        {!v.tersedia ? tr('Habis') : kurang ? tr("Kurang {0} poin", { 0: poin(v.poin - saldo) }) : tr('Tukar')}
                       </button>
                     )}
                   </div>
@@ -220,9 +221,9 @@ function Katalog({ saldo, onDitukar, onLihatSaya }) {
 }
 
 const STATUS_VOUCHER = {
-  aktif: { label: 'Bisa dipakai', kelas: 'bg-traffic-lancar/12 text-[#1D6B3D] ring-traffic-lancar/40' },
-  dipakai: { label: 'Sudah dipakai', kelas: 'bg-ink/[0.05] text-ink/65 ring-ink/15' },
-  kedaluwarsa: { label: 'Kedaluwarsa', kelas: 'bg-ink/[0.05] text-ink/65 ring-ink/15' },
+  aktif: { label: tr('Bisa dipakai'), kelas: 'bg-traffic-lancar/12 text-[#1D6B3D] ring-traffic-lancar/40' },
+  dipakai: { label: tr('Sudah dipakai'), kelas: 'bg-ink/[0.05] text-ink/65 ring-ink/15' },
+  kedaluwarsa: { label: tr('Kedaluwarsa'), kelas: 'bg-ink/[0.05] text-ink/65 ring-ink/15' },
 }
 
 function VoucherSaya() {
@@ -242,12 +243,12 @@ function VoucherSaya() {
   return (
     <section aria-labelledby="judul-saya">
       <h2 id="judul-saya" className="font-serif text-[1.5rem] leading-tight">
-        Voucher saya
+        {tr('Voucher saya')}
       </h2>
       {status === 'galat' && <ErrorBanner error={error} onRetry={muatUlang} className="mt-4" />}
-      {status === 'memuat' && <div className="mt-4 h-40 animate-pulse rounded-[1.25rem] bg-ink/[0.06]" aria-label="Memuat voucher saya" />}
+      {status === 'memuat' && <div className="mt-4 h-40 animate-pulse rounded-[1.25rem] bg-ink/[0.06]" aria-label={tr('Memuat voucher saya')} />}
       {status === 'ok' && data.items.length === 0 && (
-        <EmptyState icon={TicketPercent} title="Belum ada voucher" message="Tukar poinmu di Tukar poin, vouchernya tersimpan di sini." className="mt-6" />
+        <EmptyState icon={TicketPercent} title={tr('Belum ada voucher')} message={tr('Tukar poinmu di Tukar poin, vouchernya tersimpan di sini.')} className="mt-6" />
       )}
       {status === 'ok' && data.items.length > 0 && (
         <ul className="mt-4 grid gap-4 xl:grid-cols-2">
@@ -260,7 +261,7 @@ function VoucherSaya() {
                   kiri={<TicketPercent size={30} strokeWidth={1.75} aria-hidden="true" />}
                 >
                   <p className="flex flex-wrap items-center gap-2">
-                    <span className="font-semibold leading-snug">{r.voucher?.nama ?? 'Voucher'}</span>
+                    <span className="font-semibold leading-snug">{r.voucher?.nama ?? tr('Voucher')}</span>
                     <span className={`rounded-full px-2.5 py-0.5 text-[12px] font-semibold ring-1 ${st.kelas}`}>{st.label}</span>
                   </p>
                   <p className="mt-1 flex items-center gap-2">
@@ -268,19 +269,19 @@ function VoucherSaya() {
                     <button
                       type="button"
                       onClick={() => salin(r.kode)}
-                      aria-label={`Salin kode ${r.kode}`}
+                      aria-label={tr("Salin kode {0}", { 0: r.kode })}
                       className="grid size-touch place-items-center rounded-full text-ink-violet hover:bg-ink-violet/[0.07]"
                     >
                       {disalin === r.kode ? <Check size={18} aria-hidden="true" /> : <Copy size={18} aria-hidden="true" />}
                     </button>
                   </p>
                   <p className="text-[12px] text-ink/55">
-                    Ditukar {tanggal(r.createdAt)}
-                    {r.voucher?.berlakuSampai ? `, berlaku sampai ${tanggal(r.voucher.berlakuSampai)}` : ''}
+                    {tr('Ditukar')} {tanggal(r.createdAt)}
+                    {r.voucher?.berlakuSampai ? tr(", berlaku sampai {0}", { 0: tanggal(r.voucher.berlakuSampai) }) : ''}
                   </p>
                   {r.voucher?.syarat && (
                     <details className="mt-1 text-[12px] text-ink/65">
-                      <summary className="cursor-pointer py-1 font-semibold text-ink-violet">Syarat</summary>
+                      <summary className="cursor-pointer py-1 font-semibold text-ink-violet">{tr('Syarat')}</summary>
                       <p className="whitespace-pre-line leading-snug">{r.voucher.syarat}</p>
                     </details>
                   )}
@@ -292,16 +293,16 @@ function VoucherSaya() {
       )}
       {disalin && (
         <p role="status" className="sr-only">
-          Kode {disalin} disalin
+          {tr('Kode')} {disalin} {tr('disalin')}
         </p>
       )}
       {data && data.total > 20 && (
         <div className="mt-4 flex justify-between">
           <button type="button" disabled={page <= 1} onClick={() => setPage(page - 1)} className="min-h-touch px-4 font-semibold text-ink-violet disabled:opacity-35">
-            Sebelumnya
+            {tr('Sebelumnya')}
           </button>
           <button type="button" disabled={page * 20 >= data.total} onClick={() => setPage(page + 1)} className="min-h-touch px-4 font-semibold text-ink-violet disabled:opacity-35">
-            Berikutnya
+            {tr('Berikutnya')}
           </button>
         </div>
       )}
@@ -317,12 +318,12 @@ function Riwayat() {
   return (
     <section aria-labelledby="judul-riwayat">
       <h2 id="judul-riwayat" className="font-serif text-[1.5rem] leading-tight">
-        Riwayat poin
+        {tr('Riwayat poin')}
       </h2>
       {status === 'galat' && <ErrorBanner error={error} onRetry={muatUlang} className="mt-4" />}
-      {status === 'memuat' && <div className="mt-4 h-40 animate-pulse rounded-[1.25rem] bg-ink/[0.06]" aria-label="Memuat riwayat" />}
+      {status === 'memuat' && <div className="mt-4 h-40 animate-pulse rounded-[1.25rem] bg-ink/[0.06]" aria-label={tr('Memuat riwayat')} />}
       {status === 'ok' && data.items.length === 0 && (
-        <EmptyState icon={Gift} title="Belum ada poin" message="Poin pertamamu datang dari pemesanan yang lunas atau umpan balik." className="mt-6" />
+        <EmptyState icon={Gift} title={tr('Belum ada poin')} message={tr('Poin pertamamu datang dari pemesanan yang lunas atau umpan balik.')} className="mt-6" />
       )}
       {status === 'ok' && data.items.length > 0 && (
         <ul className="mt-3">
@@ -346,10 +347,10 @@ function Riwayat() {
       {data && data.total > 20 && (
         <div className="mt-4 flex justify-between">
           <button type="button" disabled={page <= 1} onClick={() => setPage(page - 1)} className="min-h-touch px-4 font-semibold text-ink-violet disabled:opacity-35">
-            Sebelumnya
+            {tr('Sebelumnya')}
           </button>
           <button type="button" disabled={page * 20 >= data.total} onClick={() => setPage(page + 1)} className="min-h-touch px-4 font-semibold text-ink-violet disabled:opacity-35">
-            Berikutnya
+            {tr('Berikutnya')}
           </button>
         </div>
       )}

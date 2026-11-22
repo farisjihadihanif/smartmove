@@ -1,6 +1,7 @@
 import KodeQR from './KodeQR.jsx'
 import { IKON_JENIS } from './ikon.js'
 import { labelJenis, namaMetode, rupiah, satuanLabel, waktuLengkap } from '../../lib/pembayaran.js'
+import { tr } from '../../lib/i18n.js'
 
 /**
  * E-tiket simulasi (DESIGN §3): kode + QR, detail perjalanan, cap besar "SIMULASI – bukan tiket resmi".
@@ -13,7 +14,7 @@ export default function ETiket({ payment }) {
 
   return (
     <article
-      aria-label={`E-tiket simulasi ${layanan.nama}`}
+      aria-label={tr("E-tiket simulasi {0}", { 0: layanan.nama })}
       className="cetak-tiket tema-terang relative mx-auto w-full max-w-[26rem] overflow-hidden rounded-[1.75rem] bg-white shadow-[0_20px_40px_-20px_rgb(65_57_111/0.65)] ring-1 ring-ink-violet/10 print:shadow-none"
     >
       <header className="cetak-tiket-kepala bg-pill-deep grain relative px-6 pb-6 pt-5 text-white">
@@ -47,27 +48,27 @@ export default function ETiket({ payment }) {
       <div className="relative px-6 pb-6 pt-5">
         <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-[14px]">
           <div className="col-span-2">
-            <dt className="text-ink/55">{parkir ? 'Mulai parkir' : 'Berangkat'}</dt>
+            <dt className="text-ink/55">{parkir ? tr('Mulai parkir') : tr('Berangkat')}</dt>
             <dd className="font-semibold">{payment.jadwal ? waktuLengkap(payment.jadwal) : '—'}</dd>
           </div>
           <div>
-            <dt className="text-ink/55">{parkir ? 'Lama' : 'Penumpang'}</dt>
+            <dt className="text-ink/55">{parkir ? tr('Lama') : tr('Penumpang')}</dt>
             <dd className="font-semibold">
               {payment.penumpang} {satuanLabel(layanan)}
             </dd>
           </div>
           <div>
-            <dt className="text-ink/55">Total</dt>
+            <dt className="text-ink/55">{tr('Total')}</dt>
             <dd className="font-semibold">{rupiah(payment.jumlah)}</dd>
           </div>
           {payment.metode && (
             <div>
-              <dt className="text-ink/55">Metode</dt>
+              <dt className="text-ink/55">{tr('Metode')}</dt>
               <dd className="font-semibold">{namaMetode(payment.metode)}</dd>
             </div>
           )}
           <div className="col-span-2">
-            <dt className="text-ink/55">No. pesanan</dt>
+            <dt className="text-ink/55">{tr('No. pesanan')}</dt>
             <dd className="break-all font-semibold">{payment.orderId}</dd>
           </div>
         </dl>
@@ -75,13 +76,13 @@ export default function ETiket({ payment }) {
         {/* Cap karet: besar & miring supaya e-tiket tidak bisa dikira tiket resmi. */}
         <p className="mt-6 flex justify-center">
           <span className="inline-flex -rotate-[6deg] flex-col items-center rounded-xl border-[3px] border-pill-via px-5 py-1.5 text-pill-via">
-            <span className="font-serif text-[1.875rem] leading-none tracking-[0.12em]">SIMULASI</span>
-            <span className="mt-0.5 text-[0.8125rem] font-bold">bukan tiket resmi</span>
+            <span className="font-serif text-[1.875rem] leading-none tracking-[0.12em]">{tr('SIMULASI')}</span>
+            <span className="mt-0.5 text-[0.8125rem] font-bold">{tr('bukan tiket resmi')}</span>
           </span>
         </p>
 
         <div className="mt-5 flex flex-col items-center">
-          <KodeQR value={`${eTiket.kode}|${payment.orderId}|SIMULASI`} label={`Kode QR e-tiket simulasi ${eTiket.kode}`} />
+          <KodeQR value={`${eTiket.kode}|${payment.orderId}|SIMULASI`} label={tr("Kode QR e-tiket simulasi {0}", { 0: eTiket.kode })} />
           <p className="mt-2 font-serif text-[1.375rem] tracking-[0.08em] text-ink-violet">{eTiket.kode}</p>
         </div>
 

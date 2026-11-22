@@ -15,6 +15,7 @@ import { MEDAN_CENTER } from '../lib/geo.js'
 import { PESAN_DIGABUNG, PESAN_TERKIRIM, teksBagikanLaluLintas } from '../lib/lalulintas.js'
 import { useAuth } from '../lib/useAuth.js'
 import { useLaluLintas } from '../lib/useLaluLintas.js'
+import { tr } from '../lib/i18n.js'
 
 // Live Traffic Information (mockup hal. 6, PRD §6.2, T-205).
 // Tab Estimasi Waktu: waktu tempuh jalan utama + kotak "12 mnt / 4,9 km" di peta.
@@ -22,8 +23,8 @@ import { useLaluLintas } from '../lib/useLaluLintas.js'
 // Lokasi perangkat hanya diminta saat melapor dan tidak disimpan (aturan bisnis #5).
 
 const TAB = [
-  { value: 'estimasi', label: 'Estimasi Waktu' },
-  { value: 'peta', label: 'Peta Interaktif' },
+  { value: 'estimasi', label: tr('Estimasi Waktu') },
+  { value: 'peta', label: tr('Peta Interaktif') },
 ]
 const MEBIDANG = { minLat: 3.25, maxLat: 3.9, minLng: 98.35, maxLng: 99.0 }
 const dalamWilayah = ({ lat, lng }) =>
@@ -88,12 +89,12 @@ export default function LaluLintas() {
       const { tempat } = await api.get('/places/reverse', { query: { at: latLng(titik) } })
       return tempat.nama
     } catch {
-      return 'Titik di peta'
+      return tr('Titik di peta')
     }
   }
 
   async function aturTitik(titik, nama) {
-    if (!dalamWilayah(titik)) return kabari('SmartMove baru melayani Medan dan sekitarnya.')
+    if (!dalamWilayah(titik)) return kabari(tr('SmartMove baru melayani Medan dan sekitarnya.'))
     setLapor({ titik, nama: nama ?? '' })
     if (!nama) {
       const n = await namai(titik)
@@ -102,15 +103,15 @@ export default function LaluLintas() {
   }
 
   function lokasiSaya() {
-    if (!('geolocation' in navigator)) return kabari('Peramban ini tidak bisa membaca lokasi. Ketuk peta untuk memilih titik.')
+    if (!('geolocation' in navigator)) return kabari(tr('Peramban ini tidak bisa membaca lokasi. Ketuk peta untuk memilih titik.'))
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const titik = { lat: pos.coords.latitude, lng: pos.coords.longitude }
-        if (!dalamWilayah(titik)) return kabari('Lokasimu di luar Medan. Ketuk peta untuk memilih titik.')
+        if (!dalamWilayah(titik)) return kabari(tr('Lokasimu di luar Medan. Ketuk peta untuk memilih titik.'))
         aturTitik(titik)
         setFokusTitik([titik.lat, titik.lng])
       },
-      () => kabari('Izin lokasi ditolak. Ketuk peta untuk memilih titik.'),
+      () => kabari(tr('Izin lokasi ditolak. Ketuk peta untuk memilih titik.')),
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
     )
   }
@@ -152,7 +153,7 @@ export default function LaluLintas() {
 
   const cari = useCallback(async (q) => {
     const s = q.trim()
-    if (s.length < 2) return setHasil({ status: 'galat', items: [], error: { message: 'Ketik minimal 2 huruf.' } })
+    if (s.length < 2) return setHasil({ status: 'galat', items: [], error: { message: tr('Ketik minimal 2 huruf.') } })
     setHasil({ status: 'memuat', items: [] })
     try {
       const { items } = await api.get('/places/search', { query: { q: s, near: latLng(tengah.current) } })
@@ -178,25 +179,25 @@ export default function LaluLintas() {
     if (!koridor.items.length) return
     const teks = teksBagikanLaluLintas(koridor.items)
     try {
-      if (navigator.share) return await navigator.share({ title: 'Lalu lintas Medan', text: teks })
+      if (navigator.share) return await navigator.share({ title: tr('Lalu lintas Medan'), text: teks })
       await navigator.clipboard.writeText(teks)
-      kabari('Ringkasan lalu lintas disalin. Tempel di chat untuk membagikannya.')
+      kabari(tr('Ringkasan lalu lintas disalin. Tempel di chat untuk membagikannya.'))
     } catch (e) {
-      if (e?.name !== 'AbortError') kabari('Belum bisa dibagikan dari peramban ini.')
+      if (e?.name !== 'AbortError') kabari(tr('Belum bisa dibagikan dari peramban ini.'))
     }
   }
 
   const aksi = [
-    { label: 'Rute', icon: Route, onClick: () => navigate('/navigasi') },
-    { label: 'Laporkan', short: 'Lapor', icon: Megaphone, onClick: mulaiLapor, disabled: Boolean(lapor) },
-    { label: 'Share', icon: Share2, onClick: bagikan, disabled: !koridor.items.length },
+    { label: tr('Rute'), icon: Route, onClick: () => navigate('/navigasi') },
+    { label: tr('Laporkan'), short: tr('Lapor'), icon: Megaphone, onClick: mulaiLapor, disabled: Boolean(lapor) },
+    { label: tr('Share'), icon: Share2, onClick: bagikan, disabled: !koridor.items.length },
   ]
   const estimasi = tab === 'estimasi'
 
   return (
     <PageShell
       map
-      title="Live Traffic Information"
+      title={tr('Live Traffic Information')}
       toolbar={
         <>
           <div className="relative lg:max-w-md lg:flex-1">
@@ -207,8 +208,8 @@ export default function LaluLintas() {
                 if (!v) setHasil(null)
               }}
               onSubmit={cari}
-              placeholder="Telusuri di sini"
-              label="Cari tempat di peta"
+              placeholder={tr('Telusuri di sini')}
+              label={tr('Cari tempat di peta')}
             />
             {hasil && <HasilCari hasil={hasil} onPilih={pilihTempat} onTutup={() => setHasil(null)} />}
           </div>
@@ -219,7 +220,7 @@ export default function LaluLintas() {
               setTab(v)
               setAktif(null)
             }}
-            label="Tampilan"
+            label={tr('Tampilan')}
             fitDesktop
             className="lg:shrink-0"
           />
@@ -228,7 +229,7 @@ export default function LaluLintas() {
     >
       <div className="relative z-0 flex min-h-0 flex-1 flex-col lg:flex-row">
         <div className="relative flex min-h-0 flex-1 flex-col">
-          <MapView tucked center={pusat} zoom={13} attribution="topright" className="flex-1 lg:mb-0" label="Peta lalu lintas">
+          <MapView tucked center={pusat} zoom={13} attribution="topright" className="flex-1 lg:mb-0" label={tr('Peta lalu lintas')}>
             <TrafficLayers
               koridor={koridor.items}
               laporan={estimasi && !lapor ? [] : laporan}
@@ -260,7 +261,7 @@ export default function LaluLintas() {
         </div>
 
         <section
-          aria-label={lapor ? 'Laporkan kondisi jalan' : estimasi ? 'Estimasi waktu' : 'Peta interaktif'}
+          aria-label={lapor ? tr('Laporkan kondisi jalan') : estimasi ? tr('Estimasi waktu') : tr('Peta interaktif')}
           className={`sheet-rise absolute inset-x-0 -bottom-7 z-10 overflow-y-auto rounded-t-[1.75rem] bg-surface px-5 pb-[calc(1.75rem+1rem)] pt-2 shadow-[0_-12px_32px_-14px_rgb(65_57_111/0.55)] lg:static lg:order-first lg:-mt-7 lg:flex lg:max-h-none lg:w-[26rem] lg:shrink-0 lg:flex-col lg:overflow-hidden lg:rounded-none lg:p-0 lg:shadow-[10px_0_28px_-18px_rgb(65_57_111/0.55)] xl:w-[28rem] ${
             lapor ? 'max-h-[64%]' : estimasi ? 'max-h-[50%]' : 'max-h-[46%]'
           }`}
@@ -278,7 +279,7 @@ export default function LaluLintas() {
               />
             ) : estimasi ? (
               <>
-                <h2 className="font-serif text-[1.375rem] leading-tight">Jalan utama sekarang</h2>
+                <h2 className="font-serif text-[1.375rem] leading-tight">{tr('Jalan utama sekarang')}</h2>
                 <TrafficLegend className="mb-2 mt-2" />
                 <DaftarKoridor state={koridor} pilih={pilih} onPilih={setPilih} onRetry={muatUlang} />
               </>
@@ -295,12 +296,12 @@ export default function LaluLintas() {
                 ) : (
                   <>
                     <h2 className="font-serif text-[1.375rem] leading-tight">
-                      {laporan.length ? `${laporan.length} laporan warga di area ini` : 'Belum ada laporan di area ini'}
+                      {laporan.length ? tr("{0} laporan warga di area ini", { 0: laporan.length }) : tr('Belum ada laporan di area ini')}
                     </h2>
                     <p className="mt-1 text-[14px] leading-relaxed text-ink/65">
                       {laporan.length
-                        ? 'Ketuk penanda untuk melihat detail atau mengonfirmasi.'
-                        : 'Lihat kemacetan, banjir, atau penutupan jalan? Ketuk Laporkan supaya warga lain tahu.'}
+                        ? tr('Ketuk penanda untuk melihat detail atau mengonfirmasi.')
+                        : tr('Lihat kemacetan, banjir, atau penutupan jalan? Ketuk Laporkan supaya warga lain tahu.')}
                     </p>
                   </>
                 )}

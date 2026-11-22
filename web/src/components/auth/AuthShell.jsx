@@ -2,13 +2,14 @@ import { useId, useState } from 'react'
 import { ArrowLeft, Eye, EyeOff, Megaphone, Route, Ticket, TrafficCone } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import logo from '../../assets/brand/logo.webp'
+import { tr } from '../../lib/i18n.js'
 
 // Fitur unggulan dari poster (mockup hal. 1) – tampil di panel kiri versi desktop.
 const FITUR = [
-  [Route, 'Navigasi rute alternatif'],
-  [TrafficCone, 'Pemantau lalu lintas real time'],
-  [Ticket, 'Pembayaran terintegrasi transportasi umum'],
-  [Megaphone, 'Kampanye kesadaran transportasi umum'],
+  [Route, tr('Navigasi rute alternatif')],
+  [TrafficCone, tr('Pemantau lalu lintas real time')],
+  [Ticket, tr('Pembayaran terintegrasi transportasi umum')],
+  [Megaphone, tr('Kampanye kesadaran transportasi umum')],
 ]
 
 /**
@@ -26,7 +27,7 @@ export function AuthShell({ title, subtitle, back, children }) {
           {back && (
             <Link
               to={back}
-              aria-label="Kembali"
+              aria-label={tr('Kembali')}
               className="-ml-3 grid size-touch shrink-0 place-items-center rounded-full hover:bg-white/15"
             >
               <ArrowLeft size={22} aria-hidden="true" />
@@ -37,7 +38,7 @@ export function AuthShell({ title, subtitle, back, children }) {
 
         <div className="hidden lg:mt-auto lg:block">
           <p className="max-w-[14ch] font-serif text-[clamp(2.5rem,3.6vw,3.5rem)] leading-[1.05]">
-            Permudah kegiatanmu di Medan
+            {tr('Permudah kegiatanmu di Medan')}
           </p>
           <ul className="mt-10 max-w-md divide-y divide-white/20 border-y border-white/20">
             {FITUR.map(([Icon, text]) => (
@@ -79,7 +80,7 @@ function Brand() {
       <span className="grid size-11 place-items-center rounded-2xl bg-white shadow-[0_4px_14px_rgb(20_10_60/0.25)]">
         <img src={logo} alt="" width="34" height="26" className="h-auto w-[34px]" />
       </span>
-      <span className="font-serif text-xl leading-none">SmartMove Medan</span>
+      <span className="font-serif text-xl leading-none">{tr('SmartMove Medan')}</span>
     </div>
   )
 }
@@ -115,7 +116,7 @@ export function AuthField({ icon: Icon, label, hint, type = 'text', reveal = fal
             <button
               type="button"
               onClick={() => setShown((v) => !v)}
-              aria-label={shown ? 'Sembunyikan password' : 'Tampilkan password'}
+              aria-label={shown ? tr('Sembunyikan password') : tr('Tampilkan password')}
               aria-pressed={shown}
               className="grid size-touch shrink-0 place-items-center rounded-full text-indigo/60 hover:text-indigo"
             >
@@ -146,7 +147,7 @@ export function AuthButton({ busy, children, className = '', ...props }) {
       className={`${buttonBase} bg-login-button text-white shadow-[0_6px_18px_-6px_rgb(115_36_169/0.7)] hover:brightness-110 active:scale-[0.99] disabled:opacity-70 ${className}`}
       {...props}
     >
-      {busy ? 'Tunggu sebentar…' : children}
+      {busy ? tr('Tunggu sebentar…') : children}
     </button>
   )
 }

@@ -1,3 +1,4 @@
+import { tr } from '../lib/i18n.js'
 /**
  * Bar aksi bawah bertekstur ungu tua (mockup hal. 4–7).
  * `actions`: [{ label, short?, icon: KomponenIkon, onClick, variant: 'light' | 'pill', disabled }]
@@ -9,7 +10,7 @@
 export default function BottomActionBar({ actions = [], children, className = '' }) {
   return (
     <nav
-      aria-label="Aksi"
+      aria-label={tr('Aksi')}
       className={`bg-bar-dark relative z-10 rounded-t-[1.75rem] px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 ${className}`}
     >
       {children}

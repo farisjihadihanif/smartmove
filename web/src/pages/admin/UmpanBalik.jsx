@@ -6,6 +6,7 @@ import { api } from '../../lib/api.js'
 import { FITUR } from '../../lib/kampanye.js'
 import { useApiGet } from '../../lib/useApiGet.js'
 import { jamAtauTanggal } from '../../lib/wib.js'
+import { tr } from '../../lib/i18n.js'
 
 const LABEL_FITUR = Object.fromEntries(FITUR.map((f) => [f.value, f.label]))
 
@@ -22,7 +23,7 @@ export default function UmpanBalik() {
       <Judul
         aksi={
           <label className="flex items-center gap-2 text-sm font-semibold">
-            Rating
+            {tr('Rating')}
             <select
               value={rating}
               onChange={(e) => {
@@ -31,32 +32,32 @@ export default function UmpanBalik() {
               }}
               className={`${kelasInput} w-auto`}
             >
-              <option value="">Semua</option>
+              <option value="">{tr('Semua')}</option>
               {[5, 4, 3, 2, 1].map((n) => (
                 <option key={n} value={n}>
-                  {n} bintang
+                  {n} {tr('bintang')}
                 </option>
               ))}
             </select>
           </label>
         }
       >
-        Umpan balik
+        {tr('Umpan balik')}
       </Judul>
       {(error || galat) && <ErrorBanner error={error || galat} onRetry={error ? muatUlang : undefined} className="mb-4" />}
       <ul className="divide-y divide-ink/[0.06]">
         {data?.items.map((f) => (
           <li key={f.id} className="flex flex-wrap items-start gap-4 py-4">
-            <span className="flex shrink-0 items-center gap-0.5" role="img" aria-label={`${f.rating} dari 5`}>
+            <span className="flex shrink-0 items-center gap-0.5" role="img" aria-label={tr("{0} dari 5", { 0: f.rating })}>
               {[1, 2, 3, 4, 5].map((n) => (
                 <Star key={n} size={16} aria-hidden="true" className={n <= f.rating ? 'fill-traffic-padat text-[#B26A00]' : 'text-ink/20'} />
               ))}
             </span>
             <div className="min-w-0 flex-1 basis-60">
-              <p className="text-[15px] leading-relaxed">{f.komentar || <span className="text-ink/45">Tanpa komentar</span>}</p>
+              <p className="text-[15px] leading-relaxed">{f.komentar || <span className="text-ink/45">{tr('Tanpa komentar')}</span>}</p>
               <p className="mt-1 text-xs text-ink/55">
-                {f.pengguna?.username ?? 'akun dihapus'}, {jamAtauTanggal(f.createdAt, now)}
-                {f.fitur && `, tentang ${LABEL_FITUR[f.fitur] ?? f.fitur}`}
+                {f.pengguna?.username ?? tr('akun dihapus')}, {jamAtauTanggal(f.createdAt, now)}
+                {f.fitur && tr(", tentang {0}", { 0: LABEL_FITUR[f.fitur] ?? f.fitur })}
               </p>
             </div>
             <TombolHapus
@@ -73,7 +74,7 @@ export default function UmpanBalik() {
           </li>
         ))}
       </ul>
-      {data && data.items.length === 0 && <p className="mt-4 text-sm text-ink/60">Belum ada umpan balik.</p>}
+      {data && data.items.length === 0 && <p className="mt-4 text-sm text-ink/60">{tr('Belum ada umpan balik.')}</p>}
       {data && <Halaman page={data.page} total={data.total} onPage={setPage} />}
     </>
   )

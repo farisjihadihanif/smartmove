@@ -6,6 +6,7 @@ import { api } from '../../lib/api.js'
 import { KEJADIAN, TINGKAT } from '../../lib/lalulintas.js'
 import { useApiGet } from '../../lib/useApiGet.js'
 import { jamAtauTanggal } from '../../lib/wib.js'
+import { tr } from '../../lib/i18n.js'
 
 const NADA = { lancar: 'hijau', padat: 'kuning', macet: 'merah' }
 
@@ -23,23 +24,23 @@ export default function Laporan() {
         aksi={
           <PillToggle
             options={[
-              { value: 'aktif', label: 'Aktif' },
-              { value: 'semua', label: 'Semua' },
+              { value: 'aktif', label: tr('Aktif') },
+              { value: 'semua', label: tr('Semua') },
             ]}
             value={status}
             onChange={(v) => {
               setStatus(v)
               setPage(1)
             }}
-            label="Saring laporan"
+            label={tr('Saring laporan')}
             fitDesktop
           />
         }
       >
-        Laporan lalu lintas
+        {tr('Laporan lalu lintas')}
       </Judul>
       {(error || galat) && <ErrorBanner error={error || galat} onRetry={error ? muatUlang : undefined} className="mb-4" />}
-      <Tabel label="Laporan lalu lintas" kolom={['Kondisi', 'Catatan', 'Pelapor', 'Waktu', 'Lokasi', '']}>
+      <Tabel label={tr('Laporan lalu lintas')} kolom={[tr('Kondisi'), tr('Catatan'), tr('Pelapor'), tr('Waktu'), tr('Lokasi'), '']}>
         {data?.items.map((r) => (
           <tr key={r.id}>
             <td className="px-3 py-3">
@@ -48,12 +49,12 @@ export default function Laporan() {
             </td>
             <td className="max-w-[18rem] px-3 py-3 text-ink/80">{r.catatan || <span className="text-ink/40">–</span>}</td>
             <td className="px-3 py-3">
-              {r.pelapor?.username ?? <span className="text-ink/40">akun dihapus</span>}
-              {r.konfirmasi > 0 && <span className="block text-xs text-ink/55">+{r.konfirmasi} konfirmasi</span>}
+              {r.pelapor?.username ?? <span className="text-ink/40">{tr('akun dihapus')}</span>}
+              {r.konfirmasi > 0 && <span className="block text-xs text-ink/55">+{r.konfirmasi} {tr('konfirmasi')}</span>}
             </td>
             <td className="px-3 py-3 text-ink/65">
               {jamAtauTanggal(r.createdAt, now)}
-              {new Date(r.expiresAt) < now && <span className="block text-xs">kedaluwarsa</span>}
+              {new Date(r.expiresAt) < now && <span className="block text-xs">{tr('kedaluwarsa')}</span>}
             </td>
             <td className="px-3 py-3">
               <a
@@ -62,7 +63,7 @@ export default function Laporan() {
                 rel="noreferrer"
                 className="font-semibold text-ink-violet underline-offset-2 hover:underline"
               >
-                Lihat peta
+                {tr('Lihat peta')}
               </a>
             </td>
             <td className="px-3 py-2 text-right">
@@ -81,7 +82,7 @@ export default function Laporan() {
           </tr>
         ))}
       </Tabel>
-      {data && data.items.length === 0 && <p className="mt-4 text-sm text-ink/60">Tidak ada laporan.</p>}
+      {data && data.items.length === 0 && <p className="mt-4 text-sm text-ink/60">{tr('Tidak ada laporan.')}</p>}
       {data && <Halaman page={data.page} total={data.total} onPage={setPage} />}
     </>
   )

@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import qrcode from 'qrcode-generator'
+import { tr } from '../../lib/i18n.js'
 
 /** QR kode e-tiket simulasi sebagai SVG (tajam di semua ukuran, bisa dicetak). */
 export default function KodeQR({ value, size = 168, label }) {
@@ -18,7 +19,7 @@ export default function KodeQR({ value, size = 168, label }) {
   return (
     <svg
       role="img"
-      aria-label={label ?? `Kode QR ${value}`}
+      aria-label={label ?? tr("Kode QR {0}", { 0: value })}
       viewBox={`-2 -2 ${n + 4} ${n + 4}`}
       width={size}
       height={size}

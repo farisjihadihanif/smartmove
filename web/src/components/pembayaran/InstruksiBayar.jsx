@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Check, Copy, ExternalLink, Loader2, RefreshCw, Smartphone } from 'lucide-react'
 import KodeQR from './KodeQR.jsx'
 import { SIMULATOR_MIDTRANS, namaMetode, rupiah, sisaWaktu, waktuLengkap } from '../../lib/pembayaran.js'
+import { tr } from '../../lib/i18n.js'
 
 function useSekarang(aktif) {
   const [now, setNow] = useState(() => Date.now())
@@ -27,11 +28,11 @@ function TombolSalin({ teks, label }) {
           setOk(false)
         }
       }}
-      aria-label={`Salin ${label}`}
+      aria-label={tr('Salin {0}', { 0: label })}
       className="inline-flex min-h-touch items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-ink-violet ring-1 ring-ink-violet/25 hover:bg-ink-violet/5"
     >
       {ok ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
-      {ok ? 'Disalin' : 'Salin'}
+      {ok ? tr('Disalin') : tr('Salin')}
       <span className="sr-only" role="status">
         {ok ? `${label} disalin` : ''}
       </span>
@@ -41,24 +42,24 @@ function TombolSalin({ teks, label }) {
 
 const LANGKAH = {
   qris: [
-    'Buka aplikasi bank atau e-wallet yang punya menu QRIS.',
-    'Pindai kode QR di atas.',
-    'Periksa nama penerima dan jumlah, lalu bayar.',
+    tr('Buka aplikasi bank atau e-wallet yang punya menu QRIS.'),
+    tr('Pindai kode QR di atas.'),
+    tr('Periksa nama penerima dan jumlah, lalu bayar.'),
   ],
   va: [
-    'Buka m-banking, internet banking, atau ATM bank yang sama.',
-    'Pilih Transfer ke Virtual Account.',
-    'Masukkan nomor di atas, periksa jumlah, lalu bayar.',
+    tr('Buka m-banking, internet banking, atau ATM bank yang sama.'),
+    tr('Pilih Transfer ke Virtual Account.'),
+    tr('Masukkan nomor di atas, periksa jumlah, lalu bayar.'),
   ],
   mandiri: [
-    'Buka Livin’ by Mandiri atau ATM Mandiri.',
-    'Pilih Bayar → Multipayment, masukkan kode perusahaan.',
-    'Masukkan kode bayar, periksa jumlah, lalu bayar.',
+    tr('Buka Livin’ by Mandiri atau ATM Mandiri.'),
+    tr('Pilih Bayar → Multipayment, masukkan kode perusahaan.'),
+    tr('Masukkan kode bayar, periksa jumlah, lalu bayar.'),
   ],
   ewallet: [
-    'Ketuk tombol untuk membuka aplikasinya.',
-    'Periksa jumlah, lalu konfirmasi pembayaran.',
-    'Kembali ke sini; status diperbarui otomatis.',
+    tr('Ketuk tombol untuk membuka aplikasinya.'),
+    tr('Periksa jumlah, lalu konfirmasi pembayaran.'),
+    tr('Kembali ke sini; status diperbarui otomatis.'),
   ],
 }
 
@@ -92,43 +93,43 @@ export default function InstruksiBayar({ payment, onCek, memeriksa, desktop = fa
     >
       <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
         <h2 id="judul-bayar" className="text-[15px] font-semibold text-[#8A5300]">
-          Menunggu pembayaran
+          {tr('Menunggu pembayaran')}
         </h2>
         <p className="text-[13px] text-ink/60">{namaMetode(ins.metode)}</p>
       </div>
 
       {batas && (
         <div className="mt-2" aria-live="off">
-          <p className="text-[13px] text-ink/60">{habis ? 'Batas bayar sudah lewat' : 'Bayar sebelum waktu habis'}</p>
+          <p className="text-[13px] text-ink/60">{habis ? tr('Batas bayar sudah lewat') : tr('Bayar sebelum waktu habis')}</p>
           <p
             className={`font-serif text-[3rem] leading-none tabular-nums ${habis ? 'text-ink/40' : mendesak ? 'text-traffic-macet' : 'text-ink-violet'}`}
             role="timer"
-            aria-label={habis ? 'Waktu bayar habis' : `Sisa waktu ${sisaWaktu(sisa)}`}
+            aria-label={habis ? tr('Waktu bayar habis') : tr("Sisa waktu {0}", { 0: sisaWaktu(sisa) })}
           >
             {sisaWaktu(sisa)}
           </p>
-          <p className="mt-1 text-[13px] text-ink/60">Batas: {waktuLengkap(payment.batasBayar)}</p>
+          <p className="mt-1 text-[13px] text-ink/60">{tr('Batas:')} {waktuLengkap(payment.batasBayar)}</p>
         </div>
       )}
 
       <div className="mt-5 flex items-end justify-between gap-3 border-t border-dashed border-ink-violet/25 pt-4">
         <div>
-          <p className="text-[13px] text-ink/60">Total bayar</p>
+          <p className="text-[13px] text-ink/60">{tr('Total bayar')}</p>
           <p className="font-serif text-[1.75rem] leading-tight">{rupiah(payment.jumlah)}</p>
         </div>
-        <TombolSalin teks={String(payment.jumlah)} label="jumlah" />
+        <TombolSalin teks={String(payment.jumlah)} label={tr('jumlah')} />
       </div>
 
       {!habis && ins.grup === 'qris' && (
         <div className="mt-5 flex flex-col items-center">
           <div className="tema-terang rounded-2xl bg-white p-3 ring-1 ring-ink/10">
             {ins.qrString ? (
-              <KodeQR value={ins.qrString} size={220} label="Kode QRIS untuk dibayar" />
+              <KodeQR value={ins.qrString} size={220} label={tr('Kode QRIS untuk dibayar')} />
             ) : (
-              <img src={ins.qrUrl} alt="Kode QRIS untuk dibayar" width={220} height={220} className="size-[220px]" />
+              <img src={ins.qrUrl} alt={tr('Kode QRIS untuk dibayar')} width={220} height={220} className="size-[220px]" />
             )}
           </div>
-          <p className="mt-2 text-[13px] text-ink/60">QRIS, bisa dipindai semua aplikasi pembayaran</p>
+          <p className="mt-2 text-[13px] text-ink/60">{tr('QRIS, bisa dipindai semua aplikasi pembayaran')}</p>
         </div>
       )}
 
@@ -138,26 +139,26 @@ export default function InstruksiBayar({ payment, onCek, memeriksa, desktop = fa
             <>
               <div className="flex items-end justify-between gap-3">
                 <div>
-                  <dt className="text-[13px] text-ink/60">Kode perusahaan</dt>
+                  <dt className="text-[13px] text-ink/60">{tr('Kode perusahaan')}</dt>
                   <dd className="font-serif text-[1.625rem] tracking-[0.06em] tabular-nums">{ins.kodePerusahaan}</dd>
                 </div>
-                <TombolSalin teks={ins.kodePerusahaan} label="kode perusahaan" />
+                <TombolSalin teks={ins.kodePerusahaan} label={tr('kode perusahaan')} />
               </div>
               <div className="flex items-end justify-between gap-3">
                 <div className="min-w-0">
-                  <dt className="text-[13px] text-ink/60">Kode bayar</dt>
+                  <dt className="text-[13px] text-ink/60">{tr('Kode bayar')}</dt>
                   <dd className="break-all font-serif text-[1.625rem] tracking-[0.06em] tabular-nums">{ins.kodeBayar}</dd>
                 </div>
-                <TombolSalin teks={ins.kodeBayar} label="kode bayar" />
+                <TombolSalin teks={ins.kodeBayar} label={tr('kode bayar')} />
               </div>
             </>
           ) : (
             <div className="flex items-end justify-between gap-3">
               <div className="min-w-0">
-                <dt className="text-[13px] text-ink/60">Nomor virtual account {String(ins.bank ?? '').toUpperCase()}</dt>
+                <dt className="text-[13px] text-ink/60">{tr('Nomor virtual account')} {String(ins.bank ?? '').toUpperCase()}</dt>
                 <dd className="break-all font-serif text-[1.625rem] tracking-[0.06em] tabular-nums">{ins.nomorVa}</dd>
               </div>
-              <TombolSalin teks={ins.nomorVa} label="nomor virtual account" />
+              <TombolSalin teks={ins.nomorVa} label={tr('nomor virtual account')} />
             </div>
           )}
         </dl>
@@ -170,15 +171,15 @@ export default function InstruksiBayar({ payment, onCek, memeriksa, desktop = fa
               href={ins.deeplink}
               className="bg-pill inline-flex min-h-touch items-center gap-2 rounded-full px-6 font-semibold text-white shadow-[0_6px_14px_-6px_rgb(114_13_129/0.8)]"
             >
-              <Smartphone size={18} aria-hidden="true" /> Buka {namaEwallet}
+              <Smartphone size={18} aria-hidden="true" /> {tr('Buka')} {namaEwallet}
             </a>
           )}
           {desktop && ins.qrUrl && (
             <div className="flex flex-col items-center">
               <div className="tema-terang rounded-2xl bg-white p-3 ring-1 ring-ink/10">
-                <img src={ins.qrUrl} alt={`Kode QR ${namaEwallet}`} width={200} height={200} className="size-[200px]" />
+                <img src={ins.qrUrl} alt={tr("Kode QR {0}", { 0: namaEwallet })} width={200} height={200} className="size-[200px]" />
               </div>
-              <p className="mt-2 text-[13px] text-ink/60">Di komputer? Pindai dengan aplikasi {namaEwallet} di ponsel.</p>
+              <p className="mt-2 text-[13px] text-ink/60">{tr('Di komputer? Pindai dengan aplikasi')} {namaEwallet} {tr('di ponsel.')}</p>
             </div>
           )}
         </div>
@@ -206,7 +207,7 @@ export default function InstruksiBayar({ payment, onCek, memeriksa, desktop = fa
             <span className="absolute inline-flex size-full animate-ping rounded-full bg-traffic-lancar/60 motion-reduce:hidden" />
             <span className="relative inline-flex size-2.5 rounded-full bg-traffic-lancar" />
           </span>
-          Status diperbarui otomatis
+          {tr('Status diperbarui otomatis')}
         </p>
         <button
           type="button"
@@ -219,18 +220,18 @@ export default function InstruksiBayar({ payment, onCek, memeriksa, desktop = fa
           ) : (
             <RefreshCw size={16} aria-hidden="true" />
           )}
-          Cek sekarang
+          {tr('Cek sekarang')}
         </button>
       </div>
       <p className="mt-3 text-[12px] text-ink/55">
-        Ini simulasi; tidak ada uang sungguhan. Untuk uji coba, bayar lewat{' '}
+        {tr('Ini simulasi; tidak ada uang sungguhan. Untuk uji coba, bayar lewat')}{' '}
         <a
           href={SIMULATOR_MIDTRANS}
           target="_blank"
           rel="noreferrer"
           className="inline-flex items-center gap-1 font-semibold text-ink-violet underline"
         >
-          simulator Midtrans sandbox <ExternalLink size={12} aria-hidden="true" />
+          {tr('simulator Midtrans sandbox')} <ExternalLink size={12} aria-hidden="true" />
         </a>
         .
       </p>

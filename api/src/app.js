@@ -7,6 +7,7 @@ import mongoose from 'mongoose';
 import config from './config.js';
 import { errorHandler, notFound } from './middleware/error.js';
 import { loadUser } from './middleware/auth.js';
+import { pasangBahasa } from './lib/i18n.js';
 import { createMailer } from './services/mail.js';
 import { createMidtrans } from './services/midtrans.js';
 import { authRouter } from './routes/auth.js';
@@ -31,6 +32,7 @@ export function createApp(opts = {}) {
 
   app.set('trust proxy', 1); // di belakang Nginx
   app.disable('x-powered-by');
+  app.use(pasangBahasa); // T-111: teks API ikut Accept-Language
   app.use(helmet());
   app.use(cors({ origin: cfg.clientOrigin, credentials: true }));
   app.use(express.json({ limit: '1mb' }));

@@ -183,7 +183,7 @@ export function adminPembayaranRouter() {
       Payment.aggregate([{ $group: { _id: '$status', n: { $sum: 1 }, jumlah: { $sum: '$jumlah' } } }]),
     ]);
     res.json({
-      items: items.map((p) => ({ ...pembayaranPublik(p), pengguna: pemilikPembayaran(p) })),
+      items: items.map((p) => ({ ...pembayaranPublik(p, req.bahasa), pengguna: pemilikPembayaran(p, req.bahasa) })),
       page,
       total,
       ringkasan: Object.fromEntries(ringkas.map((x) => [x._id, { jumlah: x.n, nilai: x.jumlah }])),

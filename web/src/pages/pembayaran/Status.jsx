@@ -9,6 +9,7 @@ import PitaSimulasi from '../../components/pembayaran/PitaSimulasi.jsx'
 import { api } from '../../lib/api.js'
 import { STATUS, bagikan, rupiah, ruteLayanan, satuanLabel, teksBagikan, waktuLengkap } from '../../lib/pembayaran.js'
 import { useMediaQuery } from '../../lib/useNotifications.js'
+import { tr } from '../../lib/i18n.js'
 
 const SELANG_MS = 5000 // baca status dari server SmartMove
 const CEK_TIAP = 3 // tiap 3 kali (±15 dtk) minta server menanyakan Midtrans (webhook tak sampai ke dev)
@@ -84,19 +85,19 @@ export default function StatusPembayaran() {
 
   async function bagi() {
     const hasil = await bagikan(teksBagikan(p))
-    if (hasil === 'disalin') setPesan('Detail e-tiket disalin.')
+    if (hasil === 'disalin') setPesan(tr('Detail e-tiket disalin.'))
   }
 
   return (
     <PageShell
-      title={p?.status === 'lunas' ? 'E-tiket' : 'Pembayaran'}
+      title={p?.status === 'lunas' ? tr('E-tiket') : tr('Pembayaran')}
       backTo="/pembayaran/riwayat"
-      backLabel="Kembali ke riwayat"
+      backLabel={tr('Kembali ke riwayat')}
     >
       <div className="mx-auto w-full max-w-xl pt-6 lg:pt-10">
         <PitaSimulasi className="mb-6 print:hidden" />
         {!p && !error && (
-          <div className="mx-auto h-96 max-w-[26rem] animate-pulse rounded-[1.75rem] bg-ink/[0.06]" aria-label="Memuat" />
+          <div className="mx-auto h-96 max-w-[26rem] animate-pulse rounded-[1.75rem] bg-ink/[0.06]" aria-label={tr('Memuat')} />
         )}
         {!p && error && <ErrorBanner error={error} />}
 
@@ -104,13 +105,13 @@ export default function StatusPembayaran() {
           <div className={baruLunas ? 'sheet-fade' : ''}>
             {baruLunas && (
               <p role="status" className="mb-4 text-center font-serif text-[1.375rem] text-[#1D6B3D] print:hidden">
-                Pembayaran diterima. Ini e-tiketmu.
+                {tr('Pembayaran diterima. Ini e-tiketmu.')}
               </p>
             )}
             <ETiket payment={p} />
             {p.poin > 0 && (
               <p className="mt-5 flex items-center justify-center gap-2 text-[15px] font-semibold text-ink-violet print:hidden">
-                <Sparkles size={18} className="text-pill-via" aria-hidden="true" />+{p.poin} poin masuk ke Rewards
+                <Sparkles size={18} className="text-pill-via" aria-hidden="true" />+{p.poin} {tr('poin masuk ke Rewards')}
               </p>
             )}
             <div className="mt-5 flex flex-wrap justify-center gap-3 print:hidden">
@@ -119,14 +120,14 @@ export default function StatusPembayaran() {
                 onClick={bagi}
                 className="bg-pill flex min-h-touch items-center gap-2 rounded-full px-6 font-semibold text-white shadow-[0_6px_14px_-6px_rgb(114_13_129/0.8)]"
               >
-                <Share2 size={18} aria-hidden="true" /> Bagikan
+                <Share2 size={18} aria-hidden="true" /> {tr('Bagikan')}
               </button>
               <button
                 type="button"
                 onClick={() => window.print()}
                 className="flex min-h-touch items-center gap-2 rounded-full px-5 font-semibold text-ink-violet ring-1 ring-ink-violet/30 hover:bg-ink-violet/5"
               >
-                <Printer size={18} aria-hidden="true" /> Cetak
+                <Printer size={18} aria-hidden="true" /> {tr('Cetak')}
               </button>
             </div>
             {pesan && (
@@ -153,22 +154,22 @@ export default function StatusPembayaran() {
 
 function RingkasanPesanan({ p }) {
   return (
-    <section aria-label="Ringkasan pesanan" className="px-1">
+    <section aria-label={tr('Ringkasan pesanan')} className="px-1">
       <h2 className="font-serif text-[1.25rem] leading-tight">{p.layanan.nama}</h2>
       <p className="text-[14px] text-ink/65">{ruteLayanan(p.layanan)}</p>
       <dl className="mt-3 grid grid-cols-2 gap-3 text-[14px]">
         <div className="col-span-2">
-          <dt className="text-ink/55">Jadwal</dt>
+          <dt className="text-ink/55">{tr('Jadwal')}</dt>
           <dd className="font-semibold">{p.jadwal ? waktuLengkap(p.jadwal) : '—'}</dd>
         </div>
         <div>
-          <dt className="text-ink/55">Jumlah</dt>
+          <dt className="text-ink/55">{tr('Jumlah')}</dt>
           <dd className="font-semibold">
             {p.penumpang} {satuanLabel(p.layanan)}
           </dd>
         </div>
         <div>
-          <dt className="text-ink/55">No. pesanan</dt>
+          <dt className="text-ink/55">{tr('No. pesanan')}</dt>
           <dd className="font-semibold">{p.orderId}</dd>
         </div>
       </dl>
@@ -189,14 +190,14 @@ function Gagal({ p }) {
       </p>
       <p className="mt-4 text-[15px] leading-relaxed text-ink/75">
         {p.status === 'kedaluwarsa'
-          ? 'Batas waktu pembayaran sudah lewat. Buat pesanan baru kalau masih mau berangkat.'
-          : 'Pembayaran tidak berhasil. Buat pesanan baru untuk mencoba lagi.'}
+          ? tr('Batas waktu pembayaran sudah lewat. Buat pesanan baru kalau masih mau berangkat.')
+          : tr('Pembayaran tidak berhasil. Buat pesanan baru untuk mencoba lagi.')}
       </p>
       <Link
         to="/pembayaran"
         className="bg-pill mt-5 inline-flex min-h-touch items-center rounded-full px-6 font-semibold text-white"
       >
-        Pesan lagi
+        {tr('Pesan lagi')}
       </Link>
     </section>
   )

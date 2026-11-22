@@ -1,3 +1,4 @@
+import { tr, bahasa } from './i18n.js'
 // Klien API web. Autentikasi lewat cookie httpOnly (credentials: 'include').
 // Alamat dasar: VITE_API_URL (bila API beda domain) atau '' (dev via proxy Vite / satu domain).
 const ORIGIN = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '')
@@ -27,12 +28,12 @@ function buildUrl(path, query) {
 }
 
 function defaultMessage(status) {
-  if (status === 401) return 'Sesi berakhir, silakan masuk lagi'
-  if (status === 403) return 'Kamu tidak punya akses'
-  if (status === 404) return 'Data tidak ditemukan'
-  if (status === 429) return 'Terlalu banyak permintaan, coba lagi nanti'
-  if (status >= 500) return 'Terjadi kesalahan pada server'
-  return 'Permintaan gagal'
+  if (status === 401) return tr('Sesi berakhir, silakan masuk lagi')
+  if (status === 403) return tr('Kamu tidak punya akses')
+  if (status === 404) return tr('Data tidak ditemukan')
+  if (status === 429) return tr('Terlalu banyak permintaan, coba lagi nanti')
+  if (status >= 500) return tr('Terjadi kesalahan pada server')
+  return tr('Permintaan gagal')
 }
 
 let onUnauthorized = null
@@ -47,8 +48,8 @@ export function setUnauthorizedHandler(fn) {
  */
 export function networkError(online = typeof navigator === 'undefined' || navigator.onLine !== false) {
   return online
-    ? new ApiError(0, 'Tidak bisa terhubung ke server SmartMove. Coba lagi sebentar.', 'SERVER_TAK_TERJANGKAU')
-    : new ApiError(0, 'Kamu sedang offline', 'OFFLINE')
+    ? new ApiError(0, tr('Tidak bisa terhubung ke server SmartMove. Coba lagi sebentar.'), 'SERVER_TAK_TERJANGKAU')
+    : new ApiError(0, tr('Kamu sedang offline'), 'OFFLINE')
 }
 
 /**
@@ -60,7 +61,8 @@ export async function request(path, { method = 'GET', query, body, signal, heade
     method,
     credentials: 'include',
     signal,
-    headers: { Accept: 'application/json', ...headers },
+    // Teks dari API (galat, sapaan, label) mengikuti bahasa pilihan (T-111).
+    headers: { Accept: 'application/json', 'Accept-Language': bahasa, ...headers },
   }
   if (body instanceof FormData) {
     init.body = body

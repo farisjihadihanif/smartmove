@@ -6,6 +6,7 @@ import ErrorBanner from '../../components/ErrorBanner.jsx'
 import PageShell from '../../components/PageShell.jsx'
 import Rambu from '../../components/kampanye/Rambu.jsx'
 import { useApiGet } from '../../lib/useApiGet.js'
+import { tr } from '../../lib/i18n.js'
 
 // Tips Keselamatan (T-207): konten `tips` aktif dari admin, urut `urutan`.
 export default function Tips() {
@@ -20,12 +21,12 @@ export default function Tips() {
   }, [status, hash])
 
   return (
-    <PageShell title="Tips Keselamatan" backTo="/kampanye" backLabel="Kembali ke Kampanye">
+    <PageShell title={tr('Tips Keselamatan')} backTo="/kampanye" backLabel={tr('Kembali ke Kampanye')}>
       <div className="mx-auto w-full max-w-2xl pt-6 lg:pt-10">
-        {status === 'memuat' && <p className="py-6 text-sm text-ink/70">Memuat tips…</p>}
+        {status === 'memuat' && <p className="py-6 text-sm text-ink/70">{tr('Memuat tips…')}</p>}
         {status === 'galat' && <ErrorBanner error={error} onRetry={muatUlang} />}
         {status === 'ok' && items.length === 0 && (
-          <EmptyState icon={ShieldAlert} title="Belum ada tips" message="Tips keselamatan dari pengelola SmartMove akan muncul di sini." />
+          <EmptyState icon={ShieldAlert} title={tr('Belum ada tips')} message={tr('Tips keselamatan dari pengelola SmartMove akan muncul di sini.')} />
         )}
         <ul className="divide-y divide-ink/[0.07]">
           {items.map((t) => (

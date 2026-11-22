@@ -1,11 +1,12 @@
 import { CircleAlert, ServerOff, WifiOff, X } from 'lucide-react'
 import { errorMessage, isNetworkError, isOffline } from '../lib/errors.js'
+import { tr } from '../lib/i18n.js'
 
 /**
  * Banner galat (DESIGN §5). Isi `error` (ApiError) atau `message`.
  * Offline memakai ikon WifiOff, server tak terjangkau ikon ServerOff. `onRetry` menampilkan tombol "Coba lagi".
  */
-export default function ErrorBanner({ error, message, onRetry, retryLabel = 'Coba lagi', onDismiss, className = '' }) {
+export default function ErrorBanner({ error, message, onRetry, retryLabel = tr('Coba lagi'), onDismiss, className = '' }) {
   const text = message || errorMessage(error)
   if (!text) return null
   const Icon = isOffline(error) ? WifiOff : isNetworkError(error) ? ServerOff : CircleAlert
@@ -32,7 +33,7 @@ export default function ErrorBanner({ error, message, onRetry, retryLabel = 'Cob
         <button
           type="button"
           onClick={onDismiss}
-          aria-label="Tutup"
+          aria-label={tr('Tutup')}
           className="grid size-touch shrink-0 place-items-center rounded-full text-ink/60 hover:bg-black/5"
         >
           <X size={18} aria-hidden="true" />

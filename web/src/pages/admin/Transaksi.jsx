@@ -6,6 +6,7 @@ import { Chip, Halaman, Judul, Tabel, kelasInput } from '../../components/admin/
 import { STATUS, namaMetode, rupiah } from '../../lib/pembayaran.js'
 import { useApiGet } from '../../lib/useApiGet.js'
 import { jamAtauTanggal } from '../../lib/wib.js'
+import { tr } from '../../lib/i18n.js'
 
 const NADA = { lancar: 'hijau', padat: 'kuning', macet: 'merah', abu: 'netral' }
 
@@ -25,7 +26,7 @@ export default function Transaksi() {
       <Judul
         aksi={
           <label className="flex items-center gap-2 text-sm font-semibold">
-            Status
+            {tr('Status')}
             <select
               value={status}
               onChange={(e) => {
@@ -34,7 +35,7 @@ export default function Transaksi() {
               }}
               className={`${kelasInput} w-auto`}
             >
-              <option value="">Semua</option>
+              <option value="">{tr('Semua')}</option>
               {Object.entries(STATUS).map(([v, s]) => (
                 <option key={v} value={v}>
                   {s.label}
@@ -44,11 +45,11 @@ export default function Transaksi() {
           </label>
         }
       >
-        Transaksi
+        {tr('Transaksi')}
       </Judul>
       <p className="mb-4 text-sm text-ink/65">
-        Semua transaksi adalah simulasi (Midtrans sandbox).
-        {lunas ? ` ${lunas.jumlah} lunas, total ${rupiah(lunas.nilai)}.` : ''}
+        {tr('Semua transaksi adalah simulasi (Midtrans sandbox).')}
+        {lunas ? tr(" {0} lunas, total {1}.", { 0: lunas.jumlah, 1: rupiah(lunas.nilai) }) : ''}
       </p>
       <SearchField
         value={cari}
@@ -57,13 +58,13 @@ export default function Transaksi() {
           setQ(v.trim())
           setPage(1)
         }}
-        placeholder="Cari no. pesanan, layanan, atau username"
-        label="Cari transaksi"
+        placeholder={tr('Cari no. pesanan, layanan, atau username')}
+        label={tr('Cari transaksi')}
         leading={<Search size={20} className="text-ink-violet" aria-hidden="true" />}
         className="mb-4 max-w-lg"
       />
       {error && <ErrorBanner error={error} onRetry={muatUlang} className="mb-4" />}
-      <Tabel label="Daftar transaksi" kolom={['Waktu', 'No. pesanan', 'Pengguna', 'Layanan', 'Jumlah', 'Status']}>
+      <Tabel label={tr('Daftar transaksi')} kolom={[tr('Waktu'), tr('No. pesanan'), tr('Pengguna'), tr('Layanan'), tr('Jumlah'), tr('Status')]}>
         {data?.items.map((p) => (
           <tr key={p.orderId}>
             <td className="whitespace-nowrap px-3 py-3 text-ink/70">{jamAtauTanggal(p.createdAt, now)}</td>
@@ -83,7 +84,7 @@ export default function Transaksi() {
           </tr>
         ))}
       </Tabel>
-      {data && data.items.length === 0 && <p className="mt-4 text-sm text-ink/60">Tidak ada transaksi yang cocok.</p>}
+      {data && data.items.length === 0 && <p className="mt-4 text-sm text-ink/60">{tr('Tidak ada transaksi yang cocok.')}</p>}
       {data && <Halaman page={data.page} total={data.total} limit={30} onPage={setPage} />}
     </>
   )

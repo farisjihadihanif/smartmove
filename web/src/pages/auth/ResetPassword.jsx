@@ -12,6 +12,7 @@ import {
 } from '../../components/auth/AuthShell.jsx'
 import { api } from '../../lib/api.js'
 import { checkPassword } from '../../lib/authRules.js'
+import { tr } from '../../lib/i18n.js'
 
 // Tujuan tautan di email reset: APP_URL/reset-password?token=… (API_SPECS §4).
 export default function ResetPassword() {
@@ -19,21 +20,21 @@ export default function ResetPassword() {
   const token = params.get('token') || ''
   const [form, setForm] = useState({ password: '', ulang: '' })
   const [busy, setBusy] = useState(false)
-  const [error, setError] = useState(token ? null : 'Tautan reset tidak lengkap. Minta tautan baru lewat Lupa password.')
+  const [error, setError] = useState(token ? null : tr('Tautan reset tidak lengkap. Minta tautan baru lewat Lupa password.'))
   const [done, setDone] = useState('')
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
 
   async function onSubmit(e) {
     e.preventDefault()
-    const invalid = checkPassword(form.password, 'Password baru')
+    const invalid = checkPassword(form.password, tr('Password baru'))
     if (invalid) return setError(invalid)
-    if (form.password !== form.ulang) return setError('Kedua password belum sama.')
+    if (form.password !== form.ulang) return setError(tr('Kedua password belum sama.'))
     setBusy(true)
     setError(null)
     try {
       const res = await api.post('/auth/reset', { token, password: form.password })
-      setDone(res?.message || 'Password berhasil diganti. Silakan masuk dengan password baru.')
+      setDone(res?.message || tr('Password berhasil diganti. Silakan masuk dengan password baru.'))
     } catch (err) {
       setError(err)
     } finally {
@@ -42,10 +43,10 @@ export default function ResetPassword() {
   }
 
   return (
-    <AuthShell title="Password baru" subtitle="Buat password baru untuk akunmu, minimal 8 karakter.">
+    <AuthShell title={tr('Password baru')} subtitle={tr('Buat password baru untuk akunmu, minimal 8 karakter.')}>
       {done ? (
         <div className="mt-7 flex flex-col gap-6">
-          <AuthNotice icon={CircleCheck} title="Password diganti">
+          <AuthNotice icon={CircleCheck} title={tr('Password diganti')}>
             {done}
           </AuthNotice>
           <Link
@@ -53,7 +54,7 @@ export default function ResetPassword() {
             replace
             className="flex min-h-[3.25rem] w-full items-center justify-center rounded-full bg-login-button px-6 font-semibold text-white"
           >
-            Masuk
+            {tr('Masuk')}
           </Link>
         </div>
       ) : (
@@ -61,7 +62,7 @@ export default function ResetPassword() {
           <div className="flex flex-col gap-4">
             <AuthField
               icon={LockSolid}
-              label="Password baru"
+              label={tr('Password baru')}
               reveal
               autoComplete="new-password"
               value={form.password}
@@ -70,7 +71,7 @@ export default function ResetPassword() {
             />
             <AuthField
               icon={LockSolid}
-              label="Ulangi password"
+              label={tr('Ulangi password')}
               reveal
               autoComplete="new-password"
               value={form.ulang}
@@ -80,11 +81,11 @@ export default function ResetPassword() {
           </div>
           {error && <ErrorBanner error={error} className="mt-3" />}
           <AuthButton busy={busy} disabled={busy || !token} className="mt-6">
-            Simpan password
+            {tr('Simpan password')}
           </AuthButton>
           {!token && (
             <Link to="/lupa-password" className={`${linkClass} mx-auto mt-4 inline-flex min-h-touch items-center`}>
-              Minta tautan baru
+              {tr('Minta tautan baru')}
             </Link>
           )}
         </form>

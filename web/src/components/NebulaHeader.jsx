@@ -1,4 +1,5 @@
 import { Bell } from 'lucide-react'
+import { tr } from '../lib/i18n.js'
 
 /**
  * Header bertekstur cat air lilac (mockup hal. 3–7), sudut bawah membulat agar isi di bawahnya terasa naik.
@@ -51,7 +52,7 @@ export default function NebulaHeader({
 }
 
 export function NotificationButton({ unread, onClick, className = '' }) {
-  const label = unread > 0 ? `Notifikasi, ${unread} belum dibaca` : 'Notifikasi'
+  const label = unread > 0 ? tr("Notifikasi, {0} belum dibaca", { 0: unread }) : tr('Notifikasi')
   return (
     <button
       type="button"

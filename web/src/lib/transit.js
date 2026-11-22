@@ -1,3 +1,4 @@
+import { tr, locale } from './i18n.js'
 // Helper rute transportasi umum (T-203, API_SPECS §6.2). Sama dengan mobile/lib/transit.dart – ubah bersamaan.
 import { formatDurasi, formatJarak } from './navigasi.js'
 
@@ -6,7 +7,7 @@ export const WARNA_NAIK = ['#A2028A', '#1E63C3']
 export const WARNA_JALAN = '#41396F'
 export const warnaNaik = (i) => WARNA_NAIK[i % WARNA_NAIK.length]
 
-export const LABEL_JENIS = { angkot: 'Angkot', bus: 'Bus', kereta: 'Kereta' }
+export const LABEL_JENIS = { angkot: tr('Angkot'), bus: tr('Bus'), kereta: tr('Kereta') }
 
 /** "KPUM 69 : Gabion → Term. P. Induk" → { nama: "KPUM 69", trayek: "Gabion → Term. P. Induk" }. */
 export function namaKoridor(k) {
@@ -22,38 +23,38 @@ const adaNamaJalan = (nama) => Boolean(nama) && !CADANGAN.test(nama)
 
 /** Rupiah atau "tarif belum tersedia" (null = belum diisi admin, jangan dianggap 0). */
 export const teksTarif = (n) =>
-  n === null || n === undefined ? 'tarif belum tersedia' : `Rp${Math.round(n).toLocaleString('id-ID')}`
+  n === null || n === undefined ? tr('tarif belum tersedia') : `Rp${Math.round(n).toLocaleString(locale)}`
 
 /** true bila tarif ada tapi bukan isian admin (tarif bawaan/OSM) → tampilkan "Tarif perkiraan". */
 export const tarifPerkiraan = (x) => x?.tarif !== null && x?.tarif !== undefined && x?.tarifPerkiraan === true
 
 /** Tarif satu baris teks: "Rp5.000 (perkiraan)" / "Rp5.000" / "tarif belum tersedia". */
-export const teksTarifRingkas = (x) => `${teksTarif(x?.tarif ?? null)}${tarifPerkiraan(x) ? ' (perkiraan)' : ''}`
+export const teksTarifRingkas = (x) => `${teksTarif(x?.tarif ?? null)}${tarifPerkiraan(x) ? tr(' (perkiraan)') : ''}`
 
 /** Kalimat naik/turun satu bagian `naik`. Angkot tidak punya halte: naik di sepanjang jalan. */
 export function teksNaik(b) {
-  if (b.dari.nama === 'Lokasi asal') return 'Naik di titik asalmu'
-  if (b.dari.nama === 'Titik pindah') return 'Naik di titik pindah, tempat kamu turun tadi'
+  if (b.dari.nama === 'Lokasi asal') return tr('Naik di titik asalmu')
+  if (b.dari.nama === 'Titik pindah') return tr('Naik di titik pindah, tempat kamu turun tadi')
   if (b.naikDiMana) {
     return adaNamaJalan(b.dari.nama)
-      ? `Naik di sepanjang ${singkatJalan(b.dari.nama)}`
-      : 'Naik di titik terdekat di jalur trayek'
+      ? tr("Naik di sepanjang {0}", { 0: singkatJalan(b.dari.nama) })
+      : tr('Naik di titik terdekat di jalur trayek')
   }
-  return `Naik di ${b.dari.nama}`
+  return tr("Naik di {0}", { 0: b.dari.nama })
 }
 export function teksTurun(b) {
-  if (b.ke.nama === 'Tujuan') return 'Turun di tujuan'
-  if (b.ke.nama === 'Titik pindah') return 'Turun di titik pindah'
+  if (b.ke.nama === 'Tujuan') return tr('Turun di tujuan')
+  if (b.ke.nama === 'Titik pindah') return tr('Turun di titik pindah')
   if (b.naikDiMana) {
-    return adaNamaJalan(b.ke.nama) ? `Turun di sekitar ${singkatJalan(b.ke.nama)}` : 'Turun di titik terdekat tujuan'
+    return adaNamaJalan(b.ke.nama) ? tr("Turun di sekitar {0}", { 0: singkatJalan(b.ke.nama) }) : tr('Turun di titik terdekat tujuan')
   }
-  return `Turun di ${b.ke.nama}`
+  return tr("Turun di {0}", { 0: b.ke.nama })
 }
 
 /** "Jalan kaki 105 m ke Jl. Almamater". `terakhir` = menuju tujuan. */
 export function teksJalan(b, terakhir) {
-  const ke = terakhir ? 'tujuan' : adaNamaJalan(b.ke.nama) ? singkatJalan(b.ke.nama) : 'titik naik'
-  return `Jalan kaki ${formatJarak(b.jarakM)} ke ${ke}`
+  const ke = terakhir ? 'tujuan' : adaNamaJalan(b.ke.nama) ? singkatJalan(b.ke.nama) : tr('titik naik')
+  return tr("Jalan kaki {0} ke {1}", { 0: formatJarak(b.jarakM), 1: ke })
 }
 
 /** "Naik angkot KPUM 69" (judul bagian naik). */
@@ -87,7 +88,7 @@ export function garisBagian(b) {
 /** Ringkasan satu baris: "1× pindah · jalan 271 m · tarif belum tersedia". */
 export function ringkasOpsi(o) {
   return [
-    o.transfer ? `${o.transfer}× pindah` : 'Tanpa pindah',
+    o.transfer ? tr("{0}× pindah", { 0: o.transfer }) : tr('Tanpa pindah'),
     `jalan ${formatJarak(o.jalanM)}`,
     teksTarifRingkas(o),
   ].join(' · ')
@@ -105,7 +106,7 @@ export const ringkasanTrip = (o) => ({
 export function teksBagikanTransit({ dari, ke, opsi }) {
   const baris = opsi.bagian.map((b, i) => `${i + 1}. ${teksBagian(b, i, opsi.bagian)}`)
   return [
-    `Rute transportasi umum ke ${ke.nama}: ${formatDurasi(opsi.totalS)}, ${teksTarifRingkas(opsi)}`,
+    tr("Rute transportasi umum ke {0}: {1}, {2}", { 0: ke.nama, 1: formatDurasi(opsi.totalS), 2: teksTarifRingkas(opsi) }),
     `Dari ${dari.nama}`,
     ...baris,
   ].join('\n')

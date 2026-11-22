@@ -7,12 +7,13 @@ import PetaAdmin from '../../components/admin/PetaAdmin.jsx'
 import { Chip, Field, Judul, Tombol, TombolHapus, kelasInput } from '../../components/admin/ui.jsx'
 import { api } from '../../lib/api.js'
 import { useApiGet } from '../../lib/useApiGet.js'
+import { tr, locale } from '../../lib/i18n.js'
 
 // Koridor & halte transportasi umum. Data utama dari OSM; admin membetulkan tarif
 // (→ label "Tarif perkiraan" hilang), jenis (TMD yang tercatat angkot), halte, atau menyembunyikan koridor.
 
-const JENIS = { bus: 'Bus', kereta: 'Kereta', angkot: 'Angkot' }
-const rupiah = (n) => (n == null ? '–' : `Rp${n.toLocaleString('id-ID')}`)
+const JENIS = { bus: tr('Bus'), kereta: tr('Kereta'), angkot: tr('Angkot') }
+const rupiah = (n) => (n == null ? '–' : `Rp${n.toLocaleString(locale)}`)
 
 export default function Transit() {
   const [params, setParams] = useSearchParams()
@@ -41,7 +42,7 @@ export default function Transit() {
 
   return (
     <>
-      <Judul>Koridor & halte</Judul>
+      <Judul>{tr('Koridor & halte')}</Judul>
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <div className="w-full max-w-sm">
           <SearchField
@@ -51,14 +52,14 @@ export default function Transit() {
               if (!v) setCari('')
             }}
             onSubmit={(v) => setCari(v.trim())}
-            placeholder="Kode, nama, atau operator"
-            label="Cari koridor"
+            placeholder={tr('Kode, nama, atau operator')}
+            label={tr('Cari koridor')}
           />
         </div>
-        <select value={periksa} onChange={(e) => atur({ periksa: e.target.value })} aria-label="Saring" className={`${kelasInput} w-auto`}>
-          <option value="">Semua koridor</option>
-          <option value="tarif">Tarif masih perkiraan</option>
-          <option value="jenis">TMD tercatat angkot</option>
+        <select value={periksa} onChange={(e) => atur({ periksa: e.target.value })} aria-label={tr('Saring')} className={`${kelasInput} w-auto`}>
+          <option value="">{tr('Semua koridor')}</option>
+          <option value="tarif">{tr('Tarif masih perkiraan')}</option>
+          <option value="jenis">{tr('TMD tercatat angkot')}</option>
         </select>
       </div>
       {daftar.error && <ErrorBanner error={daftar.error} onRetry={daftar.muatUlang} className="mb-4" />}
@@ -76,21 +77,21 @@ export default function Transit() {
                   {l.kode} <span className="font-normal text-ink/70">{l.nama}</span>
                 </span>
                 <span className="block text-xs text-ink/60">
-                  {JENIS[l.jenis]}, {l.jumlahHalte} halte, {rupiah(l.tarif)}
+                  {JENIS[l.jenis]}, {l.jumlahHalte} {tr('halte,')} {rupiah(l.tarif)}
                 </span>
               </span>
               <span className="flex flex-wrap gap-1.5">
-                {l.periksaJenis && <Chip nada="kuning">Periksa jenis</Chip>}
-                {l.tarifPerkiraan && <Chip nada="kuning">Tarif perkiraan</Chip>}
-                {l.dikoreksiAdmin && <Chip nada="ungu">Dikoreksi admin</Chip>}
-                {!l.aktif && <Chip nada="merah">Disembunyikan</Chip>}
-                <Chip>{l.sumber === 'osm' ? 'OSM' : 'Buatan admin'}</Chip>
+                {l.periksaJenis && <Chip nada="kuning">{tr('Periksa jenis')}</Chip>}
+                {l.tarifPerkiraan && <Chip nada="kuning">{tr('Tarif perkiraan')}</Chip>}
+                {l.dikoreksiAdmin && <Chip nada="ungu">{tr('Dikoreksi admin')}</Chip>}
+                {!l.aktif && <Chip nada="merah">{tr('Disembunyikan')}</Chip>}
+                <Chip>{l.sumber === 'osm' ? tr('OSM') : tr('Buatan admin')}</Chip>
               </span>
             </button>
           </li>
         ))}
       </ul>
-      {daftar.data && daftar.data.items.length === 0 && <p className="mt-2 text-sm text-ink/60">Tidak ada koridor yang cocok.</p>}
+      {daftar.data && daftar.data.items.length === 0 && <p className="mt-2 text-sm text-ink/60">{tr('Tidak ada koridor yang cocok.')}</p>}
     </>
   )
 }
@@ -100,7 +101,7 @@ function Detail({ id, onKembali }) {
   const l = data?.line
   return (
     <>
-      <Judul aksi={<Tombol jenis="biasa" onClick={onKembali}>Kembali ke daftar</Tombol>}>{l ? `${l.kode}` : 'Koridor'}</Judul>
+      <Judul aksi={<Tombol jenis="biasa" onClick={onKembali}>{tr('Kembali ke daftar')}</Tombol>}>{l ? `${l.kode}` : tr('Koridor')}</Judul>
       {error && <ErrorBanner error={error} onRetry={muatUlang} />}
       {l && (
         <div className="grid gap-8 xl:grid-cols-[minmax(0,24rem)_minmax(0,1fr)]">
@@ -147,23 +148,23 @@ function FormKoridor({ l, onSimpan }) {
     if (Number(f.kecepatanRataKmj) !== l.kecepatanRataKmj) body.kecepatanRataKmj = Number(f.kecepatanRataKmj)
     const tarif = f.tarif === '' ? null : Number(f.tarif)
     if (tarif !== l.tarifAdmin || (tarif !== null && l.tarifSumber !== 'admin')) body.tarif = tarif
-    if (!Object.keys(body).length) return setStatus({ memuat: false, error: null, pesan: 'Tidak ada perubahan.' })
-    kirim(body, 'Perubahan disimpan.')
+    if (!Object.keys(body).length) return setStatus({ memuat: false, error: null, pesan: tr('Tidak ada perubahan.') })
+    kirim(body, tr('Perubahan disimpan.'))
   }
 
   return (
     <form onSubmit={simpan} className="flex flex-col gap-4">
       <div className="flex flex-wrap gap-1.5">
-        <Chip>{l.sumber === 'osm' ? `OSM ${l.osmId ?? ''}` : 'Buatan admin'}</Chip>
-        {l.dikoreksiAdmin && <Chip nada="ungu">Dikoreksi admin, impor OSM tidak menimpa</Chip>}
-        {l.periksaJenis && <Chip nada="kuning">Trans Metro Deli tercatat angkot</Chip>}
-        {!l.aktif && <Chip nada="merah">Disembunyikan</Chip>}
+        <Chip>{l.sumber === 'osm' ? `OSM ${l.osmId ?? ''}` : tr('Buatan admin')}</Chip>
+        {l.dikoreksiAdmin && <Chip nada="ungu">{tr('Dikoreksi admin, impor OSM tidak menimpa')}</Chip>}
+        {l.periksaJenis && <Chip nada="kuning">{tr('Trans Metro Deli tercatat angkot')}</Chip>}
+        {!l.aktif && <Chip nada="merah">{tr('Disembunyikan')}</Chip>}
       </div>
-      <Field label="Nama">
+      <Field label={tr('Nama')}>
         <input required maxLength={150} value={f.nama} onChange={ubah('nama')} className={kelasInput} />
       </Field>
       <div className="grid grid-cols-2 gap-4">
-        <Field label="Jenis" hint={l.periksaJenis ? 'Trans Metro Deli seharusnya Bus.' : undefined}>
+        <Field label={tr('Jenis')} hint={l.periksaJenis ? tr('Trans Metro Deli seharusnya Bus.') : undefined}>
           <select value={f.jenis} onChange={ubah('jenis')} className={kelasInput}>
             {Object.entries(JENIS).map(([v, t]) => (
               <option key={v} value={v}>
@@ -172,28 +173,28 @@ function FormKoridor({ l, onSimpan }) {
             ))}
           </select>
         </Field>
-        <Field label="Warna garis">
+        <Field label={tr('Warna garis')}>
           <input value={f.warna} onChange={ubah('warna')} placeholder="#A2028A" pattern="#[0-9a-fA-F]{6}" className={kelasInput} />
         </Field>
       </div>
-      <Field label="Operator">
+      <Field label={tr('Operator')}>
         <input maxLength={100} value={f.operator} onChange={ubah('operator')} className={kelasInput} />
       </Field>
       <Field
-        label="Tarif resmi (Rp)"
+        label={tr('Tarif resmi (Rp)')}
         hint={
           l.tarifSumber === 'admin'
-            ? 'Diisi admin, tampil tanpa label perkiraan.'
-            : `Kosong = memakai perkiraan ${rupiah(l.tarif)} dengan label "Tarif perkiraan".`
+            ? tr('Diisi admin, tampil tanpa label perkiraan.')
+            : tr("Kosong = memakai perkiraan {0} dengan label \"Tarif perkiraan\".", { 0: rupiah(l.tarif) })
         }
       >
         <input type="number" min={0} max={1000000} step={500} value={f.tarif} onChange={ubah('tarif')} className={kelasInput} />
       </Field>
       <div className="grid grid-cols-2 gap-4">
-        <Field label="Kecepatan rata-rata (km/j)">
+        <Field label={tr('Kecepatan rata-rata (km/j)')}>
           <input type="number" min={1} max={120} value={f.kecepatanRataKmj} onChange={ubah('kecepatanRataKmj')} className={kelasInput} />
         </Field>
-        <Field label="Jam operasi">
+        <Field label={tr('Jam operasi')}>
           <input maxLength={40} value={f.jamOperasi} onChange={ubah('jamOperasi')} placeholder="05.30–21.00" className={kelasInput} />
         </Field>
       </div>
@@ -205,14 +206,14 @@ function FormKoridor({ l, onSimpan }) {
       )}
       <div className="flex flex-wrap gap-2">
         <Tombol type="submit" memuat={status.memuat}>
-          Simpan
+          {tr('Simpan')}
         </Tombol>
-        <Tombol jenis="biasa" onClick={() => kirim({ aktif: !l.aktif }, l.aktif ? 'Koridor disembunyikan.' : 'Koridor ditampilkan lagi.')}>
-          {l.aktif ? 'Sembunyikan' : 'Tampilkan lagi'}
+        <Tombol jenis="biasa" onClick={() => kirim({ aktif: !l.aktif }, l.aktif ? tr('Koridor disembunyikan.') : tr('Koridor ditampilkan lagi.'))}>
+          {l.aktif ? tr('Sembunyikan') : tr('Tampilkan lagi')}
         </Tombol>
         {l.sumber === 'osm' && l.dikoreksiAdmin && (
-          <Tombol jenis="biasa" onClick={() => kirim({ kembalikanOsm: true }, 'Impor OSM berikutnya akan memperbarui koridor ini lagi.')}>
-            Kembalikan ke data OSM
+          <Tombol jenis="biasa" onClick={() => kirim({ kembalikanOsm: true }, tr('Impor OSM berikutnya akan memperbarui koridor ini lagi.'))}>
+            {tr('Kembalikan ke data OSM')}
           </Tombol>
         )}
       </div>
@@ -246,13 +247,13 @@ function Halte({ l, onUbah }) {
     })
 
   return (
-    <section aria-label="Halte koridor" className="min-w-0">
+    <section aria-label={tr('Halte koridor')} className="min-w-0">
       <PetaAdmin
         garis={l.garis}
         warnaGaris={warna}
         penanda={[
           ...l.halte.map((h) => ({ id: h.id, lokasi: h.lokasi, judul: h.nama, warna, aktif: h.id === pilih })),
-          ...(baru ? [{ id: 'baru', lokasi: baru.lokasi, judul: 'Halte baru', warna: '#41396F', aktif: true }] : []),
+          ...(baru ? [{ id: 'baru', lokasi: baru.lokasi, judul: tr('Halte baru'), warna: '#41396F', aktif: true }] : []),
         ]}
         onGeser={(hid, lokasi) =>
           hid === 'baru' ? setBaru((b) => ({ ...b, lokasi })) : aksi(() => api.patch(`/admin/transit/stops/${hid}`, { lokasi }))
@@ -260,17 +261,17 @@ function Halte({ l, onUbah }) {
         onPilih={setPilih}
         onPick={tambah ? (lokasi) => setBaru((b) => ({ nama: b?.nama ?? '', lokasi })) : undefined}
         kunci={l.id}
-        label={`Peta koridor ${l.kode}`}
+        label={tr("Peta koridor {0}", { 0: l.kode })}
       />
-      <p className="mt-2 text-xs text-ink/60">Geser penanda untuk memindahkan halte. Halte yang diubah tidak ditimpa impor OSM.</p>
+      <p className="mt-2 text-xs text-ink/60">{tr('Geser penanda untuk memindahkan halte. Halte yang diubah tidak ditimpa impor OSM.')}</p>
       <div className="mt-3 flex flex-wrap items-end gap-2">
         {!tambah ? (
           <Tombol jenis="biasa" onClick={() => setTambah(true)}>
-            Tambah halte
+            {tr('Tambah halte')}
           </Tombol>
         ) : (
           <>
-            <Field label={baru ? 'Nama halte baru' : 'Ketuk peta untuk menaruh halte baru'} className="min-w-56 flex-1">
+            <Field label={baru ? tr('Nama halte baru') : tr('Ketuk peta untuk menaruh halte baru')} className="min-w-56 flex-1">
               <input
                 disabled={!baru}
                 value={baru?.nama ?? ''}
@@ -289,7 +290,7 @@ function Halte({ l, onUbah }) {
                 })
               }
             >
-              Simpan halte
+              {tr('Simpan halte')}
             </Tombol>
             <Tombol
               jenis="biasa"
@@ -298,27 +299,27 @@ function Halte({ l, onUbah }) {
                 setTambah(false)
               }}
             >
-              Batal
+              {tr('Batal')}
             </Tombol>
           </>
         )}
       </div>
       {galat && <ErrorBanner error={galat} className="mt-3" />}
-      <h2 className="mt-6 font-serif text-xl">Halte ({l.halte.length})</h2>
+      <h2 className="mt-6 font-serif text-xl">{tr('Halte (')}{l.halte.length})</h2>
       {l.halte.length === 0 && (
-        <p className="mt-1 text-sm text-ink/60">Koridor tanpa halte (angkot): penumpang naik/turun di sepanjang jalan.</p>
+        <p className="mt-1 text-sm text-ink/60">{tr('Koridor tanpa halte (angkot): penumpang naik/turun di sepanjang jalan.')}</p>
       )}
       <ol className="mt-2 divide-y divide-ink/[0.06]">
         {l.halte.map((h, i) => (
           <li key={h.id} className={`flex flex-wrap items-center gap-2 py-2 ${h.id === pilih ? 'bg-lilac-wash/25' : ''}`}>
             <span className="w-7 text-right text-xs tabular-nums text-ink/50">{i + 1}.</span>
             <NamaHalte h={h} onSimpan={(nama) => aksi(() => api.patch(`/admin/transit/stops/${h.id}`, { nama }))} />
-            {h.sumber === 'osm' && !h.dikoreksiAdmin && <Chip>OSM</Chip>}
-            {h.jumlahKoridor > 1 && <Chip>{h.jumlahKoridor} koridor</Chip>}
+            {h.sumber === 'osm' && !h.dikoreksiAdmin && <Chip>{tr('OSM')}</Chip>}
+            {h.jumlahKoridor > 1 && <Chip>{h.jumlahKoridor} {tr('koridor')}</Chip>}
             <span className="ml-auto flex gap-1">
               <button
                 type="button"
-                aria-label={`Naikkan ${h.nama}`}
+                aria-label={tr('Naikkan {0}', { 0: h.nama })}
                 disabled={i === 0}
                 onClick={() => tukar(i, i - 1)}
                 className="grid size-touch place-items-center rounded-full hover:bg-ink/5 disabled:opacity-30"
@@ -327,14 +328,14 @@ function Halte({ l, onUbah }) {
               </button>
               <button
                 type="button"
-                aria-label={`Turunkan ${h.nama}`}
+                aria-label={tr('Turunkan {0}', { 0: h.nama })}
                 disabled={i === l.halte.length - 1}
                 onClick={() => tukar(i, i + 1)}
                 className="grid size-touch place-items-center rounded-full hover:bg-ink/5 disabled:opacity-30"
               >
                 <ArrowDown size={18} aria-hidden="true" />
               </button>
-              <TombolHapus label="Lepas" onHapus={() => aksi(() => api.del(`/admin/transit/stops/${h.id}?line=${l.id}`))} />
+              <TombolHapus label={tr('Lepas')} onHapus={() => aksi(() => api.del(`/admin/transit/stops/${h.id}?line=${l.id}`))} />
             </span>
           </li>
         ))}
@@ -348,7 +349,7 @@ function NamaHalte({ h, onSimpan }) {
   return (
     <input
       value={nama}
-      aria-label={`Nama halte ${h.nama}`}
+      aria-label={tr("Nama halte {0}", { 0: h.nama })}
       onChange={(e) => setNama(e.target.value)}
       onBlur={() => nama.trim() && nama !== h.nama && onSimpan(nama)}
       onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import logo from '../assets/brand/logo.webp'
 import { TopNav } from './AppNav.jsx'
 import { NotificationButton } from './NebulaHeader.jsx'
+import { tr } from '../lib/i18n.js'
 
 /**
  * Bar atas web desktop (≥ lg), sama di semua layar: logo, menu Beranda/Rewards/Akun, lonceng.
@@ -15,7 +16,7 @@ export default function SiteBar({ signedIn, unread = 0, onNotifications, classNa
         <span className="grid size-11 place-items-center rounded-full bg-white/85">
           <img src={logo} alt="" width="34" height="26" className="w-[34px]" />
         </span>
-        <span className="font-serif text-lg leading-none">SmartMove Medan</span>
+        <span className="font-serif text-lg leading-none">{tr('SmartMove Medan')}</span>
       </Link>
       <div className="flex items-center gap-3">
         <TopNav />
@@ -32,7 +33,7 @@ export function SignInButton({ className = '' }) {
       className={`flex min-h-touch shrink-0 items-center gap-2 rounded-full bg-login-button px-5 text-[15px] font-semibold text-white shadow-[0_6px_16px_-6px_rgb(115_36_169/0.8)] transition hover:brightness-110 ${className}`}
     >
       <LogIn size={18} aria-hidden="true" />
-      Masuk
+      {tr('Masuk')}
     </Link>
   )
 }

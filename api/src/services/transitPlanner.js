@@ -1,5 +1,6 @@
 import TransitLine from '../models/TransitLine.js';
 import TransitStop from '../models/TransitStop.js';
+import { tr } from '../lib/i18n.js';
 import { tarifKoridor } from './tarif.js';
 
 // Perencana rute transportasi umum (ARCHITECTURE §5.2).
@@ -355,8 +356,11 @@ export function bagianNaik({ L, dari, ke, lain = [] }) {
   };
 }
 
-export const formatTarif = (n) =>
-  n === null ? 'Tarif belum tersedia' : `Rp ${String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
+// Teks tarif untuk klien (T-111): 'id' → "Rp 4.000", 'en' → "Rp 4,000".
+export const formatTarif = (n, bahasa = 'id') =>
+  n === null
+    ? tr(bahasa, 'Tarif belum tersedia')
+    : `Rp ${String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, bahasa === 'en' ? ',' : '.')}`;
 
 // Indeks disimpan di memori; dibangun ulang bila data koridor/halte berubah.
 let simpanan = { versi: null, indeks: null };

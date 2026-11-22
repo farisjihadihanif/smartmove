@@ -1,15 +1,16 @@
+import { tr, locale } from './i18n.js'
 // Pemesanan & Digital Payment (simulasi, T-302). Data dari API: GET /payments/services,
 // POST /payments, GET /payments(/:orderId), POST /payments/:orderId/cek.
 
-export const LABEL_SIMULASI = 'Simulasi – bukan tiket resmi'
+export const LABEL_SIMULASI = tr('Simulasi – bukan tiket resmi')
 
 // Ikon tiap jenis & metode ada di components/pembayaran/ikon.js.
 export const JENIS = [
-  { value: 'kereta', label: 'Kereta' },
-  { value: 'bus', label: 'Bus' },
-  { value: 'bus_antarkota', label: 'Antarkota' },
-  { value: 'travel', label: 'Travel' },
-  { value: 'parkir', label: 'Parkir' },
+  { value: 'kereta', label: tr('Kereta') },
+  { value: 'bus', label: tr('Bus') },
+  { value: 'bus_antarkota', label: tr('Antarkota') },
+  { value: 'travel', label: tr('Travel') },
+  { value: 'parkir', label: tr('Parkir') },
 ]
 export const labelJenis = (v) => JENIS.find((j) => j.value === v)?.label ?? v
 
@@ -18,29 +19,29 @@ export const labelJenis = (v) => JENIS.find((j) => j.value === v)?.label ?? v
 export const GRUP_METODE = [
   {
     value: 'qris',
-    label: 'QRIS',
-    ket: 'Pindai kode QR dari aplikasi bank atau e-wallet mana pun',
-    pilihan: [{ value: 'qris', label: 'QRIS' }],
+    label: tr('QRIS'),
+    ket: tr('Pindai kode QR dari aplikasi bank atau e-wallet mana pun'),
+    pilihan: [{ value: 'qris', label: tr('QRIS') }],
   },
   {
     value: 'va',
-    label: 'Virtual account',
-    ket: 'Transfer dari m-banking, internet banking, atau ATM',
+    label: tr('Virtual account'),
+    ket: tr('Transfer dari m-banking, internet banking, atau ATM'),
     pilihan: [
-      { value: 'bca', label: 'BCA' },
-      { value: 'bni', label: 'BNI' },
-      { value: 'bri', label: 'BRI' },
-      { value: 'mandiri', label: 'Mandiri' },
-      { value: 'permata', label: 'Permata' },
+      { value: 'bca', label: tr('BCA') },
+      { value: 'bni', label: tr('BNI') },
+      { value: 'bri', label: tr('BRI') },
+      { value: 'mandiri', label: tr('Mandiri') },
+      { value: 'permata', label: tr('Permata') },
     ],
   },
   {
     value: 'ewallet',
-    label: 'E-wallet',
-    ket: 'Bayar langsung di aplikasi GoPay atau ShopeePay',
+    label: tr('E-wallet'),
+    ket: tr('Bayar langsung di aplikasi GoPay atau ShopeePay'),
     pilihan: [
-      { value: 'gopay', label: 'GoPay' },
-      { value: 'shopeepay', label: 'ShopeePay' },
+      { value: 'gopay', label: tr('GoPay') },
+      { value: 'shopeepay', label: tr('ShopeePay') },
     ],
   },
 ]
@@ -50,33 +51,33 @@ export const grupDari = (metode) => GRUP_METODE.find((g) => g.pilihan.some((p) =
 export const SIMULATOR_MIDTRANS = 'https://simulator.sandbox.midtrans.com/'
 
 export const STATUS = {
-  menunggu: { label: 'Menunggu pembayaran', nada: 'padat' },
-  lunas: { label: 'Lunas', nada: 'lancar' },
-  gagal: { label: 'Gagal', nada: 'macet' },
-  kedaluwarsa: { label: 'Kedaluwarsa', nada: 'abu' },
-  dibatalkan: { label: 'Dibatalkan', nada: 'abu' },
+  menunggu: { label: tr('Menunggu pembayaran'), nada: 'padat' },
+  lunas: { label: tr('Lunas'), nada: 'lancar' },
+  gagal: { label: tr('Gagal'), nada: 'macet' },
+  kedaluwarsa: { label: tr('Kedaluwarsa'), nada: 'abu' },
+  dibatalkan: { label: tr('Dibatalkan'), nada: 'abu' },
 }
 
 // Nama metode dari Midtrans (`payment_type`) untuk riwayat & e-tiket.
 const NAMA_METODE = {
   qris: 'QRIS',
-  bca: 'Virtual account BCA',
-  bni: 'Virtual account BNI',
-  bri: 'Virtual account BRI',
-  mandiri: 'Mandiri Bill',
-  permata: 'Virtual account Permata',
+  bca: tr('Virtual account BCA'),
+  bni: tr('Virtual account BNI'),
+  bri: tr('Virtual account BRI'),
+  mandiri: tr('Mandiri Bill'),
+  permata: tr('Virtual account Permata'),
   ewallet: 'E-Wallet',
-  transfer: 'Transfer bank',
-  credit_card: 'Kartu kredit',
+  transfer: tr('Transfer bank'),
+  credit_card: tr('Kartu kredit'),
   gopay: 'GoPay',
   shopeepay: 'ShopeePay',
-  bank_transfer: 'Transfer bank',
-  echannel: 'Transfer bank (Mandiri)',
-  cstore: 'Gerai ritel',
+  bank_transfer: tr('Transfer bank'),
+  echannel: tr('Transfer bank (Mandiri)'),
+  cstore: tr('Gerai ritel'),
 }
 export const namaMetode = (m) => (m ? (NAMA_METODE[m] ?? m.replace(/_/g, ' ')) : null)
 
-export const rupiah = (n) => `Rp${Math.round(n).toLocaleString('id-ID')}`
+export const rupiah = (n) => `Rp${Math.round(n).toLocaleString(locale)}`
 
 export const satuanLabel = (layanan) => (layanan.jenis === 'parkir' ? 'jam' : 'orang')
 export const maksJumlah = (layanan) => (layanan.jenis === 'parkir' ? 24 : 8)
@@ -90,8 +91,8 @@ export function tanggalWib(now = Date.now(), offset = 0) {
   return w.toISOString().slice(0, 10)
 }
 
-const HARI = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']
-const BULAN = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
+const HARI = [tr('Min'), tr('Sen'), tr('Sel'), tr('Rab'), tr('Kam'), tr('Jum'), tr('Sab')]
+const BULAN = [tr('Jan'), tr('Feb'), tr('Mar'), tr('Apr'), tr('Mei'), tr('Jun'), tr('Jul'), tr('Agu'), tr('Sep'), tr('Okt'), tr('Nov'), tr('Des')]
 
 /** "2026-11-20" → { hari: 'Jum', tgl: 20, bulan: 'Nov' } */
 export function pecahTanggal(iso) {
@@ -107,7 +108,7 @@ export function pecahTanggal(iso) {
 export function waktuLengkap(iso) {
   const w = new Date(new Date(iso).getTime() + 7 * 3600_000)
   const dua = (n) => String(n).padStart(2, '0')
-  return `${HARI[w.getUTCDay()]}, ${w.getUTCDate()} ${BULAN[w.getUTCMonth()]} ${w.getUTCFullYear()}, ${dua(w.getUTCHours())}.${dua(w.getUTCMinutes())} WIB`
+  return tr("{0}, {1} {2} {3}, {4}.{5} WIB", { 0: HARI[w.getUTCDay()], 1: w.getUTCDate(), 2: BULAN[w.getUTCMonth()], 3: w.getUTCFullYear(), 4: dua(w.getUTCHours()), 5: dua(w.getUTCMinutes()) })
 }
 
 /** Jam mulai parkir terdekat (kelipatan 15 menit ke depan) untuk tanggal WIB tertentu. */
@@ -134,7 +135,7 @@ export function teksBagikan({ layanan, jadwal, jumlah, penumpang, eTiket }) {
     jadwal ? waktuLengkap(jadwal) : null,
     `${penumpang} ${satuanLabel(layanan)} · ${rupiah(jumlah)}`,
     eTiket?.kode ? `Kode: ${eTiket.kode}` : null,
-    'Dipesan lewat SmartMove Medan',
+    tr('Dipesan lewat SmartMove Medan'),
   ]
   return baris.filter(Boolean).join('\n')
 }
@@ -142,7 +143,7 @@ export function teksBagikan({ layanan, jadwal, jumlah, penumpang, eTiket }) {
 export async function bagikan(teks) {
   if (navigator.share) {
     try {
-      await navigator.share({ title: 'SmartMove Medan', text: teks })
+      await navigator.share({ title: tr('SmartMove Medan'), text: teks })
       return 'dibagikan'
     } catch (e) {
       if (e?.name === 'AbortError') return null

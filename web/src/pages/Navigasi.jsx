@@ -16,6 +16,7 @@ import { MEDAN_CENTER } from '../lib/geo.js'
 import { MODA, teksBagikan, titikFoto } from '../lib/navigasi.js'
 import { teksBagikanTransit } from '../lib/transit.js'
 import { useLaluLintas } from '../lib/useLaluLintas.js'
+import { tr } from '../lib/i18n.js'
 
 // Smart Navigation (mockup hal. 4, PRD §6.1): cari tujuan, pilih moda, rute di peta,
 // ringkasan & langkah di lembar bawah (desktop: panel samping kiri), Play (panduan langkah), Share, Street view (Mapillary).
@@ -24,9 +25,9 @@ import { useLaluLintas } from '../lib/useLaluLintas.js'
 // URL: ?q= (dari Beranda), ?dari=lat,lng&ke=lat,lng&mode=&dariNama=&keNama= (dari Trip Planner).
 
 const LAPISAN = [
-  { value: 'traffic', label: 'Traffic', icon: TrafficCone },
-  { value: 'transit', label: 'Transportasi umum', short: 'Umum', icon: Bus },
-  { value: 'street', label: 'Street view', icon: Camera },
+  { value: 'traffic', label: tr('Traffic'), icon: TrafficCone },
+  { value: 'transit', label: tr('Transportasi umum'), short: tr('Umum'), icon: Bus },
+  { value: 'street', label: tr('Street view'), icon: Camera },
 ]
 const MEBIDANG = { minLat: 3.25, maxLat: 3.9, minLng: 98.35, maxLng: 99.0 }
 const dalamWilayah = ({ lat, lng }) =>
@@ -44,7 +45,7 @@ async function namaTitik(lokasi, nama) {
     const { tempat } = await api.get('/places/reverse', { query: { at: latLng(lokasi) } })
     return { nama: tempat.nama, alamat: tempat.alamat, lokasi }
   } catch {
-    return { nama: 'Titik di peta', alamat: '', lokasi }
+    return { nama: tr('Titik di peta'), alamat: '', lokasi }
   }
 }
 
@@ -106,7 +107,7 @@ export default function Navigasi() {
           const lokasi = { lat: pos.coords.latitude, lng: pos.coords.longitude }
           if (!dalamWilayah(lokasi)) return setLokasiStatus('luar')
           setLokasiStatus('ok')
-          setDari((d) => d ?? { nama: 'Lokasi kamu', alamat: '', lokasi, saya: true })
+          setDari((d) => d ?? { nama: tr('Lokasi kamu'), alamat: '', lokasi, saya: true })
         },
         () => !batal && setLokasiStatus('ditolak'),
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
@@ -123,7 +124,7 @@ export default function Navigasi() {
   const cari = useCallback(
     async (q) => {
       const s = q.trim()
-      if (s.length < 2) return setHasil({ status: 'galat', items: [], error: { message: 'Ketik minimal 2 huruf.' } })
+      if (s.length < 2) return setHasil({ status: 'galat', items: [], error: { message: tr('Ketik minimal 2 huruf.') } })
       setHasil({ status: 'memuat', items: [] })
       try {
         const near = dari?.lokasi ?? tengah
@@ -160,7 +161,7 @@ export default function Navigasi() {
 
   const ketukPeta = useCallback(
     async (lokasi) => {
-      if (!dalamWilayah(lokasi)) return kabari('SmartMove baru melayani Medan dan sekitarnya.')
+      if (!dalamWilayah(lokasi)) return kabari(tr('SmartMove baru melayani Medan dan sekitarnya.'))
       setHasil(null)
       pilih(await namaTitik(lokasi))
     },
@@ -236,7 +237,7 @@ export default function Navigasi() {
     const transitOn = next.includes('transit')
     if (transitOn !== umum) gantiModa(transitOn ? 'transit' : modaSebelum.current)
     setLapisan(next.filter((v) => v !== 'transit'))
-    if (baru === 'traffic') kabari('Lapisan Traffic aktif: garis berwarna = kondisi jalan utama, lingkaran = laporan warga.')
+    if (baru === 'traffic') kabari(tr('Lapisan Traffic aktif: garis berwarna = kondisi jalan utama, lingkaran = laporan warga.'))
   }
 
   async function bagikan() {
@@ -244,20 +245,20 @@ export default function Navigasi() {
     const teks = opsi ? teksBagikanTransit({ dari, ke, opsi }) : teksBagikan({ dari, ke, mode, rute })
     try {
       if (navigator.share) {
-        await navigator.share({ title: `Rute ke ${ke.nama}`, text: teks })
+        await navigator.share({ title: tr("Rute ke {0}", { 0: ke.nama }), text: teks })
         return
       }
       await navigator.clipboard.writeText(teks)
-      kabari('Tautan rute disalin. Tempel di chat untuk membagikannya.')
+      kabari(tr('Tautan rute disalin. Tempel di chat untuk membagikannya.'))
     } catch (e) {
-      if (e?.name !== 'AbortError') kabari('Rute belum bisa dibagikan dari peramban ini.')
+      if (e?.name !== 'AbortError') kabari(tr('Rute belum bisa dibagikan dari peramban ini.'))
     }
   }
 
   const adaRute = Boolean(rute || opsi)
   const aksi = [
     {
-      label: 'Rute',
+      label: tr('Rute'),
       icon: Route,
       disabled: !adaRute,
       onClick: () => {
@@ -266,13 +267,13 @@ export default function Navigasi() {
         setFitKey((n) => n + 1)
       },
     },
-    { label: 'Play', icon: Play, disabled: !adaRute, onClick: () => setPlay(0) },
-    { label: 'Share', icon: Share2, disabled: !adaRute, onClick: bagikan },
+    { label: tr('Play'), icon: Play, disabled: !adaRute, onClick: () => setPlay(0) },
+    { label: tr('Share'), icon: Share2, disabled: !adaRute, onClick: bagikan },
   ]
   return (
     <PageShell
       map
-      title="Smart Navigation"
+      title={tr('Smart Navigation')}
       toolbar={
         <>
           <div className="relative lg:max-w-md lg:flex-1">
@@ -283,19 +284,19 @@ export default function Navigasi() {
                 if (!v) setHasil(null)
               }}
               onSubmit={cari}
-              placeholder={target === 'dari' ? 'Cari titik asal' : 'Telusuri di sini'}
-              label={target === 'dari' ? 'Cari titik asal' : 'Cari tujuan'}
+              placeholder={target === 'dari' ? tr('Cari titik asal') : tr('Telusuri di sini')}
+              label={target === 'dari' ? tr('Cari titik asal') : tr('Cari tujuan')}
             />
             {hasil && <HasilCari hasil={hasil} onPilih={pilih} onTutup={() => setHasil(null)} />}
           </div>
-          <PillToggle options={LAPISAN} value={nilaiLapisan} onChange={ubahLapisan} multiple label="Lapisan peta" fitDesktop className="lg:shrink-0" />
+          <PillToggle options={LAPISAN} value={nilaiLapisan} onChange={ubahLapisan} multiple label={tr('Lapisan peta')} fitDesktop className="lg:shrink-0" />
         </>
       }
     >
       {/* Ponsel: peta + lembar bawah + bar aksi. Desktop: panel rute di kiri, peta memenuhi sisanya. */}
       <div className="relative z-0 flex min-h-0 flex-1 flex-col lg:flex-row">
         <div className="relative flex min-h-0 flex-1 flex-col">
-          <MapView tucked attribution="topright" className="flex-1 lg:mb-0" label="Peta rute">
+          <MapView tucked attribution="topright" className="flex-1 lg:mb-0" label={tr('Peta rute')}>
             {/* Lapisan Traffic di bawah garis rute (T-205). */}
             {trafficAktif && <TrafficLayers koridor={lalin.koridor.items} laporan={lalin.laporan} onArea={lalin.onArea} redup={Boolean(rute || opsi)} />}
             <NavLayers
@@ -324,7 +325,7 @@ export default function Navigasi() {
         </div>
 
         <section
-          aria-label="Rute"
+          aria-label={tr('Rute')}
           className="sheet-rise absolute inset-x-0 -bottom-7 z-10 max-h-[58%] overflow-y-auto rounded-t-[1.75rem] bg-surface px-5 pb-[calc(1.75rem+1rem)] pt-2 shadow-[0_-12px_32px_-14px_rgb(65_57_111/0.55)] lg:static lg:order-first lg:-mt-7 lg:flex lg:max-h-none lg:w-[26rem] lg:shrink-0 lg:flex-col lg:overflow-hidden lg:rounded-none lg:p-0 lg:shadow-[10px_0_28px_-18px_rgb(65_57_111/0.55)] xl:w-[28rem]"
         >
           <span aria-hidden="true" className="mx-auto mb-3 block h-1 w-10 rounded-full bg-ink/15 lg:hidden" />

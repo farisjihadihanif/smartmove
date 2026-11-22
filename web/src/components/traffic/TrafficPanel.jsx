@@ -3,6 +3,7 @@ import { Loader2, LocateFixed, Send, X } from 'lucide-react'
 import ErrorBanner from '../ErrorBanner.jsx'
 import { formatKm, formatMenit, infoTingkat, KEJADIAN, teksTunda, TINGKAT } from '../../lib/lalulintas.js'
 import { jamWib, sejak } from '../../lib/wib.js'
+import { tr } from '../../lib/i18n.js'
 
 // Isi panel Live Traffic Information (lembar bawah di ponsel, panel kiri di desktop).
 
@@ -12,18 +13,18 @@ export function DaftarKoridor({ state, pilih, onPilih, onRetry }) {
     return (
       <p className="flex items-center gap-2 py-6 text-sm text-ink/70">
         <Loader2 size={18} className="animate-spin" aria-hidden="true" />
-        Menghitung waktu tempuh jalan utama…
+        {tr('Menghitung waktu tempuh jalan utama…')}
       </p>
     )
   }
   if (state.status === 'galat' && !state.items.length) return <ErrorBanner error={state.error} onRetry={onRetry} className="my-2" />
   if (!state.items.length) {
-    return <p className="py-6 text-sm leading-relaxed text-ink/70">Data jalan utama belum tersedia. Coba lagi nanti.</p>
+    return <p className="py-6 text-sm leading-relaxed text-ink/70">{tr('Data jalan utama belum tersedia. Coba lagi nanti.')}</p>
   }
 
   return (
     <>
-      <ul aria-label="Estimasi waktu jalan utama" className="-mx-2">
+      <ul aria-label={tr('Estimasi waktu jalan utama')} className="-mx-2">
         {state.items.map((k) => {
           const t = infoTingkat(k.tingkat)
           const tunda = teksTunda(k)
@@ -58,10 +59,10 @@ export function DaftarKoridor({ state, pilih, onPilih, onRetry }) {
                   {k.tersedia ? (
                     <>
                       <span className="block font-serif text-[1.375rem] leading-tight tabular-nums">{formatMenit(k.durasiS)}</span>
-                      {tunda && <span className="block text-xs text-ink/55">biasanya {formatMenit(k.durasiNormalS)}</span>}
+                      {tunda && <span className="block text-xs text-ink/55">{tr('biasanya')} {formatMenit(k.durasiNormalS)}</span>}
                     </>
                   ) : (
-                    <span className="block pt-1 text-xs text-ink/55">Belum bisa dihitung</span>
+                    <span className="block pt-1 text-xs text-ink/55">{tr('Belum bisa dihitung')}</span>
                   )}
                 </span>
               </button>
@@ -71,7 +72,7 @@ export function DaftarKoridor({ state, pilih, onPilih, onRetry }) {
       </ul>
       {state.diperbaruiPada && (
         <p className="mt-3 text-xs leading-relaxed text-ink/55">
-          Diperbarui {jamWib(state.diperbaruiPada)} WIB. Waktu dihitung dari laporan warga dan waktu tempuh normal.
+          {tr('Diperbarui')} {jamWib(state.diperbaruiPada)} {tr('WIB. Waktu dihitung dari laporan warga dan waktu tempuh normal.')}
         </p>
       )}
     </>
@@ -91,15 +92,15 @@ export function DetailLaporan({ laporan, now, onTutup, onKonfirmasi, mengirim })
             {laporan.kejadian !== 'none' && <span className="text-[#C62828]">, {KEJADIAN[laporan.kejadian].toLowerCase()}</span>}
           </p>
           <p className="mt-0.5 text-[13px] text-ink/60">
-            Dilaporkan {sejak(laporan.createdAt, now).toLowerCase()}
-            {laporan.konfirmasi > 0 && `, dikonfirmasi ${laporan.konfirmasi} warga`}. Hilang otomatis pukul {jamWib(laporan.expiresAt)}.
+            {tr('Dilaporkan')} {sejak(laporan.createdAt, now).toLowerCase()}
+            {laporan.konfirmasi > 0 && tr(", dikonfirmasi {0} warga", { 0: laporan.konfirmasi })}{tr('. Hilang otomatis pukul')} {jamWib(laporan.expiresAt)}.
           </p>
           {laporan.catatan && <p className="mt-2 text-[15px] leading-snug">“{laporan.catatan}”</p>}
         </div>
         <button
           type="button"
           onClick={onTutup}
-          aria-label="Tutup detail laporan"
+          aria-label={tr('Tutup detail laporan')}
           className="-mr-2 -mt-2 grid size-touch shrink-0 place-items-center rounded-full text-ink/60 hover:bg-black/5"
         >
           <X size={18} aria-hidden="true" />
@@ -112,7 +113,7 @@ export function DetailLaporan({ laporan, now, onTutup, onKonfirmasi, mengirim })
         className="mt-3 flex min-h-touch w-full items-center justify-center gap-2 rounded-full bg-action-pill text-[15px] font-semibold text-ink-violet transition hover:brightness-95 disabled:opacity-60"
       >
         {mengirim && <Loader2 size={18} className="animate-spin" aria-hidden="true" />}
-        Masih begini di sini
+        {tr('Masih begini di sini')}
       </button>
     </div>
   )
@@ -143,16 +144,16 @@ export function FormLaporan({ titik, namaTitik, onLokasiSaya, onBatal, onKirim }
   }
 
   return (
-    <form onSubmit={kirim} aria-label="Laporkan kondisi jalan" className="flex flex-col gap-5">
+    <form onSubmit={kirim} aria-label={tr('Laporkan kondisi jalan')} className="flex flex-col gap-5">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="font-serif text-[1.375rem] leading-tight">Laporkan kondisi jalan</h2>
-          <p className="mt-1 text-[13px] leading-snug text-ink/65">Ketuk peta untuk memindahkan titik. Laporan hilang sendiri setelah 2 jam.</p>
+          <h2 className="font-serif text-[1.375rem] leading-tight">{tr('Laporkan kondisi jalan')}</h2>
+          <p className="mt-1 text-[13px] leading-snug text-ink/65">{tr('Ketuk peta untuk memindahkan titik. Laporan hilang sendiri setelah 2 jam.')}</p>
         </div>
         <button
           type="button"
           onClick={onBatal}
-          aria-label="Batal melapor"
+          aria-label={tr('Batal melapor')}
           className="-mr-2 grid size-touch shrink-0 place-items-center rounded-full text-ink/60 hover:bg-black/5"
         >
           <X size={20} aria-hidden="true" />
@@ -161,7 +162,7 @@ export function FormLaporan({ titik, namaTitik, onLokasiSaya, onBatal, onKirim }
 
       <div className="flex items-center gap-3 rounded-2xl bg-search px-3 py-2.5">
         <span aria-hidden="true" className="size-3 shrink-0 rounded-full bg-pill-via ring-2 ring-white" />
-        <p className="min-w-0 flex-1 truncate text-[15px]">{titik ? namaTitik || 'Titik di peta' : 'Ketuk peta untuk memilih titik'}</p>
+        <p className="min-w-0 flex-1 truncate text-[15px]">{titik ? namaTitik || tr('Titik di peta') : tr('Ketuk peta untuk memilih titik')}</p>
         {onLokasiSaya && (
           <button
             type="button"
@@ -169,13 +170,13 @@ export function FormLaporan({ titik, namaTitik, onLokasiSaya, onBatal, onKirim }
             className="flex min-h-touch shrink-0 items-center gap-1.5 rounded-full px-2 text-sm font-semibold text-ink-violet hover:bg-ink-violet/10"
           >
             <LocateFixed size={17} aria-hidden="true" />
-            Lokasiku
+            {tr('Lokasiku')}
           </button>
         )}
       </div>
 
       <fieldset>
-        <legend className="mb-2 text-sm font-semibold">Seberapa ramai?</legend>
+        <legend className="mb-2 text-sm font-semibold">{tr('Seberapa ramai?')}</legend>
         <div className="grid grid-cols-3 gap-2">
           {PILIH_TINGKAT.map((v) => {
             const on = tingkat === v
@@ -198,7 +199,7 @@ export function FormLaporan({ titik, namaTitik, onLokasiSaya, onBatal, onKirim }
       </fieldset>
 
       <fieldset>
-        <legend className="mb-2 text-sm font-semibold">Ada kejadian?</legend>
+        <legend className="mb-2 text-sm font-semibold">{tr('Ada kejadian?')}</legend>
         <div className="flex flex-wrap gap-2">
           {PILIH_KEJADIAN.map((v) => {
             const on = kejadian === v
@@ -220,12 +221,12 @@ export function FormLaporan({ titik, namaTitik, onLokasiSaya, onBatal, onKirim }
       </fieldset>
 
       <label className="block">
-        <span className="mb-2 block text-sm font-semibold">Catatan (boleh kosong)</span>
+        <span className="mb-2 block text-sm font-semibold">{tr('Catatan (boleh kosong)')}</span>
         <textarea
           value={catatan}
           onChange={(e) => setCatatan(e.target.value.slice(0, 200))}
           rows={2}
-          placeholder="Mis. lajur kiri tergenang"
+          placeholder={tr('Mis. lajur kiri tergenang')}
           className="w-full resize-none rounded-2xl bg-search px-4 py-3 text-[15px] outline-none ring-1 ring-transparent focus:ring-pill-via"
         />
         <span className="mt-1 block text-right text-xs tabular-nums text-ink/50">{catatan.length}/200</span>
@@ -239,7 +240,7 @@ export function FormLaporan({ titik, namaTitik, onLokasiSaya, onBatal, onKirim }
         className="flex min-h-touch items-center justify-center gap-2 rounded-full bg-login-button text-base font-semibold text-white shadow-[0_6px_18px_-6px_rgb(115_36_169/0.7)] transition hover:brightness-110 disabled:opacity-50"
       >
         {status.kirim ? <Loader2 size={18} className="animate-spin" aria-hidden="true" /> : <Send size={18} aria-hidden="true" />}
-        Kirim laporan
+        {tr('Kirim laporan')}
       </button>
     </form>
   )

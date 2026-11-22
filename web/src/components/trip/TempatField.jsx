@@ -4,6 +4,7 @@ import { api, latLng } from '../../lib/api.js'
 import { errorMessage } from '../../lib/errors.js'
 import { formatJarak } from '../../lib/navigasi.js'
 import { MEDAN_CENTER } from '../../lib/geo.js'
+import { tr } from '../../lib/i18n.js'
 
 const JEDA_MS = 450
 
@@ -54,9 +55,9 @@ export default function TempatField({ label, value, onChange, near, lokasiSaya =
 
   function pakaiLokasi() {
     if (!('geolocation' in navigator)) {
-      return setHasil({ status: 'galat', items: [], pesan: 'Peramban ini tidak bisa membaca lokasi. Ketik nama tempatnya.' })
+      return setHasil({ status: 'galat', items: [], pesan: tr('Peramban ini tidak bisa membaca lokasi. Ketik nama tempatnya.') })
     }
-    setHasil({ status: 'memuat', items: [], pesan: 'Mencari lokasimu…' })
+    setHasil({ status: 'memuat', items: [], pesan: tr('Mencari lokasimu…') })
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const lokasi = { lat: pos.coords.latitude, lng: pos.coords.longitude }
@@ -67,7 +68,7 @@ export default function TempatField({ label, value, onChange, near, lokasiSaya =
           setHasil({ status: 'galat', items: [], pesan: errorMessage(e) })
         }
       },
-      () => setHasil({ status: 'galat', items: [], pesan: 'Izin lokasi ditolak. Ketik nama tempatnya.' }),
+      () => setHasil({ status: 'galat', items: [], pesan: tr('Izin lokasi ditolak. Ketik nama tempatnya.') }),
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
     )
   }
@@ -110,18 +111,18 @@ export default function TempatField({ label, value, onChange, near, lokasiSaya =
               className="flex min-h-touch w-full items-center gap-3 rounded-xl px-2 text-left text-[15px] font-semibold text-ink-violet hover:bg-ink/[0.04]"
             >
               <Crosshair size={18} aria-hidden="true" />
-              Pakai lokasi saat ini
+              {tr('Pakai lokasi saat ini')}
             </button>
           )}
           {hasil?.status === 'memuat' && (
             <p className="flex items-center gap-2 px-2 py-3 text-sm text-ink/70">
               <Loader2 size={16} className="animate-spin" aria-hidden="true" />
-              {hasil.pesan ?? 'Mencari tempat…'}
+              {hasil.pesan ?? tr('Mencari tempat…')}
             </p>
           )}
           {hasil?.status === 'galat' && <p role="alert" className="px-2 py-3 text-sm text-[#C62828]">{hasil.pesan}</p>}
           {hasil?.status === 'ok' && hasil.items.length === 0 && (
-            <p className="px-2 py-3 text-sm text-ink/70">Tidak ditemukan di Medan dan sekitarnya. Coba nama lain.</p>
+            <p className="px-2 py-3 text-sm text-ink/70">{tr('Tidak ditemukan di Medan dan sekitarnya. Coba nama lain.')}</p>
           )}
           {hasil?.status === 'ok' &&
             hasil.items.map((t) => (

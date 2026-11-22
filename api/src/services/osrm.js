@@ -80,8 +80,12 @@ const ARAH = {
 const URUTAN = ['pertama', 'kedua', 'ketiga', 'keempat', 'kelima', 'keenam'];
 const keluarKe = (n) => (n ? `keluar di jalan ${URUTAN[n - 1] || `ke-${n}`}` : 'keluar');
 
-// Satu langkah OSRM → kalimat bahasa Indonesia.
-export function teksLangkah(step) {
+// Satu langkah OSRM → kalimat sesuai bahasa (T-111): 'id' (bawaan) atau 'en'.
+export function teksLangkah(step, bahasa = 'id') {
+  return bahasa === 'en' ? teksLangkahEn(step) : teksLangkahId(step);
+}
+
+function teksLangkahId(step) {
   const m = step.maneuver || {};
   const jalan = step.name || step.ref || '';
   const ke = jalan ? ` ke ${jalan}` : '';
@@ -128,15 +132,73 @@ export function teksLangkah(step) {
   }
 }
 
+const ARAH_EN = {
+  left: 'left',
+  right: 'right',
+  'slight left': 'slightly left',
+  'slight right': 'slightly right',
+  'sharp left': 'sharply left',
+  'sharp right': 'sharply right',
+};
+const URUTAN_EN = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth'];
+const keluarKeEn = (n) => (n ? `take the ${URUTAN_EN[n - 1] || `${n}th`} exit` : 'exit');
+
+function teksLangkahEn(step) {
+  const m = step.maneuver || {};
+  const jalan = step.name || step.ref || '';
+  const ke = jalan ? ` onto ${jalan}` : '';
+  const di = jalan ? ` on ${jalan}` : '';
+  const arah = ARAH_EN[m.modifier];
+
+  switch (m.type) {
+    case 'depart':
+      return `Start${di}`;
+    case 'arrive':
+      return m.modifier === 'left'
+        ? 'Arrive at your destination, on the left'
+        : m.modifier === 'right'
+          ? 'Arrive at your destination, on the right'
+          : 'Arrive at your destination';
+    case 'roundabout':
+    case 'rotary':
+      return `Enter the roundabout and ${keluarKeEn(m.exit)}${ke}`;
+    case 'exit roundabout':
+    case 'exit rotary':
+      return `Exit the roundabout${ke}`;
+    case 'merge':
+      return `Merge${ke || ' onto the main road'}`;
+    case 'on ramp':
+      return `Take the ramp${ke}`;
+    case 'off ramp':
+      return `Take the exit${ke}`;
+    case 'fork':
+      return m.modifier?.includes('left')
+        ? `Keep left at the fork${ke}`
+        : m.modifier?.includes('right')
+          ? `Keep right at the fork${ke}`
+          : `Continue at the fork${ke}`;
+    case 'new name':
+    case 'continue':
+    case 'notification':
+      if (m.modifier === 'uturn') return `Make a U-turn${di}`;
+      if (arah) return `Turn ${arah}${ke}`;
+      return `Continue straight${di}`;
+    default:
+      if (m.modifier === 'uturn') return `Make a U-turn${di}`;
+      if (m.modifier === 'straight' || !arah) return `Go straight${ke}`;
+      return `Turn ${arah}${ke}`;
+  }
+}
+
 // Respons OSRM → bentuk API_SPECS §6.1. `null` bila rute tidak ditemukan.
-export function keRute(body, mode) {
+export function keRute(body, mode, bahasa = 'id') {
   const r = body?.code === 'Ok' ? body.routes?.[0] : null;
   if (!r) return null;
   const jarakM = Math.round(r.distance);
   const langkah = (r.legs || [])
     .flatMap((l) => l.steps || [])
     .map((s) => ({
-      teks: teksLangkah(s),
+      teks: teksLangkah(s, bahasa),
       jarakM: Math.round(s.distance || 0),
       lokasi: Array.isArray(s.maneuver?.location) ? s.maneuver.location : undefined,
     }));

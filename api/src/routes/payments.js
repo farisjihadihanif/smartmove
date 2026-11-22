@@ -73,7 +73,7 @@ export function paymentsRouter(cfg, { midtrans }) {
   r.post('/', requireAuth, batasMidtrans, async (req, res) => {
     const pesanan = await bacaPesanan(req.body || {});
     const p = await buatPembayaran(req.user, pesanan, { midtrans, appUrl: cfg.appUrl });
-    res.status(201).json({ orderId: p.orderId, payment: pembayaranPublik(p) });
+    res.status(201).json({ orderId: p.orderId, payment: pembayaranPublik(p, req.bahasa) });
   });
 
   // GET /payments → riwayat milik sendiri, terbaru dulu.
@@ -84,7 +84,7 @@ export function paymentsRouter(cfg, { midtrans }) {
       Payment.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
       Payment.countDocuments(filter),
     ]);
-    res.json({ items: items.map(pembayaranPublik), page, total });
+    res.json({ items: items.map((p) => pembayaranPublik(p, req.bahasa)), page, total });
   });
 
   async function milikSendiri(req) {
@@ -95,7 +95,7 @@ export function paymentsRouter(cfg, { midtrans }) {
 
   // GET /payments/:orderId → status & bukti (e-tiket simulasi bila lunas).
   r.get('/:orderId', requireAuth, async (req, res) => {
-    res.json({ payment: pembayaranPublik(await milikSendiri(req)) });
+    res.json({ payment: pembayaranPublik(await milikSendiri(req), req.bahasa) });
   });
 
   // POST /payments/:orderId/cek — tombol "Cek status" (DESIGN §5). Server menanyakan status ke
@@ -106,7 +106,7 @@ export function paymentsRouter(cfg, { midtrans }) {
       const st = await midtrans.cekStatus(p.orderId);
       if (st) p = (await terapkanNotifikasi(st, { serverKey: midtrans.serverKey })).payment;
     }
-    res.json({ payment: pembayaranPublik(p) });
+    res.json({ payment: pembayaranPublik(p, req.bahasa) });
   });
 
   return r;

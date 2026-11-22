@@ -1,4 +1,5 @@
 import { MapPin, Search } from 'lucide-react'
+import { tr } from '../lib/i18n.js'
 
 /**
  * Kolom "Telusuri di sini" (mockup hal. 3–7): kapsul abu muda, pin kiri, kaca pembesar kanan.
@@ -8,8 +9,8 @@ export default function SearchField({
   value,
   onChange,
   onSubmit,
-  placeholder = 'Telusuri di sini',
-  label = 'Cari tempat',
+  placeholder = tr('Telusuri di sini'),
+  label = tr('Cari tempat'),
   leading = <DefaultPin />,
   showSubmit = true,
   autoFocus = false,
@@ -40,7 +41,7 @@ export default function SearchField({
       {showSubmit && (
         <button
           type="submit"
-          aria-label="Cari"
+          aria-label={tr('Cari')}
           className="grid size-11 shrink-0 place-items-center rounded-full bg-ink-violet text-white transition hover:brightness-125"
         >
           <Search size={20} strokeWidth={2.5} aria-hidden="true" />

@@ -26,16 +26,17 @@ import { api, fileUrl } from '../lib/api.js'
 import { useAuth } from '../lib/useAuth.js'
 import { useNotifications } from '../lib/useNotifications.js'
 import { jamAtauTanggal, jamWib, salamWib } from '../lib/wib.js'
+import { tr, locale } from '../lib/i18n.js'
 
 // Beranda (mockup hal. 3): sapaan + jam Medan, lonceng, cari, 4 menu utama, Trip Planner,
 // lalu ringkasan poin & event yang sedang berlangsung (data GET /home, API_SPECS §5).
 // Terbuka untuk tamu (ARCHITECTURE §4): sapaan tanpa nama, tanpa lonceng & poin, ada tombol Masuk.
 
 const MENU = [
-  { to: '/navigasi', label: 'Smart Navigation', icon: MapIcon },
-  { to: '/lalu-lintas', label: 'Live Traffic Information', icon: TrafficCone },
-  { to: '/pembayaran', label: 'Digital Payment', icon: Banknote },
-  { to: '/kampanye', label: 'Traffic Mitigation Campaign', icon: Megaphone },
+  { to: '/navigasi', label: tr('Smart Navigation'), icon: MapIcon },
+  { to: '/lalu-lintas', label: tr('Live Traffic Information'), icon: TrafficCone },
+  { to: '/pembayaran', label: tr('Digital Payment'), icon: Banknote },
+  { to: '/kampanye', label: tr('Traffic Mitigation Campaign'), icon: Megaphone },
 ]
 
 const EVENT_ICON = { cfd: Bike, rekayasa_arus: Signpost, acara: CalendarDays, lainnya: Info }
@@ -116,10 +117,10 @@ export default function Home() {
             <Avatar user={user} />
             <div className="min-w-0 flex-1">
               <p className="text-[13px] font-semibold text-ink-violet lg:text-base">
-                Medan, <time dateTime={new Date(now).toISOString()}>{jamWib(now)}</time> WIB
+                {tr('Medan,')} <time dateTime={new Date(now).toISOString()}>{jamWib(now)}</time> {tr('WIB')}
               </p>
               <h1 className="font-serif text-[1.375rem] leading-[1.15] lg:text-[3.25rem] lg:leading-[1.05]">
-                Hallo! {data?.sapaan.salam ?? salamWib(now)}
+                {tr('Hallo!')} {data?.sapaan.salam ?? salamWib(now)}
                 {nama && (
                   <>
                     ,<br />
@@ -141,7 +142,7 @@ export default function Home() {
             onSubmit={search}
             leading={<Search size={22} strokeWidth={2.25} aria-hidden="true" />}
             showSubmit={false}
-            label="Cari tempat atau tujuan"
+            label={tr('Cari tempat atau tujuan')}
             className="mt-5 lg:mt-10 lg:max-w-2xl"
           />
         </div>
@@ -155,7 +156,7 @@ export default function Home() {
         <div className="mt-5 lg:mt-10 lg:grid lg:grid-cols-[minmax(0,1fr)_21rem] lg:gap-8">
           <div>
             <nav
-              aria-label="Menu utama"
+              aria-label={tr('Menu utama')}
               className="grid grid-cols-2 gap-x-1 gap-y-1 rounded-[1.75rem] bg-surface-menu px-1 py-3 ring-1 ring-ink-violet/[0.06] lg:grid-cols-4 lg:px-3 lg:py-6"
             >
               {MENU.map(({ to, label, icon: Icon }) => (
@@ -166,7 +167,7 @@ export default function Home() {
             <TripPlannerCard />
           </div>
 
-          <aside className="mt-6 flex flex-col gap-6 lg:mt-0" aria-label="Ringkasan hari ini">
+          <aside className="mt-6 flex flex-col gap-6 lg:mt-0" aria-label={tr('Ringkasan hari ini')}>
             {tamu ? <GuestCard /> : <PointsLink poin={data?.poin} loading={!data && !error} />}
             {data?.events?.length > 0 && <OngoingEvents events={data.events} now={now} />}
           </aside>
@@ -190,22 +191,22 @@ export default function Home() {
 function GuestCard() {
   return (
     <section className="rounded-[1.5rem] bg-card px-5 py-5 ring-1 ring-ink/[0.08] lg:px-6 lg:py-6">
-      <h2 className="font-serif text-xl leading-snug">Simpan perjalanan & kumpulkan poin</h2>
+      <h2 className="font-serif text-xl leading-snug">{tr('Simpan perjalanan & kumpulkan poin')}</h2>
       <p className="mt-1.5 text-[15px] leading-relaxed text-ink/70">
-        Masuk untuk memakai Trip Planner, Rewards, dan pembayaran tiket.
+        {tr('Masuk untuk memakai Trip Planner, Rewards, dan pembayaran tiket.')}
       </p>
       <div className="mt-4 flex gap-2">
         <Link
           to="/masuk"
           className="flex min-h-touch flex-1 items-center justify-center rounded-full bg-login-button px-5 text-[15px] font-semibold text-white transition hover:brightness-110"
         >
-          Masuk
+          {tr('Masuk')}
         </Link>
         <Link
           to="/daftar"
           className="flex min-h-touch flex-1 items-center justify-center rounded-full px-5 text-[15px] font-semibold text-login-button ring-2 ring-inset ring-login-button transition hover:bg-login-button/5"
         >
-          Buat akun
+          {tr('Buat akun')}
         </Link>
       </div>
     </section>
@@ -217,7 +218,7 @@ function Avatar({ user }) {
     return (
       <Link
         to="/masuk"
-        aria-label="Masuk"
+        aria-label={tr('Masuk')}
         className="grid size-14 shrink-0 place-items-center rounded-full bg-login-avatar text-white shadow-[0_4px_12px_rgb(65_57_111/0.3)] ring-[3px] ring-white lg:size-24"
       >
         <UserRound className="size-7 lg:size-11" aria-hidden="true" />
@@ -229,7 +230,7 @@ function Avatar({ user }) {
   return (
     <Link
       to="/akun"
-      aria-label="Akun"
+      aria-label={tr('Akun')}
       className="grid size-14 shrink-0 place-items-center overflow-hidden rounded-full bg-login-avatar font-serif text-2xl text-white shadow-[0_4px_12px_rgb(65_57_111/0.3)] ring-[3px] ring-white lg:size-24 lg:text-4xl"
     >
       {foto ? <img src={foto} alt="" className="size-full object-cover" /> : <span aria-hidden="true">{inisial}</span>}
@@ -248,10 +249,10 @@ function TripPlannerCard() {
       </span>
       <span className="min-w-0 flex-1">
         <span className="block font-serif text-2xl leading-tight drop-shadow-[0_1px_2px_rgb(65_57_111/0.35)] lg:text-4xl">
-          Trip Planner
+          {tr('Trip Planner')}
         </span>
         <span className="mt-1 block font-serif text-[15px] leading-snug text-white/95 lg:mt-2 lg:text-lg">
-          Buat perencanaan terbaik untuk setiap perjalananmu
+          {tr('Buat perencanaan terbaik untuk setiap perjalananmu')}
         </span>
       </span>
       <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white/20 transition group-hover:bg-card/30 lg:size-12">
@@ -276,10 +277,10 @@ function PointsLink({ poin, loading }) {
         ) : (
           <>
             <span className="block font-serif text-2xl leading-tight lg:text-4xl">
-              {(poin?.saldo ?? 0).toLocaleString('id-ID')} poin
+              {(poin?.saldo ?? 0).toLocaleString(locale)} {tr('poin')}
             </span>
             <span className="block text-sm text-ink/65">
-              {poin?.bulanIni ? `+${poin.bulanIni.toLocaleString('id-ID')} bulan ini` : 'Kumpulkan dari perjalanan & pembayaran'}
+              {poin?.bulanIni ? tr("+{0} bulan ini", { 0: poin.bulanIni.toLocaleString(locale) }) : tr('Kumpulkan dari perjalanan & pembayaran')}
             </span>
           </>
         )}
@@ -293,7 +294,7 @@ function OngoingEvents({ events, now }) {
   return (
     <section aria-labelledby="event-title">
       <h2 id="event-title" className="px-1 text-base font-bold">
-        Sedang berlangsung
+        {tr('Sedang berlangsung')}
       </h2>
       <ul className="mt-2 divide-y divide-ink/[0.07] rounded-[1.5rem] bg-card px-4 ring-1 ring-ink/[0.08]">
         {events.map((e) => {
@@ -305,7 +306,7 @@ function OngoingEvents({ events, now }) {
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block text-[15px] font-semibold leading-snug">{e.judul}</span>
-                <span className="block text-sm text-ink/65">Sampai {jamAtauTanggal(e.selesai, now)} WIB</span>
+                <span className="block text-sm text-ink/65">{tr('Sampai')} {jamAtauTanggal(e.selesai, now)} {tr('WIB')}</span>
               </span>
             </li>
           )

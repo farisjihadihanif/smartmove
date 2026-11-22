@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import EmptyState from '../EmptyState.jsx'
 import { isUnread } from '../../lib/notifications.js'
 import { hariWib, sejak } from '../../lib/wib.js'
+import { tr } from '../../lib/i18n.js'
 
 const JENIS = {
   event: { icon: CalendarClock, to: '/kampanye/event', tint: 'bg-icon-blue/15 text-icon-blue-deep' },
@@ -40,7 +41,7 @@ export default function NotificationSheet({ open, onClose, items, lastSeen, now 
       <button
         type="button"
         tabIndex={-1}
-        aria-label="Tutup notifikasi"
+        aria-label={tr('Tutup notifikasi')}
         onClick={onClose}
         className="sheet-fade absolute inset-0 bg-ink-violet/45"
       />
@@ -53,13 +54,13 @@ export default function NotificationSheet({ open, onClose, items, lastSeen, now 
         <span aria-hidden="true" className="mx-auto mt-2.5 h-1 w-10 rounded-full bg-ink/15 lg:hidden" />
         <header className="flex items-center gap-3 px-5 pb-2 pt-3 lg:pt-5">
           <h2 id="notif-title" className="flex-1 font-serif text-xl">
-            Notifikasi
+            {tr('Notifikasi')}
           </h2>
           <button
             ref={closeRef}
             type="button"
             onClick={onClose}
-            aria-label="Tutup"
+            aria-label={tr('Tutup')}
             className="grid size-touch place-items-center rounded-full text-ink/70 transition hover:bg-ink/5"
           >
             <X size={22} aria-hidden="true" />
@@ -69,8 +70,8 @@ export default function NotificationSheet({ open, onClose, items, lastSeen, now 
         {items.length === 0 ? (
           <EmptyState
             icon={Bell}
-            title="Belum ada notifikasi"
-            message="Pengingat perjalanan dan event lalu lintas dalam 24 jam ke depan akan muncul di sini."
+            title={tr('Belum ada notifikasi')}
+            message={tr('Pengingat perjalanan dan event lalu lintas dalam 24 jam ke depan akan muncul di sini.')}
             className="pb-12 pt-4"
           />
         ) : (
@@ -99,7 +100,7 @@ export default function NotificationSheet({ open, onClose, items, lastSeen, now 
                         <span className="flex-1">{n.isi}</span>
                         {baru && (
                           <span className="size-2.5 shrink-0 rounded-full bg-pill-via">
-                            <span className="sr-only">Baru</span>
+                            <span className="sr-only">{tr('Baru')}</span>
                           </span>
                         )}
                       </span>

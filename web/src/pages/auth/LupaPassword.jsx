@@ -13,6 +13,7 @@ import {
 } from '../../components/auth/AuthShell.jsx'
 import { api } from '../../lib/api.js'
 import { EMAIL_RE } from '../../lib/authRules.js'
+import { tr } from '../../lib/i18n.js'
 
 // Lupa password: kirim tautan reset ke email (API_SPECS §4).
 export default function LupaPassword() {
@@ -25,14 +26,14 @@ export default function LupaPassword() {
     e.preventDefault()
     const value = email.trim().toLowerCase()
     if (!EMAIL_RE.test(value)) {
-      setError('Format email belum benar.')
+      setError(tr('Format email belum benar.'))
       return
     }
     setBusy(true)
     setError(null)
     try {
       const res = await api.post('/auth/forgot', { email: value })
-      setSent({ to: value, message: res?.message || 'Tautan reset password sudah dikirim. Cek kotak masuk email kamu.' })
+      setSent({ to: value, message: res?.message || tr('Tautan reset password sudah dikirim. Cek kotak masuk email kamu.') })
     } catch (err) {
       setError(err)
     } finally {
@@ -42,15 +43,15 @@ export default function LupaPassword() {
 
   return (
     <AuthShell
-      title="Lupa password"
-      subtitle="Masukkan email akunmu. Kami kirim tautan untuk membuat password baru."
+      title={tr('Lupa password')}
+      subtitle={tr('Masukkan email akunmu. Kami kirim tautan untuk membuat password baru.')}
       back="/masuk"
     >
       <form onSubmit={onSubmit} noValidate className="mt-7 flex flex-col">
         <AuthField
           icon={MailSolid}
-          label="Email"
-          placeholder="nama@email.com"
+          label={tr('Email')}
+          placeholder={tr('nama@email.com')}
           type="email"
           inputMode="email"
           autoComplete="email"
@@ -60,20 +61,20 @@ export default function LupaPassword() {
         {error && <ErrorBanner error={error} className="mt-3" />}
         {sent && (
           <div className="mt-4">
-            <AuthNotice icon={MailCheck} title="Cek kotak masuk" detail={sent.to}>
+            <AuthNotice icon={MailCheck} title={tr('Cek kotak masuk')} detail={sent.to}>
               {sent.message}
             </AuthNotice>
           </div>
         )}
         <AuthButton busy={busy} className="mt-6">
-          {sent ? 'Kirim ulang tautan' : 'Kirim tautan'}
+          {sent ? tr('Kirim ulang tautan') : tr('Kirim tautan')}
         </AuthButton>
       </form>
 
       <AuthFooter>
-        Sudah ingat?{' '}
+        {tr('Sudah ingat?')}{' '}
         <Link to="/masuk" className={`${linkClass} inline-flex min-h-touch items-center px-1`}>
-          Kembali ke Masuk
+          {tr('Kembali ke Masuk')}
         </Link>
       </AuthFooter>
     </AuthShell>

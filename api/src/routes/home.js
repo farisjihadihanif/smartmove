@@ -1,4 +1,5 @@
 import express from 'express';
+import { tr } from '../lib/i18n.js';
 import Event from '../models/Event.js';
 import PointLedger from '../models/PointLedger.js';
 import Trip from '../models/Trip.js';
@@ -52,7 +53,8 @@ export function homeRouter(cfg) {
   r.get('/', async (req, res) => {
     const now = sekarang();
     const { jam, menit } = jamWib(now);
-    const salam = salamUntukJam(jam);
+    const b = req.bahasa ?? 'id';
+    const salam = tr(b, salamUntukJam(jam));
     const user = req.user;
     const nama = user ? user.namaLengkap || user.username : null;
 
@@ -70,7 +72,7 @@ export function homeRouter(cfg) {
       id: `event:${e.id}`,
       jenis: 'event',
       judul: e.judul,
-      isi: `Dimulai ${dua(jamWib(e.mulai).jam)}.${dua(jamWib(e.mulai).menit)} WIB`,
+      isi: tr(b, 'Dimulai {0} WIB', [`${dua(jamWib(e.mulai).jam)}.${dua(jamWib(e.mulai).menit)}`]),
       waktu: e.mulai,
       muncul: munculPengingat(e.mulai, e.createdAt),
       ref: e.id,
@@ -97,8 +99,8 @@ export function homeRouter(cfg) {
         notifikasi.push({
           id: `trip:${t.id}`,
           jenis: 'trip',
-          judul: t.judul || `Ke ${t.tujuan.nama}`,
-          isi: `Berangkat ${dua(w.jam)}.${dua(w.menit)} WIB`,
+          judul: t.judul || tr(b, 'Ke {0}', [t.tujuan.nama]),
+          isi: tr(b, 'Berangkat {0} WIB', [`${dua(w.jam)}.${dua(w.menit)}`]),
           waktu: t.berangkatPada,
           muncul: munculPengingat(t.berangkatPada, t.createdAt),
           ref: t.id,
@@ -109,8 +111,8 @@ export function homeRouter(cfg) {
         notifikasi.push({
           id: `poin:${l.id}`,
           jenis: 'poin',
-          judul: tambah ? `+${l.jumlah} poin` : `${l.jumlah} poin`,
-          isi: tambah ? `Poin dari ${LABEL_POIN[l.alasan]}` : `Poin dipakai untuk ${LABEL_POIN[l.alasan]}`,
+          judul: tambah ? tr(b, '+{0} poin', [l.jumlah]) : tr(b, '{0} poin', [l.jumlah]),
+          isi: tr(b, tambah ? 'Poin dari {0}' : 'Poin dipakai untuk {0}', [tr(b, LABEL_POIN[l.alasan])]),
           waktu: l.createdAt,
           muncul: l.createdAt,
           ref: l.ref,
@@ -126,7 +128,7 @@ export function homeRouter(cfg) {
     res.json({
       sapaan: {
         salam,
-        teks: nama ? `Hallo! ${salam}, ${nama}` : `Hallo! ${salam}`,
+        teks: nama ? tr(b, 'Hallo! {0}, {1}', [salam, nama]) : tr(b, 'Hallo! {0}', [salam]),
         jam: `${dua(jam)}.${dua(menit)}`,
         zona: 'WIB',
         waktuServer: now.toISOString(),

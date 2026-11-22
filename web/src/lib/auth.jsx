@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { api, setUnauthorizedHandler } from './api.js'
 import { AuthContext, useAuth } from './useAuth.js'
+import { tr } from './i18n.js'
 
 // Sesi web: cookie httpOnly di-set API; di sini cukup simpan data pengguna dari /auth/me.
 
@@ -79,10 +80,10 @@ export function RequireAdmin() {
     return (
       <main className="grid min-h-dvh place-items-center bg-surface px-6 text-center">
         <div>
-          <h1 className="font-serif text-2xl">Khusus pengelola</h1>
-          <p className="mt-2 text-[15px] text-ink/70">Akunmu tidak punya akses ke dasbor admin.</p>
+          <h1 className="font-serif text-2xl">{tr('Khusus pengelola')}</h1>
+          <p className="mt-2 text-[15px] text-ink/70">{tr('Akunmu tidak punya akses ke dasbor admin.')}</p>
           <a href="/" className="mt-5 inline-flex min-h-touch items-center rounded-full bg-login-button px-6 font-semibold text-white">
-            Kembali ke Beranda
+            {tr('Kembali ke Beranda')}
           </a>
         </div>
       </main>

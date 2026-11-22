@@ -15,6 +15,7 @@ import {
 import { api } from '../../lib/api.js'
 import { useAuth } from '../../lib/useAuth.js'
 import { checkRegister } from '../../lib/authRules.js'
+import { tr } from '../../lib/i18n.js'
 
 // Daftar akun: gaya sama dengan Member Login (mockup hal. 2).
 export default function Daftar() {
@@ -54,25 +55,25 @@ export default function Daftar() {
 
   return (
     <AuthShell
-      title="Buat akun"
-      subtitle="Simpan rencana perjalanan, kumpulkan poin, dan pesan tiket simulasi."
+      title={tr('Buat akun')}
+      subtitle={tr('Simpan rencana perjalanan, kumpulkan poin, dan pesan tiket simulasi.')}
       back="/masuk"
     >
       <form onSubmit={onSubmit} noValidate className="mt-7 flex flex-col">
         <div className="flex flex-col gap-4">
           <AuthField
             icon={BadgeSolid}
-            label="Nama lengkap"
-            placeholder="mis. Budi Siregar"
+            label={tr('Nama lengkap')}
+            placeholder={tr('mis. Budi Siregar')}
             autoComplete="name"
             value={form.namaLengkap}
             onChange={set('namaLengkap')}
           />
           <AuthField
             icon={PersonSolid}
-            label="Username"
-            placeholder="mis. budi_medan"
-            hint="Huruf kecil, angka, titik, atau garis bawah."
+            label={tr('Username')}
+            placeholder={tr('mis. budi_medan')}
+            hint={tr('Huruf kecil, angka, titik, atau garis bawah.')}
             autoComplete="username"
             autoCapitalize="none"
             spellCheck={false}
@@ -81,8 +82,8 @@ export default function Daftar() {
           />
           <AuthField
             icon={MailSolid}
-            label="Email"
-            placeholder="nama@email.com"
+            label={tr('Email')}
+            placeholder={tr('nama@email.com')}
             type="email"
             inputMode="email"
             autoComplete="email"
@@ -91,8 +92,8 @@ export default function Daftar() {
           />
           <AuthField
             icon={LockSolid}
-            label="Password"
-            hint="Minimal 8 karakter."
+            label={tr('Password')}
+            hint={tr('Minimal 8 karakter.')}
             reveal
             autoComplete="new-password"
             value={form.password}
@@ -103,14 +104,14 @@ export default function Daftar() {
         {error && <ErrorBanner error={error} className="mt-3" />}
 
         <AuthButton busy={busy} className="mt-6">
-          Buat akun
+          {tr('Buat akun')}
         </AuthButton>
       </form>
 
       <AuthFooter>
-        Sudah punya akun?{' '}
+        {tr('Sudah punya akun?')}{' '}
         <Link to="/masuk" state={location.state} className={`${linkClass} inline-flex min-h-touch items-center px-1`}>
-          Masuk
+          {tr('Masuk')}
         </Link>
       </AuthFooter>
     </AuthShell>

@@ -1,5 +1,6 @@
 import { FlaskConical } from 'lucide-react'
 import { LABEL_SIMULASI } from '../../lib/pembayaran.js'
+import { tr } from '../../lib/i18n.js'
 
 /**
  * Pita "Simulasi" (AGENTS aturan 7): wajib ada di setiap layar pembayaran & e-tiket.
@@ -14,7 +15,7 @@ export default function PitaSimulasi({ gelap = false, className = '' }) {
     >
       <FlaskConical size={15} aria-hidden="true" className="shrink-0" />
       {LABEL_SIMULASI}
-      {!gelap && '. Tidak ada uang sungguhan.'}
+      {!gelap && tr('. Tidak ada uang sungguhan.')}
     </p>
   )
 }

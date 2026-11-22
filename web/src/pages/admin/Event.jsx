@@ -7,6 +7,7 @@ import { api } from '../../lib/api.js'
 import { JENIS_EVENT, infoJenisEvent, rentangEvent } from '../../lib/kampanye.js'
 import { useApiGet } from '../../lib/useApiGet.js'
 import { dariInputWib, keInputWib } from '../../lib/wib.js'
+import { tr } from '../../lib/i18n.js'
 
 // Kelola EventAlert: daftar + form dengan lokasi dipilih di peta (opsional).
 export default function Event() {
@@ -18,7 +19,7 @@ export default function Event() {
 
   return (
     <>
-      <Judul aksi={!edit && <Tombol onClick={() => setEdit('baru')}>Tambah event</Tombol>}>EventAlert</Judul>
+      <Judul aksi={!edit && <Tombol onClick={() => setEdit('baru')}>{tr('Tambah event')}</Tombol>}>{tr('EventAlert')}</Judul>
       {edit ? (
         <FormEvent
           key={edit === 'baru' ? 'baru' : edit.id}
@@ -32,15 +33,15 @@ export default function Event() {
         <>
           <PillToggle
             options={[
-              { value: 'aktif', label: 'Berlangsung & mendatang' },
-              { value: 'selesai', label: 'Sudah selesai' },
+              { value: 'aktif', label: tr('Berlangsung & mendatang') },
+              { value: 'selesai', label: tr('Sudah selesai') },
             ]}
             value={status}
             onChange={(v) => {
               setStatus(v)
               setPage(1)
             }}
-            label="Saring event"
+            label={tr('Saring event')}
             fitDesktop
             className="mb-4"
           />
@@ -55,10 +56,10 @@ export default function Event() {
                     {infoJenisEvent(e.jenis).label}, {rentangEvent(e, now)}
                   </p>
                 </div>
-                {e.status === 'berlangsung' && <Chip nada="hijau">Berlangsung</Chip>}
-                {!e.lokasi && <Chip>Tanpa lokasi</Chip>}
+                {e.status === 'berlangsung' && <Chip nada="hijau">{tr('Berlangsung')}</Chip>}
+                {!e.lokasi && <Chip>{tr('Tanpa lokasi')}</Chip>}
                 <Tombol jenis="biasa" onClick={() => setEdit(e)}>
-                  Ubah
+                  {tr('Ubah')}
                 </Tombol>
                 <TombolHapus
                   onHapus={async () => {
@@ -69,7 +70,7 @@ export default function Event() {
               </li>
             ))}
           </ul>
-          {data && data.items.length === 0 && <p className="mt-2 text-sm text-ink/60">Belum ada event di sini.</p>}
+          {data && data.items.length === 0 && <p className="mt-2 text-sm text-ink/60">{tr('Belum ada event di sini.')}</p>}
           {data && <Halaman page={data.page} total={data.total} onPage={setPage} />}
         </>
       )}
@@ -105,11 +106,11 @@ function FormEvent({ awal, onSelesai }) {
   return (
     <form onSubmit={simpan} className="grid gap-6 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
       <div className="flex flex-col gap-4">
-        <h2 className="font-serif text-xl">{awal ? 'Ubah event' : 'Event baru'}</h2>
-        <Field label="Judul">
-          <input required maxLength={150} value={f.judul} onChange={ubah('judul')} className={kelasInput} placeholder="Car Free Day Jl. Pemuda" />
+        <h2 className="font-serif text-xl">{awal ? tr('Ubah event') : tr('Event baru')}</h2>
+        <Field label={tr('Judul')}>
+          <input required maxLength={150} value={f.judul} onChange={ubah('judul')} className={kelasInput} placeholder={tr('Car Free Day Jl. Pemuda')} />
         </Field>
-        <Field label="Jenis">
+        <Field label={tr('Jenis')}>
           <select value={f.jenis} onChange={ubah('jenis')} className={kelasInput}>
             {Object.entries(JENIS_EVENT).map(([v, j]) => (
               <option key={v} value={v}>
@@ -119,40 +120,40 @@ function FormEvent({ awal, onSelesai }) {
           </select>
         </Field>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Mulai (WIB)">
+          <Field label={tr('Mulai (WIB)')}>
             <input required type="datetime-local" value={f.mulai} onChange={ubah('mulai')} className={kelasInput} />
           </Field>
-          <Field label="Selesai (WIB)">
+          <Field label={tr('Selesai (WIB)')}>
             <input required type="datetime-local" value={f.selesai} onChange={ubah('selesai')} className={kelasInput} />
           </Field>
         </div>
-        <Field label="Isi" hint="Jelaskan jalan yang terdampak dan jalan alternatif.">
+        <Field label={tr('Isi')} hint={tr('Jelaskan jalan yang terdampak dan jalan alternatif.')}>
           <textarea required maxLength={2000} rows={4} value={f.isi} onChange={ubah('isi')} className={`${kelasInput} py-2.5`} />
         </Field>
         {status.error && <ErrorBanner error={status.error} />}
         <div className="flex flex-wrap gap-2">
           <Tombol type="submit" memuat={status.memuat}>
-            Simpan event
+            {tr('Simpan event')}
           </Tombol>
           <Tombol jenis="biasa" onClick={onSelesai}>
-            Batal
+            {tr('Batal')}
           </Tombol>
         </div>
       </div>
       <div className="min-w-0">
-        <p className="mb-2 text-sm font-semibold">Lokasi di peta (boleh kosong)</p>
+        <p className="mb-2 text-sm font-semibold">{tr('Lokasi di peta (boleh kosong)')}</p>
         <PetaAdmin
-          penanda={f.lokasi ? [{ id: 'e', lokasi: f.lokasi, judul: f.judul || 'Lokasi event', warna: infoJenisEvent(f.jenis).warna, aktif: true }] : []}
+          penanda={f.lokasi ? [{ id: 'e', lokasi: f.lokasi, judul: f.judul || tr('Lokasi event'), warna: infoJenisEvent(f.jenis).warna, aktif: true }] : []}
           onGeser={(_, lokasi) => setF((x) => ({ ...x, lokasi }))}
           onPick={(lokasi) => setF((x) => ({ ...x, lokasi }))}
           kunci={awal?.id ?? 'baru'}
-          label="Peta lokasi event"
+          label={tr('Peta lokasi event')}
         />
         <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-ink/60">
-          <span>{f.lokasi ? `${f.lokasi.lat.toFixed(5)}, ${f.lokasi.lng.toFixed(5)}` : 'Ketuk peta untuk menaruh penanda.'}</span>
+          <span>{f.lokasi ? `${f.lokasi.lat.toFixed(5)}, ${f.lokasi.lng.toFixed(5)}` : tr('Ketuk peta untuk menaruh penanda.')}</span>
           {f.lokasi && (
             <Tombol jenis="biasa" onClick={() => setF((x) => ({ ...x, lokasi: null }))}>
-              Hapus lokasi
+              {tr('Hapus lokasi')}
             </Tombol>
           )}
         </div>

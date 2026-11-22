@@ -2,6 +2,7 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import L from 'leaflet'
 import { Marker, Polyline, useMap, useMapEvents } from 'react-leaflet'
 import { formatKm, formatMenit, infoTingkat, KEJADIAN, titikTengah, TINGKAT } from '../../lib/lalulintas.js'
+import { tr } from '../../lib/i18n.js'
 
 // Lapisan lalu lintas (T-205): koridor jalan utama (garis biru = belum ada laporan, ruas padat/macet
 // berwarna), kotak waktu "12 mnt / 4,9 km" seperti mockup hal. 6, dan penanda laporan warga.
@@ -169,7 +170,7 @@ export default function TrafficLayers({
           zIndexOffset={laporanAktif?.id === r.id ? 900 : 500}
           eventHandlers={onPilihLaporan ? { click: () => onPilihLaporan(r) } : undefined}
           title={`${TINGKAT[r.tingkat]?.label ?? ''}${r.kejadian !== 'none' ? ` · ${KEJADIAN[r.kejadian]}` : ''}`}
-          alt={`Laporan ${TINGKAT[r.tingkat]?.label ?? ''}`}
+          alt={tr('Laporan {0}', { 0: TINGKAT[r.tingkat]?.label ?? '' })}
           interactive={Boolean(onPilihLaporan)}
         />
       ))}

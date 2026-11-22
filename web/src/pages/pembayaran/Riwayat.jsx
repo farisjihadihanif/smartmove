@@ -8,6 +8,7 @@ import PitaSimulasi from '../../components/pembayaran/PitaSimulasi.jsx'
 import { IKON_JENIS } from '../../components/pembayaran/ikon.js'
 import { STATUS, rupiah, waktuLengkap } from '../../lib/pembayaran.js'
 import { useApiGet } from '../../lib/useApiGet.js'
+import { tr } from '../../lib/i18n.js'
 
 const WARNA_STATUS = {
   lancar: 'bg-traffic-lancar/12 text-[#1D6B3D] ring-traffic-lancar/40',
@@ -37,22 +38,22 @@ export default function RiwayatPembayaran() {
   const habis = data ? page * 20 >= data.total : true
 
   return (
-    <PageShell title="Riwayat pemesanan" backTo="/pembayaran" backLabel="Kembali ke Digital Payment">
+    <PageShell title={tr('Riwayat pemesanan')} backTo="/pembayaran" backLabel={tr('Kembali ke Digital Payment')}>
       <div className="mx-auto w-full max-w-2xl pt-6 lg:pt-10">
         <PitaSimulasi className="mb-4" />
         {status === 'galat' && <ErrorBanner error={error} onRetry={muatUlang} />}
-        {status === 'memuat' && <div className="h-64 animate-pulse rounded-3xl bg-ink/[0.06]" aria-label="Memuat riwayat" />}
+        {status === 'memuat' && <div className="h-64 animate-pulse rounded-3xl bg-ink/[0.06]" aria-label={tr('Memuat riwayat')} />}
         {status === 'ok' && data.items.length === 0 && (
           <EmptyState
             icon={Ticket}
-            title="Belum ada pemesanan"
-            message="Pesan tiket kereta, bus, travel, atau parkir dari Digital Payment."
+            title={tr('Belum ada pemesanan')}
+            message={tr('Pesan tiket kereta, bus, travel, atau parkir dari Digital Payment.')}
             action={
               <Link
                 to="/pembayaran"
                 className="bg-pill inline-flex min-h-touch items-center rounded-full px-6 font-semibold text-white"
               >
-                Pesan tiket
+                {tr('Pesan tiket')}
               </Link>
             }
             className="mt-8"
@@ -95,7 +96,7 @@ export default function RiwayatPembayaran() {
                 onClick={() => setPage(page - 1)}
                 className="min-h-touch rounded-full px-4 font-semibold text-ink-violet disabled:opacity-35"
               >
-                Sebelumnya
+                {tr('Sebelumnya')}
               </button>
               <button
                 type="button"
@@ -103,7 +104,7 @@ export default function RiwayatPembayaran() {
                 onClick={() => setPage(page + 1)}
                 className="min-h-touch rounded-full px-4 font-semibold text-ink-violet disabled:opacity-35"
               >
-                Berikutnya
+                {tr('Berikutnya')}
               </button>
             </div>
           </>

@@ -1,18 +1,19 @@
 import { Gift, House, UserRound } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
+import { tr } from '../lib/i18n.js'
 
 // Navigasi utama (mockup hal. 3: Home · Rewards · Account).
 // Ponsel: bar bawah gaya Material 3; desktop: tautan di header.
 const NAV_ITEMS = [
-  { to: '/', label: 'Beranda', icon: House, end: true },
-  { to: '/rewards', label: 'Rewards', icon: Gift },
-  { to: '/akun', label: 'Akun', icon: UserRound },
+  { to: '/', label: tr('Beranda'), icon: House, end: true },
+  { to: '/rewards', label: tr('Rewards'), icon: Gift },
+  { to: '/akun', label: tr('Akun'), icon: UserRound },
 ]
 
 export function BottomNav({ className = '' }) {
   return (
     <nav
-      aria-label="Navigasi utama"
+      aria-label={tr('Navigasi utama')}
       className={`fixed inset-x-0 bottom-0 z-30 border-t border-ink/5 bg-surface-nav/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md ${className}`}
     >
       <ul className="mx-auto grid max-w-screen-sm grid-cols-3">
@@ -41,7 +42,7 @@ export function BottomNav({ className = '' }) {
 
 export function TopNav({ className = '' }) {
   return (
-    <nav aria-label="Navigasi utama" className={className}>
+    <nav aria-label={tr('Navigasi utama')} className={className}>
       <ul className="flex items-center gap-1 rounded-full bg-white/45 p-1 backdrop-blur-sm">
         {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
           <li key={to}>

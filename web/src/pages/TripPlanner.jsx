@@ -19,6 +19,7 @@ import {
   teksRingkasan,
 } from '../lib/trip.js'
 import { hariWib } from '../lib/wib.js'
+import { tr } from '../lib/i18n.js'
 
 // Trip Planner (DESIGN §3, gaya kartu Trip Planner mockup hal. 3): rencana berikutnya di kartu
 // gradasi pink → ungu, daftar rencana per hari seperti garis waktu, form asal/tujuan/moda/jam.
@@ -84,7 +85,7 @@ export default function TripPlanner() {
     }))
     tutupForm()
     setNomorBaru((n) => n + 1)
-    kabari(edit ? 'Perubahan disimpan.' : 'Rencana disimpan.')
+    kabari(edit ? tr('Perubahan disimpan.') : tr('Rencana disimpan.'))
   }
 
   async function hapus(trip) {
@@ -92,7 +93,7 @@ export default function TripPlanner() {
       await api.del(`/trips/${trip.id}`)
       setData((d) => ({ ...d, items: d.items.filter((t) => t.id !== trip.id), total: Math.max(0, d.total - 1) }))
       if (form?.trip?.id === trip.id) tutupForm()
-      kabari('Rencana dihapus.')
+      kabari(tr('Rencana dihapus.'))
     } catch (error) {
       kabari(error.message)
     }
@@ -105,7 +106,7 @@ export default function TripPlanner() {
   const formAktif = form ?? (desktop ? { trip: null, kunci: `baru-${nomorBaru}` } : null)
 
   return (
-    <PageShell title="Trip Planner">
+    <PageShell title={tr('Trip Planner')}>
       <div className="pt-5 lg:grid lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-10 lg:pt-10 xl:grid-cols-[minmax(0,1fr)_27rem] xl:gap-14">
         <div className="min-w-0 pb-16 lg:pb-0">
           <Sorotan trip={berikutnya} now={now} memuat={data.status === 'memuat'} onBuat={() => bukaForm()} desktop={desktop} />
@@ -117,15 +118,15 @@ export default function TripPlanner() {
           {kosong && (
             <EmptyState
               icon={CalendarClock}
-              title="Belum ada rencana"
-              message="Simpan rute yang sering kamu tempuh, misalnya rumah ke kampus, lalu mulai navigasi dengan sekali ketuk."
+              title={tr('Belum ada rencana')}
+              message={tr('Simpan rute yang sering kamu tempuh, misalnya rumah ke kampus, lalu mulai navigasi dengan sekali ketuk.')}
             />
           )}
 
           {grup.length > 0 && (
             <section aria-labelledby="judul-rencana" className="mt-8 lg:mt-10">
               <h2 id="judul-rencana" className="font-serif text-2xl">
-                Rencanamu
+                {tr('Rencanamu')}
               </h2>
               {grup.map((g) => (
                 <section key={g.kunci} aria-label={g.judul} className="mt-5">
@@ -143,9 +144,9 @@ export default function TripPlanner() {
           {lewat.length > 0 && (
             <details className="group mt-8 rounded-[1.5rem] bg-surface-nav/70 px-4 py-1 lg:px-5">
               <summary className="flex min-h-touch cursor-pointer list-none items-center justify-between text-[15px] font-semibold text-ink/75 [&::-webkit-details-marker]:hidden">
-                Sudah lewat ({lewat.length})
-                <span className="text-sm font-normal text-ink-violet group-open:hidden">Tampilkan</span>
-                <span className="hidden text-sm font-normal text-ink-violet group-open:inline">Sembunyikan</span>
+                {tr('Sudah lewat (')}{lewat.length})
+                <span className="text-sm font-normal text-ink-violet group-open:hidden">{tr('Tampilkan')}</span>
+                <span className="hidden text-sm font-normal text-ink-violet group-open:inline">{tr('Sembunyikan')}</span>
               </summary>
               <ol className="pb-2 opacity-80">
                 {lewat.map((t) => (
@@ -162,7 +163,7 @@ export default function TripPlanner() {
               disabled={data.status === 'menambah'}
               className="mx-auto mt-6 flex min-h-touch items-center rounded-full px-6 text-[15px] font-semibold text-ink-violet ring-1 ring-ink-violet/25 hover:bg-ink-violet/[0.05] disabled:opacity-60"
             >
-              {data.status === 'menambah' ? 'Memuat…' : 'Muat rencana lainnya'}
+              {data.status === 'menambah' ? tr('Memuat…') : tr('Muat rencana lainnya')}
             </button>
           )}
           {data.status === 'ok' && data.error && <ErrorBanner className="mt-4" error={data.error} onRetry={() => muat(data.page + 1)} />}
@@ -190,7 +191,7 @@ export default function TripPlanner() {
           className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-4 z-20 flex min-h-touch items-center gap-2 rounded-full bg-login-button py-3 pl-4 pr-5 text-[15px] font-semibold text-white shadow-[0_10px_24px_-8px_rgb(115_36_169/0.8)]"
         >
           <Plus size={20} aria-hidden="true" />
-          Buat rencana
+          {tr('Buat rencana')}
         </button>
       )}
 
@@ -212,10 +213,10 @@ function PanelForm({ aktif, onSimpan, onBatal }) {
   return (
     <>
       <h2 id={id} className="font-serif text-2xl">
-        {edit ? 'Ubah rencana' : 'Rencana baru'}
+        {edit ? tr('Ubah rencana') : tr('Rencana baru')}
       </h2>
       <p className="mb-5 mt-1 text-sm text-ink/65">
-        {edit ? 'Perubahan langsung dipakai saat kamu mulai navigasi.' : 'Pilih asal, tujuan, dan cara berangkat.'}
+        {edit ? tr('Perubahan langsung dipakai saat kamu mulai navigasi.') : tr('Pilih asal, tujuan, dan cara berangkat.')}
       </p>
       <TripForm key={aktif.kunci} awal={aktif.trip} onSimpan={onSimpan} onBatal={onBatal} idJudul={id} />
     </>
@@ -235,14 +236,14 @@ function LembarForm({ onTutup, children }) {
     }
   }, [onTutup])
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end" role="dialog" aria-modal="true" aria-label="Form rencana perjalanan">
-      <button type="button" aria-label="Tutup form" onClick={onTutup} className="sheet-fade absolute inset-0 bg-ink-violet/45" />
+    <div className="fixed inset-0 z-50 flex flex-col justify-end" role="dialog" aria-modal="true" aria-label={tr('Form rencana perjalanan')}>
+      <button type="button" aria-label={tr('Tutup form')} onClick={onTutup} className="sheet-fade absolute inset-0 bg-ink-violet/45" />
       <section className="sheet-rise relative max-h-[92dvh] overflow-y-auto rounded-t-[1.75rem] bg-surface px-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-2 shadow-[0_-12px_32px_-14px_rgb(65_57_111/0.55)]">
         <span aria-hidden="true" className="mx-auto mb-3 block h-1 w-10 rounded-full bg-ink/15" />
         <button
           type="button"
           onClick={onTutup}
-          aria-label="Tutup"
+          aria-label={tr('Tutup')}
           className="absolute right-3 top-3 grid size-touch place-items-center rounded-full text-ink/60 hover:bg-black/5"
         >
           <X size={20} aria-hidden="true" />
@@ -264,9 +265,9 @@ function Sorotan({ trip, now, memuat, onBuat, desktop }) {
   if (!trip) {
     return (
       <section className={`${kartu} px-5 py-6 lg:px-8 lg:py-8`}>
-        <h2 className={`font-serif text-[1.75rem] leading-tight lg:text-4xl ${bayang}`}>Mau ke mana berikutnya?</h2>
+        <h2 className={`font-serif text-[1.75rem] leading-tight lg:text-4xl ${bayang}`}>{tr('Mau ke mana berikutnya?')}</h2>
         <p className={`mt-2 max-w-[34ch] font-serif text-[15px] leading-snug text-white/95 lg:text-lg ${bayang}`}>
-          Buat perencanaan terbaik untuk setiap perjalananmu.
+          {tr('Buat perencanaan terbaik untuk setiap perjalananmu.')}
         </p>
         {!desktop && (
           <button
@@ -275,7 +276,7 @@ function Sorotan({ trip, now, memuat, onBuat, desktop }) {
             className="mt-5 flex min-h-touch items-center gap-2 rounded-full bg-white px-5 text-[15px] font-semibold text-trip-4 shadow-[0_6px_16px_-8px_rgb(65_57_111/0.8)]"
           >
             <Plus size={20} aria-hidden="true" />
-            Buat rencana
+            {tr('Buat rencana')}
           </button>
         )}
       </section>
@@ -287,7 +288,7 @@ function Sorotan({ trip, now, memuat, onBuat, desktop }) {
   return (
     <section aria-labelledby="judul-berikutnya" className={`${kartu} px-5 pb-5 pt-5 lg:px-8 lg:pb-7 lg:pt-7`}>
       <h2 id="judul-berikutnya" className="sr-only">
-        Perjalanan berikutnya
+        {tr('Perjalanan berikutnya')}
       </h2>
       <div className="flex items-start justify-between gap-4">
         <div className={bayang}>
@@ -309,7 +310,7 @@ function Sorotan({ trip, now, memuat, onBuat, desktop }) {
       <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3">
         <TombolNavigasi trip={trip} terang />
         {bisaDipesan(trip) && <TombolPesan trip={trip} terang />}
-        {ringkas && <span className={`text-sm font-semibold text-white/95 ${bayang}`}>Estimasi {ringkas}</span>}
+        {ringkas && <span className={`text-sm font-semibold text-white/95 ${bayang}`}>{tr('Estimasi')} {ringkas}</span>}
       </div>
     </section>
   )
@@ -319,7 +320,7 @@ function Sorotan({ trip, now, memuat, onBuat, desktop }) {
 function Lintasan({ trip, terang = false, className = '' }) {
   const garis = terang ? 'border-white/60' : 'border-ink-violet/35'
   return (
-    <ol className={`relative ${className}`} aria-label={`Dari ${trip.asal.nama} ke ${trip.tujuan.nama}`}>
+    <ol className={`relative ${className}`} aria-label={tr("Dari {0} ke {1}", { 0: trip.asal.nama, 1: trip.tujuan.nama })}>
       <span aria-hidden="true" className={`absolute bottom-[0.8rem] left-[0.3rem] top-[0.8rem] border-l-2 border-dotted ${garis}`} />
       <li className="relative flex items-center gap-3">
         <span
@@ -347,14 +348,14 @@ function TombolNavigasi({ trip, terang = false }) {
       }
     >
       <Navigation size={terang ? 18 : 16} aria-hidden="true" />
-      Mulai navigasi
+      {tr('Mulai navigasi')}
     </Link>
   )
 }
 
 /** Pesan tiket (umum) / parkir (mobil, motor) di Digital Payment. */
 function TombolPesan({ trip, terang = false }) {
-  const label = trip.moda === 'transit' ? 'Pesan tiket' : 'Pesan parkir'
+  const label = trip.moda === 'transit' ? tr('Pesan tiket') : tr('Pesan parkir')
   return (
     <Link
       to={tautanPesan(trip)}
@@ -389,7 +390,7 @@ function ItemRencana({ trip, onUbah, onHapus, diubah, lewat = false, now }) {
             {lewat && <p className="mt-1 text-xs text-ink/55">{hariWib(trip.berangkatPada, now)}</p>}
           </>
         ) : (
-          <p className="pt-1 text-xs font-semibold leading-tight text-ink/50">Tanpa jam</p>
+          <p className="pt-1 text-xs font-semibold leading-tight text-ink/50">{tr('Tanpa jam')}</p>
         )}
       </div>
 
@@ -406,16 +407,16 @@ function ItemRencana({ trip, onUbah, onHapus, diubah, lewat = false, now }) {
 
         {konfirmasi ? (
           <div className="mt-3 flex flex-wrap items-center gap-2 rounded-2xl bg-login-field px-3 py-1.5" role="alert">
-            <span className="flex-1 text-sm">Hapus rencana ini?</span>
+            <span className="flex-1 text-sm">{tr('Hapus rencana ini?')}</span>
             <button type="button" onClick={() => setKonfirmasi(false)} className="min-h-touch rounded-full px-3 text-sm font-semibold text-ink/70 hover:bg-black/5">
-              Batal
+              {tr('Batal')}
             </button>
             <button
               type="button"
               onClick={onHapus}
               className="min-h-touch rounded-full bg-traffic-macet px-4 text-sm font-semibold text-white hover:brightness-110"
             >
-              Hapus
+              {tr('Hapus')}
             </button>
           </div>
         ) : (
@@ -426,7 +427,7 @@ function ItemRencana({ trip, onUbah, onHapus, diubah, lewat = false, now }) {
             <button
               type="button"
               onClick={onUbah}
-              aria-label={`Ubah rencana ke ${trip.tujuan.nama}`}
+              aria-label={tr("Ubah rencana ke {0}", { 0: trip.tujuan.nama })}
               className="grid size-touch place-items-center rounded-full text-ink-violet hover:bg-ink-violet/[0.07]"
             >
               <Pencil size={18} aria-hidden="true" />
@@ -434,7 +435,7 @@ function ItemRencana({ trip, onUbah, onHapus, diubah, lewat = false, now }) {
             <button
               type="button"
               onClick={() => setKonfirmasi(true)}
-              aria-label={`Hapus rencana ke ${trip.tujuan.nama}`}
+              aria-label={tr("Hapus rencana ke {0}", { 0: trip.tujuan.nama })}
               className="grid size-touch place-items-center rounded-full text-ink/55 hover:bg-traffic-macet/10 hover:text-[#C62828]"
             >
               <Trash2 size={18} aria-hidden="true" />
@@ -448,7 +449,7 @@ function ItemRencana({ trip, onUbah, onHapus, diubah, lewat = false, now }) {
 
 function Kerangka() {
   return (
-    <div className="mt-8 space-y-4" aria-busy="true" aria-label="Memuat rencana">
+    <div className="mt-8 space-y-4" aria-busy="true" aria-label={tr('Memuat rencana')}>
       {[0, 1, 2].map((i) => (
         <div key={i} className="grid grid-cols-[3.5rem_1fr] gap-3">
           <span className="h-6 animate-pulse rounded-lg bg-ink/10" />

@@ -24,7 +24,7 @@ export function placesRouter(cfg) {
       nominatim.search(q, { limit: MAKS_HASIL }),
     );
     let items = (Array.isArray(mentah) ? mentah : [])
-      .map(keTempat)
+      .map((p) => keTempat(p, req.bahasa))
       .filter((t) => Number.isFinite(t.lokasi.lat) && Number.isFinite(t.lokasi.lng) && dalamWilayah(t.lokasi));
 
     if (near && dalamWilayah(near)) {
@@ -45,7 +45,7 @@ export function placesRouter(cfg) {
     if (!mentah || mentah.error || mentah.lat === undefined) {
       throw httpError(404, 'Nama lokasi tidak ditemukan');
     }
-    res.json({ tempat: keTempat(mentah) });
+    res.json({ tempat: keTempat(mentah, req.bahasa) });
   });
 
   return r;

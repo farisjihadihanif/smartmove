@@ -1,4 +1,5 @@
 import { httpError } from '../lib/httpError.js';
+import { tr } from '../lib/i18n.js';
 import { MEBIDANG } from '../lib/wilayah.js';
 
 const gagal = () => httpError(502, 'Layanan peta sedang bermasalah, coba lagi nanti', 'LAYANAN_PETA_GAGAL');
@@ -67,9 +68,9 @@ export function createNominatim(cfg, { fetch = globalThis.fetch } = {}) {
 }
 
 // Bentuk tempat untuk klien: { id, nama, alamat, jenis, lokasi: {lat,lng} }.
-export function keTempat(p) {
+export function keTempat(p, bahasa = 'id') {
   const label = String(p.display_name || '');
-  const nama = p.name || label.split(',')[0].trim() || 'Lokasi tanpa nama';
+  const nama = p.name || label.split(',')[0].trim() || tr(bahasa, 'Lokasi tanpa nama');
   const alamat = label.startsWith(nama) ? label.slice(nama.length).replace(/^\s*,\s*/, '') : label;
   return {
     id: `osm:${p.osm_type || ''}${p.osm_id ?? p.place_id ?? ''}`,

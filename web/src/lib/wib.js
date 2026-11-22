@@ -1,7 +1,8 @@
+import { tr } from './i18n.js'
 // Waktu Medan (WIB, UTC+7, tanpa musim panas). Jam server dari GET /home → `waktuServer`.
 const WIB_MS = 7 * 60 * 60 * 1000
 const DAY_MS = 24 * 60 * 60 * 1000
-const BULAN = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
+const BULAN = [tr('Jan'), tr('Feb'), tr('Mar'), tr('Apr'), tr('Mei'), tr('Jun'), tr('Jul'), tr('Agu'), tr('Sep'), tr('Okt'), tr('Nov'), tr('Des')]
 const dua = (n) => String(n).padStart(2, '0')
 
 const shift = (t) => new Date(new Date(t).getTime() + WIB_MS)
@@ -16,18 +17,18 @@ export function jamWib(t) {
 /** Sama dengan API (home.js): pagi 04–10, siang 11–14, sore 15–17, malam 18–03. */
 export function salamWib(t) {
   const h = shift(t).getUTCHours()
-  if (h >= 4 && h < 11) return 'Selamat pagi'
-  if (h >= 11 && h < 15) return 'Selamat siang'
-  if (h >= 15 && h < 18) return 'Selamat sore'
-  return 'Selamat malam'
+  if (h >= 4 && h < 11) return tr('Selamat pagi')
+  if (h >= 11 && h < 15) return tr('Selamat siang')
+  if (h >= 15 && h < 18) return tr('Selamat sore')
+  return tr('Selamat malam')
 }
 
 /** "Hari ini" / "Besok" / "Kemarin" / "21 Nov" relatif terhadap `now`. */
 export function hariWib(t, now) {
   const d = wibDay(t) - wibDay(now)
-  if (d === 0) return 'Hari ini'
-  if (d === 1) return 'Besok'
-  if (d === -1) return 'Kemarin'
+  if (d === 0) return tr('Hari ini')
+  if (d === 1) return tr('Besok')
+  if (d === -1) return tr('Kemarin')
   const w = shift(t)
   return `${w.getUTCDate()} ${BULAN[w.getUTCMonth()]}`
 }
@@ -41,9 +42,9 @@ export function jamAtauTanggal(t, now) {
 /** Untuk kejadian lampau: "Baru saja", "15 menit lalu", "3 jam lalu", lalu tanggal. */
 export function sejak(t, now) {
   const m = Math.floor((new Date(now) - new Date(t)) / 60000)
-  if (m < 1) return 'Baru saja'
-  if (m < 60) return `${m} menit lalu`
-  if (m < 24 * 60) return `${Math.floor(m / 60)} jam lalu`
+  if (m < 1) return tr('Baru saja')
+  if (m < 60) return tr("{0} menit lalu", { 0: m })
+  if (m < 24 * 60) return tr("{0} jam lalu", { 0: Math.floor(m / 60) })
   return hariWib(t, now)
 }
 

@@ -4,6 +4,7 @@ import { Chip, Field, Halaman, Judul, Tombol, TombolHapus, kelasInput } from '..
 import { api } from '../../lib/api.js'
 import { JENIS, labelJenis, rupiah, ruteLayanan } from '../../lib/pembayaran.js'
 import { useApiGet } from '../../lib/useApiGet.js'
+import { tr } from '../../lib/i18n.js'
 
 // Katalog pemesanan Digital Payment (PRD §6.3 "dikelola admin", T-304): moda, operator,
 // asal–tujuan, jam keberangkatan, harga. Semua data simulasi.
@@ -16,7 +17,7 @@ export default function Layanan() {
 
   return (
     <>
-      <Judul aksi={!edit && <Tombol onClick={() => setEdit('baru')}>Tambah layanan</Tombol>}>Katalog pemesanan</Judul>
+      <Judul aksi={!edit && <Tombol onClick={() => setEdit('baru')}>{tr('Tambah layanan')}</Tombol>}>{tr('Katalog pemesanan')}</Judul>
       {edit ? (
         <FormLayanan
           key={edit === 'baru' ? 'baru' : edit.id}
@@ -29,7 +30,7 @@ export default function Layanan() {
       ) : (
         <>
           <label className="mb-4 flex items-center gap-2 text-sm font-semibold">
-            Jenis
+            {tr('Jenis')}
             <select
               value={jenis}
               onChange={(e) => {
@@ -38,7 +39,7 @@ export default function Layanan() {
               }}
               className={`${kelasInput} w-auto`}
             >
-              <option value="">Semua</option>
+              <option value="">{tr('Semua')}</option>
               {JENIS.map((j) => (
                 <option key={j.value} value={j.value}>
                   {j.label}
@@ -59,13 +60,13 @@ export default function Layanan() {
                     {s.operator ? `, ${s.operator}` : ''}, {ruteLayanan(s)}
                   </p>
                   <p className="text-xs text-ink/60">
-                    {rupiah(s.harga)} per {s.satuan}
-                    {s.jadwal.length ? `, ${s.jadwal.length} jadwal (${s.jadwal.slice(0, 4).join(', ')}${s.jadwal.length > 4 ? ', …' : ''})` : ', jam bebas'}
+                    {rupiah(s.harga)} {tr('per')} {s.satuan}
+                    {s.jadwal.length ? tr(", {0} jadwal ({1}{2})", { 0: s.jadwal.length, 1: s.jadwal.slice(0, 4).join(', '), 2: s.jadwal.length > 4 ? ', …' : '' }) : tr(', jam bebas')}
                   </p>
                 </div>
-                {!s.aktif && <Chip>Nonaktif</Chip>}
+                {!s.aktif && <Chip>{tr('Nonaktif')}</Chip>}
                 <Tombol jenis="biasa" onClick={() => setEdit(s)}>
-                  Ubah
+                  {tr('Ubah')}
                 </Tombol>
                 <TombolHapus
                   onHapus={async () => {
@@ -81,7 +82,7 @@ export default function Layanan() {
               </li>
             ))}
           </ul>
-          {data && data.items.length === 0 && <p className="mt-4 text-sm text-ink/60">Belum ada layanan. Isi awal: npm run isi:layanan di folder api.</p>}
+          {data && data.items.length === 0 && <p className="mt-4 text-sm text-ink/60">{tr('Belum ada layanan. Isi awal: npm run isi:layanan di folder api.')}</p>}
           {data && <Halaman page={data.page} total={data.total} limit={50} onPage={setPage} />}
         </>
       )}
@@ -132,10 +133,10 @@ function FormLayanan({ awal, onSelesai }) {
 
   return (
     <form onSubmit={simpan} className="grid max-w-2xl gap-4 sm:grid-cols-2">
-      <Field label="Kode" hint={awal ? 'Kode tidak bisa diubah.' : 'Huruf, angka, tanda hubung (mis. TRAVEL-TOBA).'}>
+      <Field label={tr('Kode')} hint={awal ? tr('Kode tidak bisa diubah.') : tr('Huruf, angka, tanda hubung (mis. TRAVEL-TOBA).')}>
         <input value={f.kode} onChange={ubah('kode')} required disabled={!!awal} maxLength={30} className={`${kelasInput} uppercase disabled:opacity-60`} />
       </Field>
-      <Field label="Jenis">
+      <Field label={tr('Jenis')}>
         <select value={f.jenis} onChange={ubah('jenis')} className={kelasInput}>
           {JENIS.map((j) => (
             <option key={j.value} value={j.value}>
@@ -144,41 +145,41 @@ function FormLayanan({ awal, onSelesai }) {
           ))}
         </select>
       </Field>
-      <Field label="Nama layanan" className="sm:col-span-2">
+      <Field label={tr('Nama layanan')} className="sm:col-span-2">
         <input value={f.nama} onChange={ubah('nama')} required maxLength={120} className={kelasInput} />
       </Field>
-      <Field label="Operator (opsional)">
+      <Field label={tr('Operator (opsional)')}>
         <input value={f.operator} onChange={ubah('operator')} maxLength={80} className={kelasInput} />
       </Field>
-      <Field label={parkir ? 'Harga per jam (Rp)' : 'Harga per orang (Rp)'}>
+      <Field label={parkir ? tr('Harga per jam (Rp)') : tr('Harga per orang (Rp)')}>
         <input type="number" min={1} step={1} value={f.harga} onChange={ubah('harga')} required className={kelasInput} />
       </Field>
-      <Field label={parkir ? 'Lokasi parkir' : 'Asal'}>
+      <Field label={parkir ? tr('Lokasi parkir') : tr('Asal')}>
         <input value={f.asal} onChange={ubah('asal')} maxLength={120} className={kelasInput} />
       </Field>
       {!parkir && (
-        <Field label="Tujuan">
+        <Field label={tr('Tujuan')}>
           <input value={f.tujuan} onChange={ubah('tujuan')} maxLength={120} className={kelasInput} />
         </Field>
       )}
       <Field
-        label="Jam keberangkatan (WIB)"
-        hint={parkir ? 'Kosongkan: parkir bisa mulai jam berapa saja.' : 'Pisahkan dengan koma, mis. 06:40, 08:00, 09:45.'}
+        label={tr('Jam keberangkatan (WIB)')}
+        hint={parkir ? tr('Kosongkan: parkir bisa mulai jam berapa saja.') : tr('Pisahkan dengan koma, mis. 06:40, 08:00, 09:45.')}
         className="sm:col-span-2"
       >
         <input value={f.jadwal} onChange={ubah('jadwal')} className={kelasInput} placeholder="06:40, 08:00" />
       </Field>
       <label className="flex min-h-touch items-center gap-3 text-sm font-semibold">
         <input type="checkbox" checked={f.aktif} onChange={ubah('aktif')} className="size-5 accent-[color:var(--color-pill-via)]" />
-        Bisa dipesan
+        {tr('Bisa dipesan')}
       </label>
       {kirim.error && <ErrorBanner error={kirim.error} className="sm:col-span-2" />}
       <div className="flex gap-3 sm:col-span-2">
         <Tombol type="submit" memuat={kirim.jalan}>
-          {awal ? 'Simpan perubahan' : 'Tambah layanan'}
+          {awal ? tr('Simpan perubahan') : tr('Tambah layanan')}
         </Tombol>
         <Tombol jenis="biasa" onClick={onSelesai}>
-          Batal
+          {tr('Batal')}
         </Tombol>
       </div>
     </form>

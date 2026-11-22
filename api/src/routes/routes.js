@@ -1,5 +1,6 @@
 import express from 'express';
 import { httpError } from '../lib/httpError.js';
+import { tr } from '../lib/i18n.js';
 import { str } from '../lib/validate.js';
 import { parseLatLng, wajibDalamWilayah } from '../lib/wilayah.js';
 import { denganCache } from '../services/cache.js';
@@ -40,9 +41,9 @@ export function routesRouter(cfg) {
     const from = bulat(wajibDalamWilayah(parseLatLng(req.query.from, 'Parameter from')));
     const to = bulat(wajibDalamWilayah(parseLatLng(req.query.to, 'Parameter to')));
 
-    const kunci = `routes:${mode}:${from.lat},${from.lng};${to.lat},${to.lng}`;
+    const kunci = `routes:${req.bahasa}:${mode}:${from.lat},${from.lng};${to.lat},${to.lng}`;
     const rute = await denganCache(kunci, async () => {
-      const hasil = keRute(await osrm.route(from, to, PROFIL[mode]), mode);
+      const hasil = keRute(await osrm.route(from, to, PROFIL[mode]), mode, req.bahasa);
       if (!hasil) throw httpError(404, 'Rute tidak ditemukan', 'RUTE_TIDAK_ADA');
       return hasil;
     });
@@ -96,11 +97,11 @@ export function routesRouter(cfg) {
 
   // Opsi mentah planner → bagian lengkap dengan jalan kaki OSRM.
   // `null` bila jalan kaki sebenarnya melebihi batas (opsi dibuang).
-  async function susunOpsi(o, asal, tujuan) {
+  async function susunOpsi(o, asal, tujuan, b) {
     const naik = o.kaki.map(bagianNaik);
-    const titik = [{ nama: 'Lokasi asal', lokasi: asal }];
+    const titik = [{ nama: tr(b, 'Lokasi asal'), lokasi: asal }];
     for (const n of naik) titik.push(n.dari, n.ke);
-    titik.push({ nama: 'Tujuan', lokasi: tujuan });
+    titik.push({ nama: tr(b, 'Tujuan'), lokasi: tujuan });
 
     // Ruas jalan kaki: asal→naik1, (turun1→naik2), turunAkhir→tujuan.
     const pasangan = [];
@@ -130,8 +131,8 @@ export function routesRouter(cfg) {
       }
     });
     naik.forEach((n, k) => {
-      n.dari.nama ||= k === 0 ? 'Titik naik terdekat' : 'Titik pindah';
-      n.ke.nama ||= k === naik.length - 1 ? 'Titik turun terdekat' : 'Titik pindah';
+      n.dari.nama ||= tr(b, k === 0 ? 'Titik naik terdekat' : 'Titik pindah');
+      n.ke.nama ||= tr(b, k === naik.length - 1 ? 'Titik turun terdekat' : 'Titik pindah');
     });
 
     const bagian = [];
@@ -146,7 +147,7 @@ export function routesRouter(cfg) {
       jalanM: jalan.reduce((t, b) => t + b.jarakM, 0),
       transfer: naik.length - 1,
       tarif, // null = ada koridor yang tarifnya belum diisi; jangan dianggap 0
-      tarifTeks: formatTarif(tarif),
+      tarifTeks: formatTarif(tarif, b),
       tarifPerkiraan: tarif !== null && naik.some((n) => n.tarifPerkiraan),
       perkiraan: jalan.some((b) => b.perkiraan),
       bagian,
@@ -165,7 +166,7 @@ export function routesRouter(cfg) {
     const opsi = [];
     for (const o of kandidat.slice(0, OPSI_MAKS * 3)) {
       if (opsi.length >= OPSI_MAKS) break;
-      const hasil = await susunOpsi(o, from, to);
+      const hasil = await susunOpsi(o, from, to, req.bahasa);
       if (hasil) opsi.push(hasil);
     }
     opsi.sort((a, b) => skor(a) - skor(b));

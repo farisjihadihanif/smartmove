@@ -17,6 +17,7 @@ import {
   teksTurun,
   warnaNaik,
 } from '../../lib/transit.js'
+import { tr } from '../../lib/i18n.js'
 
 // Rute transportasi umum (T-203): ringkasan, pilihan opsi, dan garis perjalanan per bagian.
 // Warna rel di sini = warna garis di peta (NavLayers), jadi pengguna bisa mencocokkan keduanya.
@@ -25,9 +26,9 @@ import {
 const LabelPerkiraan = () => (
   <span
     className="inline-flex items-center whitespace-nowrap rounded-full border border-ink/20 px-2 py-0.5 text-xs font-semibold text-ink/65"
-    title="Tarif bawaan sesuai jenis angkutan, belum dikonfirmasi admin"
+    title={tr('Tarif bawaan sesuai jenis angkutan, belum dikonfirmasi admin')}
   >
-    Tarif perkiraan
+    {tr('Tarif perkiraan')}
   </span>
 )
 
@@ -41,7 +42,7 @@ export function TransitRingkasan({ data, memuat, galat, onRetry, idx, onIdx }) {
   if (galat) return <ErrorBanner error={galat} onRetry={onRetry} />
   if (memuat || !data) {
     return (
-      <div aria-busy="true" aria-label="Mencari rute transportasi umum" className="animate-pulse">
+      <div aria-busy="true" aria-label={tr('Mencari rute transportasi umum')} className="animate-pulse">
         <div className="h-9 w-32 rounded-lg bg-ink/10" />
         <div className="mt-2 h-4 w-56 rounded bg-ink/[0.07]" />
         <div className="mt-5 h-24 rounded-2xl bg-ink/[0.05]" />
@@ -51,9 +52,9 @@ export function TransitRingkasan({ data, memuat, galat, onRetry, idx, onIdx }) {
   if (!data.opsi.length) {
     return (
       <div>
-        <h2 className="font-serif text-[1.5rem] leading-tight">Belum ada angkot atau bus di rute ini</h2>
+        <h2 className="font-serif text-[1.5rem] leading-tight">{tr('Belum ada angkot atau bus di rute ini')}</h2>
         <p className="mt-1 text-[15px] leading-relaxed text-ink/70">
-          Tidak ada trayek yang lewat dalam jarak jalan kaki dari titik asal dan tujuan. Geser titiknya ke jalan besar terdekat, atau pilih Mobil, Motor, atau Jalan kaki.
+          {tr('Tidak ada trayek yang lewat dalam jarak jalan kaki dari titik asal dan tujuan. Geser titiknya ke jalan besar terdekat, atau pilih Mobil, Motor, atau Jalan kaki.')}
         </p>
       </div>
     )
@@ -65,13 +66,13 @@ export function TransitRingkasan({ data, memuat, galat, onRetry, idx, onIdx }) {
         <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <span className="font-serif text-[2.25rem] leading-none">{formatDurasi(opsi.totalS)}</span>
           <span className={`text-[15px] font-semibold ${opsi.tarif === null ? 'text-ink/55' : 'text-ink/75'}`}>
-            {opsi.tarif === null ? 'Tarif belum tersedia' : teksTarif(opsi.tarif)}
+            {opsi.tarif === null ? tr('Tarif belum tersedia') : teksTarif(opsi.tarif)}
           </span>
           {tarifPerkiraan(opsi) && <LabelPerkiraan />}
         </p>
         <p className="mt-1.5 text-sm text-ink/65">
-          {opsi.transfer ? `${opsi.transfer}× pindah` : 'Tanpa pindah'}, jalan kaki {formatJarak(opsi.jalanM)}
-          {opsi.perkiraan ? '. Jarak jalan kaki masih perkiraan.' : '.'}
+          {opsi.transfer ? tr("{0}× pindah", { 0: opsi.transfer }) : tr('Tanpa pindah')}{tr(', jalan kaki')} {formatJarak(opsi.jalanM)}
+          {opsi.perkiraan ? tr('. Jarak jalan kaki masih perkiraan.') : '.'}
         </p>
       </div>
       {data.opsi.length > 1 && <PilihOpsi opsi={data.opsi} idx={idx} onIdx={onIdx} />}
@@ -83,7 +84,7 @@ export function TransitRingkasan({ data, memuat, galat, onRetry, idx, onIdx }) {
 /** Opsi lain sebagai rantai kecil: jalan · [KPUM 69] · jalan, plus durasinya. */
 function PilihOpsi({ opsi, idx, onIdx }) {
   return (
-    <div role="radiogroup" aria-label="Pilihan rute" className="-mx-5 flex snap-x gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] lg:-mx-1 lg:flex-wrap lg:px-1">
+    <div role="radiogroup" aria-label={tr('Pilihan rute')} className="-mx-5 flex snap-x gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] lg:-mx-1 lg:flex-wrap lg:px-1">
       {opsi.map((o, i) => {
         const on = i === idx
         const urut = indeksNaik(o.bagian)
@@ -93,7 +94,7 @@ function PilihOpsi({ opsi, idx, onIdx }) {
             type="button"
             role="radio"
             aria-checked={on}
-            aria-label={`${formatDurasi(o.totalS)}, ${o.bagian.filter((b) => b.jenis === 'naik').map(judulNaik).join(', lalu ')}. ${ringkasOpsi(o)}`}
+            aria-label={`${formatDurasi(o.totalS)}, ${o.bagian.filter((b) => b.jenis === 'naik').map(judulNaik).join(tr(', lalu '))}. ${ringkasOpsi(o)}`}
             onClick={() => onIdx(i)}
             className={`flex min-h-touch shrink-0 snap-start items-center gap-2 rounded-2xl px-3 py-2 text-left transition ${
               on ? 'bg-card ring-2 ring-pill-via shadow-[0_6px_16px_-10px_rgb(114_13_129/0.9)]' : 'bg-search ring-1 ring-ink/[0.06] hover:bg-card'
@@ -126,7 +127,7 @@ function PilihOpsi({ opsi, idx, onIdx }) {
 function GarisPerjalanan({ bagian }) {
   const urut = indeksNaik(bagian)
   return (
-    <ol aria-label="Langkah perjalanan" className="flex flex-col">
+    <ol aria-label={tr('Langkah perjalanan')} className="flex flex-col">
       {bagian.map((b, i) =>
         b.jenis === 'jalan' ? (
           <BarisJalan key={i} b={b} terakhir={i === bagian.length - 1} />
@@ -151,7 +152,7 @@ function BarisJalan({ b, terakhir }) {
         <p className="text-[15px] font-semibold leading-snug">{teksJalan(b, terakhir)}</p>
         <p className="mt-0.5 text-sm text-ink/60">
           {formatDurasi(b.durasiS)}
-          {b.perkiraan ? ', perkiraan' : ''}
+          {b.perkiraan ? tr(', perkiraan') : ''}
         </p>
       </div>
     </li>
@@ -179,7 +180,7 @@ function BarisNaik({ b, warna }) {
               style={{ backgroundColor: warna }}
             >
               <IkonJenis jenis={b.koridor.jenis} size={13} strokeWidth={2.5} aria-hidden="true" />
-              {LABEL_JENIS[b.koridor.jenis] ?? 'Kendaraan'}
+              {LABEL_JENIS[b.koridor.jenis] ?? tr('Kendaraan')}
             </span>
             <span className="text-[17px] font-bold leading-tight">{nama}</span>
           </p>
@@ -196,7 +197,7 @@ function BarisNaik({ b, warna }) {
           </p>
           {lain.length > 0 && (
             <p className="mt-1.5 text-sm leading-snug text-ink/65">
-              Juga lewat sini: <span className="font-semibold text-ink/80">{lain.join(', ')}</span>
+              {tr('Juga lewat sini:')} <span className="font-semibold text-ink/80">{lain.join(', ')}</span>
             </p>
           )}
         </div>
@@ -217,7 +218,7 @@ export function TransitPanduan({ opsi, idx, onPlay, children }) {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm font-semibold text-ink/60" aria-live="polite">
-          Bagian {idx + 1} dari {total}
+          {tr('Bagian')} {idx + 1} {tr('dari')} {total}
         </p>
         <button
           type="button"
@@ -225,7 +226,7 @@ export function TransitPanduan({ opsi, idx, onPlay, children }) {
           className="flex min-h-touch items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-ink-violet hover:bg-ink-violet/10"
         >
           <X size={18} aria-hidden="true" />
-          Selesai
+          {tr('Selesai')}
         </button>
       </div>
       <div className="flex items-start gap-4">
@@ -240,7 +241,7 @@ export function TransitPanduan({ opsi, idx, onPlay, children }) {
           {b.jenis === 'jalan' ? (
             <>
               <p className="font-serif text-[1.5rem] leading-tight">{teksBagian(b, idx, opsi.bagian)}</p>
-              <p className="mt-1 text-[15px] text-ink/70">Sekitar {formatDurasi(b.durasiS)}</p>
+              <p className="mt-1 text-[15px] text-ink/70">{tr('Sekitar')} {formatDurasi(b.durasiS)}</p>
             </>
           ) : (
             <>
@@ -265,14 +266,14 @@ export function TransitPanduan({ opsi, idx, onPlay, children }) {
           className="flex min-h-touch items-center justify-center gap-1 rounded-full bg-search font-semibold text-ink-violet ring-1 ring-ink/[0.06] transition hover:bg-card disabled:opacity-40"
         >
           <ChevronLeft size={20} aria-hidden="true" />
-          Sebelumnya
+          {tr('Sebelumnya')}
         </button>
         <button
           type="button"
           onClick={() => onPlay(terakhir ? null : idx + 1)}
           className="flex min-h-touch items-center justify-center gap-1 rounded-full bg-login-button font-semibold text-white shadow-[0_6px_16px_-6px_rgb(115_36_169/0.8)] transition hover:brightness-110"
         >
-          {terakhir ? 'Selesai' : 'Berikutnya'}
+          {terakhir ? tr('Selesai') : tr('Berikutnya')}
           {!terakhir && <ChevronRight size={20} aria-hidden="true" />}
         </button>
       </div>

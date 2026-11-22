@@ -6,6 +6,7 @@ import { api } from '../../lib/api.js'
 import { useAuth } from '../../lib/useAuth.js'
 import { useApiGet } from '../../lib/useApiGet.js'
 import { hariWib } from '../../lib/wib.js'
+import { tr } from '../../lib/i18n.js'
 
 // Pengguna: cari, ubah peran, hapus akun beserta data pribadinya.
 export default function Pengguna() {
@@ -29,7 +30,7 @@ export default function Pengguna() {
 
   return (
     <>
-      <Judul>Pengguna</Judul>
+      <Judul>{tr('Pengguna')}</Judul>
       <div className="mb-4 max-w-md">
         <SearchField
           value={q}
@@ -41,12 +42,12 @@ export default function Pengguna() {
             setCari(v.trim())
             setPage(1)
           }}
-          placeholder="Username, email, atau nama"
-          label="Cari pengguna"
+          placeholder={tr('Username, email, atau nama')}
+          label={tr('Cari pengguna')}
         />
       </div>
       {(error || galat) && <ErrorBanner error={error || galat} onRetry={error ? muatUlang : undefined} className="mb-4" />}
-      <Tabel label="Daftar pengguna" kolom={['Pengguna', 'Email', 'Peran', 'Bergabung', '']}>
+      <Tabel label={tr('Daftar pengguna')} kolom={[tr('Pengguna'), tr('Email'), tr('Peran'), tr('Bergabung'), '']}>
         {data?.items.map((u) => {
           const diriSendiri = u.id === saya?.id
           return (
@@ -57,19 +58,19 @@ export default function Pengguna() {
               </td>
               <td className="px-3 py-3 text-ink/75">{u.email}</td>
               <td className="px-3 py-3">
-                <Chip nada={u.role === 'admin' ? 'ungu' : 'netral'}>{u.role === 'admin' ? 'Admin' : 'Pengguna'}</Chip>
+                <Chip nada={u.role === 'admin' ? 'ungu' : 'netral'}>{u.role === 'admin' ? tr('Admin') : tr('Pengguna')}</Chip>
               </td>
               <td className="px-3 py-3 text-ink/65">{hariWib(u.createdAt, now)}</td>
               <td className="px-3 py-2 text-right">
                 {diriSendiri ? (
-                  <span className="text-xs text-ink/50">Akunmu</span>
+                  <span className="text-xs text-ink/50">{tr('Akunmu')}</span>
                 ) : (
                   <span className="inline-flex flex-wrap justify-end gap-2">
                     <Tombol
                       jenis="biasa"
                       onClick={() => aksi(() => api.patch(`/admin/users/${u.id}`, { role: u.role === 'admin' ? 'user' : 'admin' }))}
                     >
-                      {u.role === 'admin' ? 'Jadikan pengguna' : 'Jadikan admin'}
+                      {u.role === 'admin' ? tr('Jadikan pengguna') : tr('Jadikan admin')}
                     </Tombol>
                     <TombolHapus onHapus={() => aksi(() => api.del(`/admin/users/${u.id}`))} />
                   </span>
@@ -79,10 +80,10 @@ export default function Pengguna() {
           )
         })}
       </Tabel>
-      {data && data.items.length === 0 && <p className="mt-4 text-sm text-ink/60">Tidak ada pengguna yang cocok.</p>}
+      {data && data.items.length === 0 && <p className="mt-4 text-sm text-ink/60">{tr('Tidak ada pengguna yang cocok.')}</p>}
       {data && <Halaman page={data.page} total={data.total} onPage={setPage} />}
       <p className="mt-6 max-w-[60ch] text-xs leading-relaxed text-ink/55">
-        Menghapus akun juga menghapus rencana perjalanan, laporan, umpan balik, poin, dan vouchernya. Riwayat pembayaran simulasi tetap disimpan atas nama “Pengguna dihapus”.
+        {tr('Menghapus akun juga menghapus rencana perjalanan, laporan, umpan balik, poin, dan vouchernya. Riwayat pembayaran simulasi tetap disimpan atas nama “Pengguna dihapus”.')}
       </p>
     </>
   )
