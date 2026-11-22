@@ -4,6 +4,7 @@ import 'i18n.dart';
 import 'navigasi.dart';
 import 'transit.dart';
 import 'wib.dart';
+import 'kota.dart';
 
 // Helper Trip Planner (T-109). Sama dengan web/src/lib/trip.js – ubah bersamaan.
 
@@ -149,11 +150,11 @@ DateTime waktuWib(DateTime tanggal, TimeOfDay jam) => DateTime.utc(
   tanggal.day,
   jam.hour,
   jam.minute,
-).subtract(const Duration(hours: 7));
+).subtract(kota.offsetZona);
 
 /// Waktu → tanggal & jam WIB untuk pemilih.
 ({DateTime tanggal, TimeOfDay jam}) keWib(DateTime t) {
-  final w = t.toUtc().add(const Duration(hours: 7));
+  final w = t.toUtc().add(kota.offsetZona);
   return (
     tanggal: DateTime(w.year, w.month, w.day),
     jam: TimeOfDay(hour: w.hour, minute: w.minute),

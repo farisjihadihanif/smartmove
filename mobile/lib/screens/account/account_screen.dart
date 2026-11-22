@@ -9,6 +9,7 @@ import '../../theme.dart';
 import '../../widgets/widgets.dart';
 import '../payment/payment_history_screen.dart';
 import '../rewards/rewards_screen.dart';
+import '../../kota.dart';
 
 /// Pilih foto (galeri). Tes menggantinya. → (bytes, nama berkas) atau null bila batal.
 typedef PilihFoto = Future<(List<int>, String)?> Function();
@@ -312,7 +313,7 @@ class AccountScreenState extends State<AccountScreen> {
         if (dibuat != null)
           Text(
             tr('Bergabung {0}', [
-              '${bulanPanjang(dibuat.toUtc().add(const Duration(hours: 7)).month)} ${dibuat.year}',
+              '${bulanPanjang(dibuat.toUtc().add(kota.offsetZona).month)} ${dibuat.year}',
             ]),
             style: sans(size: 13, color: AppColors.ink.withValues(alpha: 0.5)),
           ),

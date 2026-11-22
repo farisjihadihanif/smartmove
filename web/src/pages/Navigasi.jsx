@@ -12,7 +12,7 @@ import TrafficLayers from '../components/traffic/TrafficLayers.jsx'
 import TrafficLegend from '../components/TrafficLegend.jsx'
 import RouteSheet from '../components/nav/RouteSheet.jsx'
 import { api, latLng } from '../lib/api.js'
-import { MEDAN_CENTER } from '../lib/geo.js'
+import { PUSAT_KOTA, dalamWilayah } from '../lib/geo.js'
 import { MODA, teksBagikan, titikFoto } from '../lib/navigasi.js'
 import { teksBagikanTransit } from '../lib/transit.js'
 import { useLaluLintas } from '../lib/useLaluLintas.js'
@@ -29,9 +29,6 @@ const LAPISAN = [
   { value: 'transit', label: tr('Transportasi umum'), short: tr('Umum'), icon: Bus },
   { value: 'street', label: tr('Street view'), icon: Camera },
 ]
-const MEBIDANG = { minLat: 3.25, maxLat: 3.9, minLng: 98.35, maxLng: 99.0 }
-const dalamWilayah = ({ lat, lng }) =>
-  lat >= MEBIDANG.minLat && lat <= MEBIDANG.maxLat && lng >= MEBIDANG.minLng && lng <= MEBIDANG.maxLng
 
 function parseTitik(v) {
   const m = /^(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)$/.exec(v || '')
@@ -67,7 +64,7 @@ export default function Navigasi() {
   const [fitKey, setFitKey] = useState(0)
   const [lapisan, setLapisan] = useState([])
   const [fotoState, setFotoState] = useState({ kunci: null, data: null, error: null })
-  const [tengah, setTengah] = useState({ lat: MEDAN_CENTER[0], lng: MEDAN_CENTER[1] })
+  const [tengah, setTengah] = useState({ lat: PUSAT_KOTA[0], lng: PUSAT_KOTA[1] })
   const [pesan, setPesan] = useState('')
   const pesanTimer = useRef(null)
   const trafficAktif = lapisan.includes('traffic')

@@ -11,7 +11,7 @@ import TrafficLegend from '../components/TrafficLegend.jsx'
 import TrafficLayers from '../components/traffic/TrafficLayers.jsx'
 import { DaftarKoridor, DetailLaporan, FormLaporan } from '../components/traffic/TrafficPanel.jsx'
 import { api, latLng } from '../lib/api.js'
-import { MEDAN_CENTER } from '../lib/geo.js'
+import { PUSAT_KOTA, dalamWilayah } from '../lib/geo.js'
 import { PESAN_DIGABUNG, PESAN_TERKIRIM, teksBagikanLaluLintas } from '../lib/lalulintas.js'
 import { useAuth } from '../lib/useAuth.js'
 import { useLaluLintas } from '../lib/useLaluLintas.js'
@@ -26,14 +26,11 @@ const TAB = [
   { value: 'estimasi', label: tr('Estimasi Waktu') },
   { value: 'peta', label: tr('Peta Interaktif') },
 ]
-const MEBIDANG = { minLat: 3.25, maxLat: 3.9, minLng: 98.35, maxLng: 99.0 }
-const dalamWilayah = ({ lat, lng }) =>
-  lat >= MEBIDANG.minLat && lat <= MEBIDANG.maxLat && lng >= MEBIDANG.minLng && lng <= MEBIDANG.maxLng
 const keLatLng = ([lng, lat]) => [lat, lng]
 
 // Pusat kota tampil di area peta yang tidak tertutup lembar bawah (ponsel: geser ±2,4 km ke selatan).
 const pusatAwal = () =>
-  window.matchMedia('(min-width: 64rem)').matches ? MEDAN_CENTER : [MEDAN_CENTER[0] - 0.022, MEDAN_CENTER[1]]
+  window.matchMedia('(min-width: 64rem)').matches ? PUSAT_KOTA : [PUSAT_KOTA[0] - 0.022, PUSAT_KOTA[1]]
 
 function paddingPeta() {
   return window.matchMedia('(min-width: 64rem)').matches
@@ -55,7 +52,7 @@ export default function LaluLintas() {
   const [konfirmasi, setKonfirmasi] = useState(false)
   const [now, setNow] = useState(() => Date.now())
   const [pusat] = useState(pusatAwal)
-  const tengah = useRef({ lat: MEDAN_CENTER[0], lng: MEDAN_CENTER[1] })
+  const tengah = useRef({ lat: PUSAT_KOTA[0], lng: PUSAT_KOTA[1] })
   const [pesan, setPesan] = useState('')
   const pesanTimer = useRef(null)
 

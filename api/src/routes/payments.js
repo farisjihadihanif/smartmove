@@ -14,6 +14,7 @@ import {
   terapkanNotifikasi,
   wib,
 } from '../services/payments.js';
+import kota from '../cities/index.js';
 
 const TANGGAL_RE = /^\d{4}-\d{2}-\d{2}$/;
 const escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -49,7 +50,7 @@ export function paymentsRouter(cfg, { midtrans }) {
     const { asal, tujuan, jenis } = req.query;
     const now = Date.now();
     const tanggal = typeof req.query.tanggal === 'string' && req.query.tanggal ? req.query.tanggal : wib(now).tanggal;
-    if (!TANGGAL_RE.test(tanggal) || Number.isNaN(new Date(`${tanggal}T00:00:00+07:00`).getTime())) {
+    if (!TANGGAL_RE.test(tanggal) || Number.isNaN(new Date(`${tanggal}T00:00:00${kota.zonaWaktu.offset}`).getTime())) {
       throw httpError(400, 'Tanggal harus berformat YYYY-MM-DD');
     }
     if (jenis !== undefined && !JENIS_LAYANAN.includes(jenis)) {

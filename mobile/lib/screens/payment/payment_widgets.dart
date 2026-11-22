@@ -4,6 +4,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../i18n.dart';
 import '../../pembayaran.dart';
 import '../../theme.dart';
+import '../../kota.dart';
 
 // Potongan tampilan Digital Payment & e-tiket (T-302). Sama dengan web components/pembayaran/*.
 
@@ -69,7 +70,7 @@ class PitaTanggal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final awal = DateTime.parse('${hariIni}T12:00:00+07:00');
+    final awal = DateTime.parse('${hariIni}T12:00:00${kota.offset}');
     return SizedBox(
       height: 76,
       child: ListView.separated(

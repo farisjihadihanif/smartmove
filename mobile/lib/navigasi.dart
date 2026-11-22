@@ -2,6 +2,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'i18n.dart';
+import 'kota.dart';
 
 // Helper Smart Navigation (T-107). Sama dengan web/src/lib/navigasi.js – ubah bersamaan.
 
@@ -24,12 +25,8 @@ enum Moda {
   };
 }
 
-/// Batas wilayah layanan (sama dengan api/src/lib/wilayah.js MEBIDANG).
-bool dalamWilayah(LatLng p) =>
-    p.latitude >= 3.25 &&
-    p.latitude <= 3.9 &&
-    p.longitude >= 98.35 &&
-    p.longitude <= 99.0;
+/// Batas wilayah layanan kota aktif (sama dengan api/src/cities).
+bool dalamWilayah(LatLng p) => kota.dalamBatas(p);
 
 /// Durasi detik → "12 mnt", "1 j 5 mnt", "< 1 mnt".
 String formatDurasi(num detik) {
@@ -142,6 +139,6 @@ LatLng? keLatLng(Object? v) {
 String tanggalFoto(String? iso) {
   final d = iso == null ? null : DateTime.tryParse(iso);
   if (d == null) return '';
-  final w = d.toUtc().add(const Duration(hours: 7));
+  final w = d.toUtc().add(kota.offsetZona);
   return tanggalBulanTahun(w.day, w.month, w.year);
 }

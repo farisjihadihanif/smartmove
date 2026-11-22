@@ -1,11 +1,10 @@
+import kota from '../cities/index.js';
 import { httpError } from './httpError.js';
 
-// Batas wilayah layanan: Medan dan sekitarnya (Mebidang = Medan, Binjai, Deli Serdang).
-// Kotak kasar yang mencakup Binjai (barat), Belawan (utara), Kualanamu (timur) dan
-// Pancur Batu/Sibolangit (selatan). Cukup untuk menolak titik yang jelas di luar.
-export const MEBIDANG = { minLat: 3.25, maxLat: 3.9, minLng: 98.35, maxLng: 99.0 };
+// Batas wilayah layanan kota aktif (src/cities; Medan = kotak Mebidang).
+export const BATAS = kota.batas;
 
-export const dalamWilayah = ({ lat, lng }, b = MEBIDANG) =>
+export const dalamWilayah = ({ lat, lng }, b = BATAS) =>
   lat >= b.minLat && lat <= b.maxLat && lng >= b.minLng && lng <= b.maxLng;
 
 const LATLNG_RE = /^(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)$/;
@@ -23,7 +22,7 @@ export function parseLatLng(v, nama = 'Koordinat') {
 
 export function wajibDalamWilayah(titik) {
   if (!dalamWilayah(titik)) {
-    throw httpError(422, 'SmartMove baru melayani Medan dan sekitarnya', 'DI_LUAR_WILAYAH');
+    throw httpError(422, `SmartMove baru melayani ${kota.wilayahLayanan}`, 'DI_LUAR_WILAYAH');
   }
   return titik;
 }

@@ -1,8 +1,9 @@
 import 'i18n.dart';
+import 'kota.dart';
 
-// Waktu Medan (WIB, UTC+7, tanpa musim panas). Samakan dengan web/src/lib/wib.js.
+// Waktu kota aktif (kota.dart; Medan: WIB, UTC+7, tanpa musim panas). Samakan dengan web/src/lib/wib.js.
 
-const _wib = Duration(hours: 7);
+final _wib = kota.offsetZona;
 DateTime _shift(DateTime t) => t.toUtc().add(_wib);
 int _hari(DateTime t) {
   final w = _shift(t);

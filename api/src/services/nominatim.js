@@ -1,6 +1,6 @@
 import { httpError } from '../lib/httpError.js';
 import { tr } from '../lib/i18n.js';
-import { MEBIDANG } from '../lib/wilayah.js';
+import kota from '../cities/index.js';
 
 const gagal = () => httpError(502, 'Layanan peta sedang bermasalah, coba lagi nanti', 'LAYANAN_PETA_GAGAL');
 
@@ -49,13 +49,13 @@ export function createNominatim(cfg, { fetch = globalThis.fetch } = {}) {
   }
 
   return {
-    // Hasil mentah Nominatim, dibatasi kotak Mebidang.
+    // Hasil mentah Nominatim, dibatasi kotak wilayah kota aktif.
     search(q, { limit = 10 } = {}) {
-      const b = MEBIDANG;
+      const b = kota.batas;
       return panggil('/search', {
         q,
         limit,
-        countrycodes: 'id',
+        countrycodes: kota.nominatim.countrycodes,
         viewbox: `${b.minLng},${b.maxLat},${b.maxLng},${b.minLat}`,
         bounded: 1,
         addressdetails: 1,

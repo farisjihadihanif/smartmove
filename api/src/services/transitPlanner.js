@@ -2,15 +2,16 @@ import TransitLine from '../models/TransitLine.js';
 import TransitStop from '../models/TransitStop.js';
 import { tr } from '../lib/i18n.js';
 import { tarifKoridor } from './tarif.js';
+import kota from '../cities/index.js';
 
 // Perencana rute transportasi umum (ARCHITECTURE §5.2).
 //
 // Dua cara naik-turun:
 // - koridor yang punya halte (Trans Metro Deli, kereta, …): hanya di halte, urut `urutan`;
-// - koridor tanpa halte (angkot Medan): di mana saja sepanjang garis trayek, jadi titik
+// - koridor tanpa halte (angkot): di mana saja sepanjang garis trayek, jadi titik
 //   naik/turun = titik terdekat di garis dari asal/tujuan. Kereta tanpa stasiun dilewati.
 // Arah selalu mengikuti urutan garis (relasi OSM satu arah), maksimal 1 transfer.
-// Semua hitungan geometri memakai proyeksi datar lokal (meter) di sekitar Medan.
+// Semua hitungan geometri memakai proyeksi datar lokal (meter) di sekitar kota aktif (src/cities).
 
 export const JALAN_MAKS = 800; // jalan kaki garis lurus ke titik naik / dari titik turun
 export const TRANSFER_MAKS = 400; // jalan kaki garis lurus saat pindah koridor
@@ -26,8 +27,7 @@ export const KECEPATAN_JALAN = 1.3; // m/s (±4,7 km/j), untuk perkiraan
 export const FAKTOR_JALAN = 1.3; // garis lurus → jarak jalan sebenarnya, untuk perkiraan
 const JARAK_SIMPUL = 100; // titik contoh di garis angkot untuk mencari tempat transfer
 
-const LAT0 = 3.6;
-const LNG0 = 98.67;
+const { lat: LAT0, lng: LNG0 } = kota.acuanProyeksi;
 const KX = 111320 * Math.cos((LAT0 * Math.PI) / 180);
 const KY = 110574;
 const keXY = (lng, lat) => [(lng - LNG0) * KX, (lat - LAT0) * KY];

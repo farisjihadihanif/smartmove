@@ -5,7 +5,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import RoadCorridor from '../src/models/RoadCorridor.js';
 import {
   KORIDOR_JALAN,
-  RELASI_MEDAN,
+  RELASI_BATAS,
   gabungRuas,
   imporKoridorJalan,
   kueriKoridorJalan,
@@ -114,7 +114,7 @@ describe('dipotong ke batas Kota Medan', () => {
   const titik = (lat, lon) => ({ lat, lon });
   const batas = {
     type: 'relation',
-    id: RELASI_MEDAN,
+    id: RELASI_BATAS,
     members: [
       { type: 'way', role: 'outer', geometry: [titik(3.55, 98.6), titik(3.55, 98.7), titik(3.62, 98.7)] },
       { type: 'way', role: 'outer', geometry: [titik(3.62, 98.7), titik(3.62, 98.6), titik(3.55, 98.6)] },

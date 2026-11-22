@@ -1,4 +1,5 @@
-import { MEBIDANG, dalamWilayah } from '../lib/wilayah.js';
+import kota from '../cities/index.js';
+import { BATAS, dalamWilayah } from '../lib/wilayah.js';
 
 // Mengubah respons Overpass (relasi route + node halte) menjadi calon
 // TransitLine/TransitStop. Murni (tanpa database) supaya mudah dites.
@@ -13,12 +14,12 @@ const JENIS = {
 };
 
 const PERAN_HALTE = /^(platform|stop)(_entry_only|_exit_only)?$/;
-const MIN_DALAM_WILAYAH = 0.8; // rute antarkota (sebagian besar di luar Mebidang) dilewati
+const MIN_DALAM_WILAYAH = 0.8; // rute antarkota (sebagian besar di luar wilayah kota) dilewati
 
 const bulat = (n) => Math.round(n * 1e6) / 1e6;
 const titik = (lon, lat) => [bulat(lon), bulat(lat)];
 const sama = (a, b) => Boolean(a && b) && a[0] === b[0] && a[1] === b[1];
-const dalam = ([lng, lat]) => dalamWilayah({ lat, lng }, MEBIDANG);
+const dalam = ([lng, lat]) => dalamWilayah({ lat, lng }, BATAS);
 
 function bersih(v, maks = 200) {
   if (typeof v !== 'string') return undefined;
@@ -43,7 +44,7 @@ export function bacaTarif(v) {
   return n > 0 && n <= 1_000_000 ? n : undefined;
 }
 
-// Jarak kira-kira (meter) dua titik [lng, lat] di sekitar Medan.
+// Jarak kira-kira (meter) dua titik [lng, lat] skala kota.
 const meter = (a, b) => Math.hypot((a[0] - b[0]) * 111130, (a[1] - b[1]) * 110574);
 const panjang = (g) => g.reduce((t, p, i) => (i ? t + meter(g[i - 1], p) : 0), 0);
 
@@ -218,8 +219,8 @@ export function olahOverpass(data) {
     const t = rel.tags || {};
     const osmId = `relation/${rel.id}`;
     const nama = namaKoridor(t, rel.id);
-    // Angkot Medan di OSM banyak yang ditandai route=bus dengan network "Angkot Kota Medan".
-    const jenis = /angkot|angkutan kota/i.test(`${t.network || ''} ${t.operator || ''}`) ? 'angkot' : JENIS[t.route];
+    // Angkot yang di OSM ditandai route=bus dikenali dari network/operator (config kota).
+    const jenis = kota.osm.polaAngkot.test(`${t.network || ''} ${t.operator || ''}`) ? 'angkot' : JENIS[t.route];
     if (!jenis) {
       dilewati.push({ osmId, nama, alasan: `jenis route=${t.route} tidak didukung` });
       continue;
@@ -301,8 +302,8 @@ export function buatKode(k, terpakai) {
     .replace(/[^A-Z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
   let awalan = { bus: 'BUS', kereta: 'KA', angkot: 'ANGKOT' }[k.jenis];
-  if (/trans\s*metro\s*deli/i.test(k.jaringan || '')) awalan = 'TMD';
-  else if (/railink/i.test(k.jaringan || '')) awalan = 'RAILINK';
+  const khusus = kota.osm.awalanJaringan.find((a) => a.pola.test(k.jaringan || ''));
+  if (khusus) awalan = khusus.awalan;
   const id = k.osmId.split('/')[1].replace('#pulang', '-P');
   const dasar = ref ? `${awalan}-${ref}` : `OSM-${id}`;
   let kode = dasar;

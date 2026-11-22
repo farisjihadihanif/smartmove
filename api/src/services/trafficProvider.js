@@ -1,5 +1,6 @@
 import TrafficReport from '../models/TrafficReport.js';
 import { denganCache } from './cache.js';
+import kota from '../cities/index.js';
 import { publicLaporan } from './trafficReports.js';
 
 /*
@@ -31,10 +32,10 @@ export const JARAK_KE_RUTE_M = 75; // laporan dianggap di koridor bila ≤ 75 m 
 export const PENGARUH_M = 250; // satu laporan memengaruhi ±250 m ruas jalan
 const BIN_M = 50;
 
-// Proyeksi datar dengan lintang acuan Medan (cukup untuk skala kota) → meter.
+// Proyeksi datar dengan lintang acuan kota aktif (cukup untuk skala kota) → meter.
 // Lintang acuan harus tetap; memakai cos lintang tiap titik membuat x melenceng.
-const COS_MEDAN = Math.cos((3.6 * Math.PI) / 180);
-const keXY = ([lng, lat]) => [lng * 111320 * COS_MEDAN, lat * 110574];
+const COS_KOTA = Math.cos((kota.acuanProyeksi.lat * Math.PI) / 180);
+const keXY = ([lng, lat]) => [lng * 111320 * COS_KOTA, lat * 110574];
 
 // Posisi titik terdekat di polyline: { jarakM (ke garis), sepanjangM (dari awal garis) }.
 export function proyeksiKeGaris(garis, titik) {

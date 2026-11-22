@@ -4,9 +4,10 @@ import Event from '../models/Event.js';
 import PointLedger from '../models/PointLedger.js';
 import Trip from '../models/Trip.js';
 import { eventPublik } from '../services/campaign.js';
+import kota from '../cities/index.js';
 
-// WIB = UTC+7, tanpa musim panas.
-const WIB_MS = 7 * 60 * 60 * 1000;
+// Zona waktu kota aktif (Medan: WIB = UTC+7, tanpa musim panas).
+const WIB_MS = kota.zonaWaktu.offsetMs;
 const JAM_MS = 60 * 60 * 1000;
 const MAKS_EVENT = 5;
 const MAKS_NOTIF = 10;

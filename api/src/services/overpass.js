@@ -1,10 +1,10 @@
-import { MEBIDANG } from '../lib/wilayah.js';
+import kota from '../cities/index.js';
 
 export const OVERPASS_BAWAAN = 'https://overpass-api.de/api/interpreter';
 
-// Relasi `route` transportasi umum di kotak Mebidang + node anggotanya (halte),
+// Relasi `route` transportasi umum di kotak wilayah kota aktif + node anggotanya (halte),
 // dalam SATU permintaan. `out geom` menyertakan geometri jalan tiap anggota.
-export function kueriTransit(b = MEBIDANG) {
+export function kueriTransit(b = kota.batas) {
   const bbox = `${b.minLat},${b.minLng},${b.maxLat},${b.maxLng}`;
   return [
     '[out:json][timeout:180];',

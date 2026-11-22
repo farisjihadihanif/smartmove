@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import PointLedger from '../models/PointLedger.js';
 import User from '../models/User.js';
+import kota from '../cities/index.js';
 
 // Poin hanya diubah di server dan selalu bersama entri PointLedger, dalam satu
 // transaksi MongoDB (DATABASE §4.1). Index unik (alasan, ref) membuat pemberian poin
@@ -28,7 +29,7 @@ export const entriPublik = (l) => ({
   createdAt: l.createdAt,
 });
 
-const WIB_MS = 7 * 60 * 60 * 1000;
+const WIB_MS = kota.zonaWaktu.offsetMs; // zona waktu kota aktif (Medan: WIB)
 /**
  * Kunci minggu WIB (Senin–Minggu), mis. "2026-11-16" = Senin awal minggu.
  * Dipakai sebagai `ref` poin umpan balik: index unik (alasan, ref) menjamin

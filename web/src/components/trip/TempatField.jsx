@@ -3,7 +3,7 @@ import { Crosshair, Loader2, MapPin } from 'lucide-react'
 import { api, latLng } from '../../lib/api.js'
 import { errorMessage } from '../../lib/errors.js'
 import { formatJarak } from '../../lib/navigasi.js'
-import { MEDAN_CENTER } from '../../lib/geo.js'
+import { PUSAT_KOTA } from '../../lib/geo.js'
 import { tr } from '../../lib/i18n.js'
 
 const JEDA_MS = 450
@@ -33,7 +33,7 @@ export default function TempatField({ label, value, onChange, near, lokasiSaya =
     const ctrl = new AbortController()
     const t = setTimeout(() => {
       setHasil({ status: 'memuat', items: [] })
-      const titik = near ?? { lat: MEDAN_CENTER[0], lng: MEDAN_CENTER[1] }
+      const titik = near ?? { lat: PUSAT_KOTA[0], lng: PUSAT_KOTA[1] }
       api.get('/places/search', { query: { q: pencarian, near: latLng(titik) }, signal: ctrl.signal }).then(
         ({ items }) => setHasil({ status: 'ok', items }),
         (e) => e.name !== 'AbortError' && setHasil({ status: 'galat', items: [], pesan: errorMessage(e) }),

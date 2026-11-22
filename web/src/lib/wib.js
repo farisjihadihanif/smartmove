@@ -1,6 +1,7 @@
 import { tr } from './i18n.js'
-// Waktu Medan (WIB, UTC+7, tanpa musim panas). Jam server dari GET /home → `waktuServer`.
-const WIB_MS = 7 * 60 * 60 * 1000
+import kota from './kota.js'
+// Waktu kota aktif (lib/kota.js; Medan: WIB, UTC+7, tanpa musim panas). Jam server dari GET /home → `waktuServer`.
+const WIB_MS = kota.zonaWaktu.offsetMs
 const DAY_MS = 24 * 60 * 60 * 1000
 const BULAN = [tr('Jan'), tr('Feb'), tr('Mar'), tr('Apr'), tr('Mei'), tr('Jun'), tr('Jul'), tr('Agu'), tr('Sep'), tr('Okt'), tr('Nov'), tr('Des')]
 const dua = (n) => String(n).padStart(2, '0')
@@ -52,4 +53,4 @@ export function sejak(t, now) {
 export const keInputWib = (iso) => (iso ? new Date(new Date(iso).getTime() + WIB_MS).toISOString().slice(0, 16) : '')
 
 /** Nilai <input type="datetime-local"> (dibaca sebagai WIB) → ISO. */
-export const dariInputWib = (v) => (v ? new Date(`${v}:00+07:00`).toISOString() : null)
+export const dariInputWib = (v) => (v ? new Date(`${v}:00${kota.zonaWaktu.offset}`).toISOString() : null)

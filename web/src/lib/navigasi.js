@@ -1,4 +1,5 @@
 import { tr, locale } from './i18n.js'
+import kota from './kota.js'
 // Helper Smart Navigation (T-107). Sama dengan mobile/lib/navigasi.dart – ubah bersamaan.
 
 /** Pilihan moda di UI (API_SPECS §2: driving | motorcycle | walking; transit = GET /routes/transit). */
@@ -61,6 +62,6 @@ export function tanggalFoto(iso) {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
-    timeZone: 'Asia/Jakarta',
+    timeZone: kota.zonaWaktu.iana,
   })
 }

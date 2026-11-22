@@ -3,6 +3,7 @@ import { formatDurasi, formatJarak } from './navigasi.js'
 import { teksTarifRingkas } from './transit.js'
 import { hariWib, jamWib } from './wib.js'
 import { tr } from './i18n.js'
+import kota from './kota.js'
 
 /** Moda rencana (API: driving | motorcycle | walking | transit). */
 export const MODA_TRIP = [
@@ -13,7 +14,7 @@ export const MODA_TRIP = [
 ]
 export const labelModa = (v) => MODA_TRIP.find((m) => m.value === v)?.label ?? v
 
-const WIB_MS = 7 * 60 * 60 * 1000
+const WIB_MS = kota.zonaWaktu.offsetMs
 const dua = (n) => String(n).padStart(2, '0')
 
 /** ISO → isian form WIB { tanggal: "2026-11-19", jam: "07:30" }. */
@@ -30,7 +31,7 @@ export function keIsian(iso) {
 export function dariIsian({ tanggal, jam }, now = Date.now()) {
   if (!jam) return null
   const t = tanggal || keIsian(new Date(now).toISOString()).tanggal
-  const d = new Date(`${t}T${jam}:00+07:00`)
+  const d = new Date(`${t}T${jam}:00${kota.zonaWaktu.offset}`)
   return Number.isNaN(d.getTime()) ? null : d.toISOString()
 }
 

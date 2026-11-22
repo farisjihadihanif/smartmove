@@ -129,7 +129,7 @@ class TrafficScreenState extends State<TrafficScreen> {
 
   /// Tengah area peta yang terlihat (bagian bawah tertutup lembar).
   LatLng get _tengahTerlihat {
-    if (!_mapReady) return medanCenter;
+    if (!_mapReady) return pusatKota;
     final b = _map.camera.visibleBounds;
     final c = b.center;
     return LatLng(c.latitude + (b.north - c.latitude) * 0.35, c.longitude);
@@ -335,10 +335,7 @@ class TrafficScreenState extends State<TrafficScreen> {
             child: MapView(
               tucked: true,
               controller: _map,
-              center: LatLng(
-                medanCenter.latitude - 0.022,
-                medanCenter.longitude,
-              ),
+              center: LatLng(pusatKota.latitude - 0.022, pusatKota.longitude),
               zoom: 13,
               tileProvider: widget.tileProvider,
               onTap: _ketukPeta,

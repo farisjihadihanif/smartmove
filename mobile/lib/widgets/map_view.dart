@@ -4,9 +4,10 @@ import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../theme.dart';
+import '../kota.dart';
 
-/// Pusat kota Medan (Lapangan Merdeka).
-const medanCenter = LatLng(3.5913, 98.6776);
+/// Pusat kota aktif (Medan: Lapangan Merdeka).
+final pusatKota = kota.pusat;
 
 // ARCHITECTURE: tile diambil langsung dari OSM dengan atribusi;
 // rute & pencarian tetap lewat API kita.
@@ -21,7 +22,7 @@ const _userAgentPackage = 'id.smartmove.smartmove';
 class MapView extends StatelessWidget {
   const MapView({
     super.key,
-    this.center = medanCenter,
+    this.center,
     this.zoom = 14,
     this.controller,
     this.tucked = false,
@@ -31,7 +32,7 @@ class MapView extends StatelessWidget {
     this.tileProvider,
   });
 
-  final LatLng center;
+  final LatLng? center;
   final double zoom;
   final MapController? controller;
   final bool tucked;
@@ -49,7 +50,7 @@ class MapView extends StatelessWidget {
     final map = FlutterMap(
       mapController: controller,
       options: MapOptions(
-        initialCenter: center,
+        initialCenter: center ?? pusatKota,
         initialZoom: zoom,
         maxZoom: 19,
         onTap: onTap,

@@ -269,7 +269,7 @@ class NavigationScreenState extends State<NavigationScreen> {
     }
   }
 
-  LatLng get _tengah => _mapReady ? _map.camera.center : medanCenter;
+  LatLng get _tengah => _mapReady ? _map.camera.center : pusatKota;
 
   Future<void> cari(String q) async {
     final s = q.trim();

@@ -6,6 +6,7 @@ import '../../i18n.dart';
 import '../../state.dart';
 import '../../theme.dart';
 import '../../widgets/widgets.dart';
+import '../../kota.dart';
 
 // Rewards (DESIGN §3, PRD §6.4, T-304): saldo poin, tukar voucher, voucher saya, riwayat.
 // Sama dengan web pages/Rewards.jsx. Voucher digambar sebagai kupon sobek (bahasa visual e-tiket).
@@ -15,7 +16,7 @@ String _poin(num n) => angka(n.abs().round());
 String _tanggal(Object? iso) {
   final d = DateTime.tryParse('$iso');
   if (d == null) return '';
-  final w = d.toUtc().add(const Duration(hours: 7));
+  final w = d.toUtc().add(kota.offsetZona);
   return tanggalBulanTahun(w.day, w.month, w.year);
 }
 

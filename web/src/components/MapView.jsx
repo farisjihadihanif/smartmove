@@ -1,7 +1,7 @@
 import { tr } from '../lib/i18n.js'
 import 'leaflet/dist/leaflet.css'
 import { AttributionControl, MapContainer, TileLayer } from 'react-leaflet'
-import { MEDAN_CENTER } from '../lib/geo.js'
+import { PUSAT_KOTA } from '../lib/geo.js'
 
 // ARCHITECTURE: tile diambil langsung dari OSM dengan atribusi; rute/pencarian tetap lewat API.
 const TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
@@ -14,7 +14,7 @@ const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">Op
  * `attribution`: posisi atribusi (`bottomright` bawaan; `topright` bila bawah tertutup lembar bawah).
  */
 export default function MapView({
-  center = MEDAN_CENTER,
+  center = PUSAT_KOTA,
   zoom = 14,
   tucked = false,
   label = tr('Peta'),

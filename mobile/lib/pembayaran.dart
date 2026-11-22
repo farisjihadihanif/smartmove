@@ -5,6 +5,7 @@ import 'i18n.dart';
 export 'i18n.dart' show rupiah;
 import 'trip.dart';
 import 'theme.dart';
+import 'kota.dart';
 
 // Pemesanan & Digital Payment — SELALU simulasi (T-302, PRD §6.3).
 // Sama dengan web lib/pembayaran.js.
@@ -121,7 +122,7 @@ String ruteLayanan(Map l) {
   return '${l['asal'] ?? '—'} → $tujuan';
 }
 
-const _wib = Duration(hours: 7);
+final _wib = kota.offsetZona;
 String _dua(int n) => n.toString().padLeft(2, '0');
 
 /// Tanggal WIB "YYYY-MM-DD" untuk [offset] hari dari [now].
@@ -164,7 +165,7 @@ List<({String jam, DateTime waktu, bool tersedia})> slotLayanan(
     for (var m = 0; m < 24 * 60; m += 30)
       () {
         final jam = '${_dua(m ~/ 60)}:${_dua(m % 60)}';
-        final waktu = DateTime.parse('${tanggal}T$jam:00+07:00');
+        final waktu = DateTime.parse('${tanggal}T$jam:00${kota.offset}');
         return (jam: jam, waktu: waktu, tersedia: waktu.isAfter(batas));
       }(),
   ];

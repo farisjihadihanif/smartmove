@@ -25,6 +25,7 @@ import {
   waktuLengkap,
 } from '../lib/pembayaran.js'
 import { useApiGet } from '../lib/useApiGet.js'
+import kota from '../lib/kota.js'
 import { useAuth } from '../lib/useAuth.js'
 import { useMediaQuery } from '../lib/useNotifications.js'
 import { tr } from '../lib/i18n.js'
@@ -405,7 +406,7 @@ function JenisChips({ value, onChange }) {
 
 /** Pita tanggal 14 hari ke depan (WIB). */
 function PitaTanggal({ value, onChange, hariIni }) {
-  const awal = new Date(`${hariIni}T12:00:00+07:00`).getTime()
+  const awal = new Date(`${hariIni}T12:00:00${kota.zonaWaktu.offset}`).getTime()
   const hari = Array.from({ length: JUMLAH_HARI }, (_, i) => tanggalWib(awal, i))
   return (
     <div className="mt-4">

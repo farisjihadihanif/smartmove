@@ -1,60 +1,41 @@
+import kota from '../cities/index.js';
 import RoadCorridor from '../models/RoadCorridor.js';
 
 /*
- * Koridor jalan utama Medan dari OpenStreetMap (Keputusan Final #4, tab Estimasi Waktu).
+ * Koridor jalan utama kota aktif (src/cities; Medan) dari OpenStreetMap (Keputusan Final #4, tab Estimasi Waktu).
  *
- * Alur: Overpass (way trunk/primary/secondary bernama tertentu di dalam batas Kota Medan)
+ * Alur: Overpass (way trunk/primary/secondary bernama tertentu di dalam batas kota)
  * → graf simpul OSM → sambungkan celah kecil → jalur terpanjang (dua kali Dijkstra)
  * → disederhanakan → disimpan per `kode`. Jalan dua jalur (one-way kiri & kanan) otomatis
  * menjadi satu garis karena jalur terpanjang hanya melewati salah satunya.
  */
 
-// Relasi batas administratif "Kota Medan" (admin_level 5). Area Overpass = 3600000000 + id.
-export const RELASI_MEDAN = 8484616;
+// Relasi batas administratif kota (Medan: "Kota Medan", admin_level 5). Area Overpass = 3600000000 + id.
+export const RELASI_BATAS = kota.osm.relasiBatas;
 export const KELAS_JALAN = ['trunk', 'primary', 'secondary'];
 
-// Nama di OSM dicocokkan persis (tanpa beda huruf besar/kecil). Jalan layang/akses
-// (mis. "Overpass Jamin Ginting") sengaja tidak ikut.
-// `cari` = kata kunci untuk kueri Overpass (longgar), `pola` = penyaring tepat di JS.
-export const KORIDOR_JALAN = [
-  { kode: 'GATSU', nama: 'Jl. Gatot Subroto', cari: 'Gatot Subroto', pola: /^Jalan (Jenderal )?Gatot Subroto$/i },
-  { kode: 'SMRAJA', nama: 'Jl. Sisingamangaraja', cari: 'Sisingamangaraja', pola: /^Jalan Sisingamangaraja$/i },
-  { kode: 'JAMINGINTING', nama: 'Jl. Jamin Ginting', cari: 'Jamin Ginting', pola: /^Jalan Jamin Ginting$/i },
-  { kode: 'RINGROAD', nama: 'Jl. Gagak Hitam (Ring Road)', cari: 'Gagak Hitam', pola: /^Jalan Gagak Hitam$/i },
-  {
-    kode: 'PUTRIHIJAU',
-    nama: 'Jl. Putri Hijau – Yos Sudarso',
-    cari: 'Putri Hijau|Yos Sudarso',
-    pola: /^Jalan (Putri Hijau|K\. ?L\. Yos Sudarso)$/i,
-  },
-  { kode: 'KATAMSO', nama: 'Jl. Brigjend Katamso', cari: 'Katamso', pola: /^Jalan Brigjen(d)? Katamso$/i },
-  {
-    kode: 'AHNASUTION',
-    nama: 'Jl. A.H. Nasution',
-    cari: 'Nasution',
-    pola: /^Jalan (Jenderal )?(Abdul Haris|A\. ?H\.) Nasution$/i,
-  },
-];
+// Daftar koridor & pola nama: config kota (src/cities/<kota>.js `koridorJalan`).
+export const KORIDOR_JALAN = kota.koridorJalan;
 
 export const CELAH_MAKS_M = 300; // bagian ruas yang terputus ≤ 300 m disambung
 const TOLERANSI_SEDERHANA_M = 5;
 
-export function kueriKoridorJalan(defs = KORIDOR_JALAN, relasi = RELASI_MEDAN) {
+export function kueriKoridorJalan(defs = KORIDOR_JALAN, relasi = RELASI_BATAS) {
   // Satu regex longgar untuk Overpass; penyaringan tepat per koridor di JS.
   const nama = defs.map((d) => d.cari).join('|');
   return [
     '[out:json][timeout:180];',
-    `area(id:${3600000000 + relasi})->.medan;`,
-    `way["highway"~"^(${KELAS_JALAN.join('|')})$"]["name"~"${nama}",i](area.medan);`,
+    `area(id:${3600000000 + relasi})->.kota;`,
+    `way["highway"~"^(${KELAS_JALAN.join('|')})$"]["name"~"${nama}",i](area.kota);`,
     'out body geom;',
-    // Batas kota untuk memotong way yang menjulur ke luar Medan (filter area mengembalikan
+    // Batas kota untuk memotong way yang menjulur ke luar kota (filter area mengembalikan
     // way utuh selama sebagian di dalam).
     `rel(${relasi});`,
     'out geom;',
   ].join('\n');
 }
 
-const COS = Math.cos((3.6 * Math.PI) / 180);
+const COS = Math.cos((kota.acuanProyeksi.lat * Math.PI) / 180);
 const meter = (a, b) => Math.hypot((a[0] - b[0]) * 111320 * COS, (a[1] - b[1]) * 110574);
 
 export const panjangGaris = (c) => c.reduce((t, p, i) => (i ? t + meter(c[i - 1], p) : 0), 0);
@@ -300,7 +281,7 @@ function potongKeWilayah(ways, diDalam) {
 }
 
 // Respons Overpass → daftar koridor siap disimpan + catatan.
-export function olahKoridorJalan(data, defs = KORIDOR_JALAN, relasi = RELASI_MEDAN) {
+export function olahKoridorJalan(data, defs = KORIDOR_JALAN, relasi = RELASI_BATAS) {
   const el = data?.elements || [];
   const diDalam = pembatasWilayah(el.find((e) => e.type === 'relation' && e.id === relasi));
   const semuaWay = el.filter((e) => e.type === 'way' && e.tags?.name);
@@ -327,7 +308,7 @@ export function olahKoridorJalan(data, defs = KORIDOR_JALAN, relasi = RELASI_MED
       jumlahWay: new Set(milik.map((w) => w.id)).size,
     });
   });
-  if (!diDalam) catatan.push({ kode: '-', pesan: 'batas Kota Medan tidak ada di respons; ruas tidak dipotong' });
+  if (!diDalam) catatan.push({ kode: '-', pesan: `batas kota ${kota.nama} tidak ada di respons; ruas tidak dipotong` });
   return { koridor, catatan };
 }
 

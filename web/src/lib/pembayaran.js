@@ -1,4 +1,5 @@
 import { tr, locale } from './i18n.js'
+import kota from './kota.js'
 // Pemesanan & Digital Payment (simulasi, T-302). Data dari API: GET /payments/services,
 // POST /payments, GET /payments(/:orderId), POST /payments/:orderId/cek.
 
@@ -117,7 +118,7 @@ export function slotParkir(tanggal, now = Date.now()) {
   const slot = []
   for (let m = 0; m < 24 * 60; m += 30) {
     const jam = `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`
-    const waktu = new Date(`${tanggal}T${jam}:00+07:00`)
+    const waktu = new Date(`${tanggal}T${jam}:00${kota.zonaWaktu.offset}`)
     slot.push({
       jam,
       waktu: waktu.toISOString(),

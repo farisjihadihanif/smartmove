@@ -663,7 +663,7 @@ class _PilihTempatScreenState extends State<PilihTempatScreen> {
       _galat = null;
     });
     try {
-      final near = widget.near ?? medanCenter;
+      final near = widget.near ?? pusatKota;
       final r = await _api.get(
         '/places/search',
         query: {'q': s, 'near': latLngQuery(near.latitude, near.longitude)},

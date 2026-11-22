@@ -5,6 +5,7 @@ import { httpError } from '../lib/httpError.js';
 import { tr } from '../lib/i18n.js';
 import { METODE, signatureValid, statusDariMidtrans } from './midtrans.js';
 import { catatPoin, poinPembayaran } from './points.js';
+import kota from '../cities/index.js';
 
 // Pemesanan & Digital Payment — SELALU simulasi (TASK Keputusan #3, ARCHITECTURE §5.3).
 // `Payment.status` hanya diubah oleh notifikasi Midtrans bertanda tangan sah (webhook atau
@@ -18,7 +19,7 @@ export const MAKS_JAM_PARKIR = 24;
 export const MAKS_HARI_PESAN = 30;
 export const KEDALUWARSA_MS = 24 * 60 * 60 * 1000;
 
-const WIB_MS = 7 * 60 * 60 * 1000;
+const WIB_MS = kota.zonaWaktu.offsetMs; // zona waktu kota aktif (Medan: WIB)
 const MENIT = 60 * 1000;
 const dua = (n) => String(n).padStart(2, '0');
 
@@ -32,7 +33,7 @@ export function wib(d) {
 }
 
 /** "YYYY-MM-DD" + "HH:mm" (WIB) → Date. */
-export const dariWib = (tanggal, jam) => new Date(`${tanggal}T${jam}:00+07:00`);
+export const dariWib = (tanggal, jam) => new Date(`${tanggal}T${jam}:00${kota.zonaWaktu.offset}`);
 
 /**
  * Pemilik transaksi untuk tampilan admin (`/admin/payments`, T-304). Akun yang sudah dihapus

@@ -17,6 +17,8 @@ const config = {
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean),
+  // Kota aktif (src/cities). Bawaan: medan.
+  city: env.CITY || 'medan',
   appUrl: env.APP_URL || 'http://localhost:4200',
   dnsServers: (env.DNS_SERVERS || '')
     .split(',')
