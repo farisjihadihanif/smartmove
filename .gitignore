@@ -9,3 +9,8 @@ dist/
 api/uploads/
 uploads/
 .playwright-mcp/
+
+# Local-only docs/agent files
+CLAUDE.md
+AGENTS.md
+docs/
