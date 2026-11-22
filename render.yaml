@@ -1,0 +1,66 @@
+# Render Blueprint — API SmartMove (gratis). Panduan lengkap: DEPLOY.md.
+# Web di Vercel (web/vercel.json), database di MongoDB Atlas M0.
+services:
+  - type: web
+    name: smartmove-api # URL: https://smartmove-api.onrender.com (samakan dengan web/vercel.json)
+    runtime: node
+    plan: free
+    region: singapore # terdekat ke Medan
+    rootDir: api
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 25.5.0
+      - key: CITY
+        value: medan
+      - key: TRUST_PROXY
+        value: "1"
+      - key: COOKIE_SAMESITE
+        value: lax
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_DAYS
+        value: "7"
+      # Diisi di Dashboard saat Blueprint dibuat (rahasia / tergantung akunmu).
+      - key: MONGO_URL
+        sync: false
+      - key: CLIENT_ORIGIN
+        sync: false
+      - key: APP_URL
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      # Email lewat API HTTP (Render free memblokir port SMTP).
+      - key: MAIL_PROVIDER
+        value: brevo
+      - key: MAIL_FROM
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      # Midtrans SANDBOX saja (simulasi).
+      - key: MIDTRANS_SERVER_KEY
+        sync: false
+      - key: MIDTRANS_CLIENT_KEY
+        sync: false
+      # Peta.
+      - key: OSRM_URL_CAR
+        value: https://routing.openstreetmap.de/routed-car
+      - key: OSRM_URL_FOOT
+        value: https://routing.openstreetmap.de/routed-foot
+      - key: NOMINATIM_URL
+        value: https://nominatim.openstreetmap.org
+      - key: NOMINATIM_EMAIL
+        sync: false
+      - key: MAPILLARY_TOKEN
+        sync: false

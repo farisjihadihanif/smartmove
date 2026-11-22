@@ -11,6 +11,7 @@ import TransitLine from '../../models/TransitLine.js';
 import Trip from '../../models/Trip.js';
 import User from '../../models/User.js';
 import { httpError } from '../../lib/httpError.js';
+import { hapusBerkas } from '../../services/berkas.js';
 import { publicLaporan } from '../../services/trafficReports.js';
 import { umpanBalikPublik } from '../../services/campaign.js';
 import { golonganTarif } from '../../services/tarif.js';
@@ -119,6 +120,7 @@ export function adminPenggunaRouter() {
       Payment.updateMany({ user: u._id }, { $unset: { user: 1 }, $set: { penggunaDihapus: true } }),
     ]);
     await u.deleteOne();
+    if (u.foto) await hapusBerkas(u.foto).catch(() => {});
     res.status(204).end();
   });
 

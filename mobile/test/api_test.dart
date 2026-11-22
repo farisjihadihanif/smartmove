@@ -19,13 +19,118 @@ ApiClient _client(
   hasInternet: () async => online,
 );
 
+http.Response _resp503(int _) => http.Response('', 503);
+
 http.Response _json(Object body, [int status = 200]) => http.Response(
   jsonEncode(body),
   status,
   headers: {'content-type': 'application/json; charset=utf-8'},
 );
 
+const _wakeCepat = WakeUp(
+  timeout: Duration(milliseconds: 200),
+  window: Duration(seconds: 2),
+  retryDelay: Duration(milliseconds: 5),
+  showAfter: Duration(milliseconds: 1),
+);
+
+ApiClient _wakeClient(
+  Future<http.Response> Function(http.Request) handler, {
+  bool online = true,
+  WakeUp wake = _wakeCepat,
+}) => ApiClient(
+  client: MockClient(handler),
+  tokens: MemoryTokenStore(),
+  baseUrl: 'http://api.test/api',
+  hasInternet: () async => online,
+  wakeUp: wake,
+);
+
 void main() {
+  group('server bangun tidur (T-305)', () {
+    test(
+      'GET: 503 & putus saat bangun → dicoba ulang sampai berhasil',
+      () async {
+        var n = 0;
+        final dilihat = <bool>[];
+        final api = _wakeClient((_) async {
+          n++;
+          if (n == 1) return http.Response('', 503);
+          if (n == 2) throw http.ClientException('putus');
+          return _json({'ok': true});
+        });
+        api.waking.addListener(() => dilihat.add(api.waking.value));
+        expect(await api.get('/home'), {'ok': true});
+        expect(n, 3);
+        expect(dilihat, contains(true));
+        expect(api.waking.value, isFalse);
+      },
+    );
+
+    test('POST putus jaringan tidak diulang (bisa sudah diproses)', () async {
+      var n = 0;
+      final api = _wakeClient((_) async {
+        n++;
+        throw http.ClientException('putus');
+      });
+      await expectLater(
+        api.post('/payments', {'a': 1}),
+        throwsA(isA<ApiException>().having((e) => e.isNetwork, 'net', true)),
+      );
+      expect(n, 1);
+    });
+
+    test('POST 502 saat bangun diulang (belum sampai ke API)', () async {
+      var n = 0;
+      final api = _wakeClient(
+        (_) async => ++n == 1 ? http.Response('', 502) : _json({'ok': 1}),
+      );
+      expect(await api.post('/auth/login', {'x': 1}), {'ok': 1});
+      expect(n, 2);
+    });
+
+    test('server tak kunjung bangun → galat jaringan setelah window', () async {
+      final api = _wakeClient(
+        (_) async => throw http.ClientException('putus'),
+        wake: const WakeUp(
+          timeout: Duration(milliseconds: 50),
+          window: Duration(milliseconds: 60),
+          retryDelay: Duration(milliseconds: 10),
+        ),
+      );
+      await expectLater(
+        api.get('/home'),
+        throwsA(
+          isA<ApiException>().having((e) => e.code, 'code', kServerUnreachable),
+        ),
+      );
+      expect(api.waking.value, isFalse);
+    });
+
+    test('offline → langsung galat OFFLINE tanpa menunggu', () async {
+      var n = 0;
+      final api = _wakeClient((_) async {
+        n++;
+        throw http.ClientException('putus');
+      }, online: false);
+      await expectLater(
+        api.get('/home'),
+        throwsA(isA<ApiException>().having((e) => e.code, 'code', kOffline)),
+      );
+      expect(n, 1);
+    });
+
+    test('server sudah bangun: 503 tidak diulang', () async {
+      var n = 0;
+      final api = _wakeClient(
+        (req) async => req.url.path.endsWith('/ok') ? _json({}) : _resp503(++n),
+      );
+      await api.get('/ok');
+      await expectLater(api.get('/x'), throwsA(isA<ApiException>()));
+      expect(n, 1);
+    });
+  });
+
   group('ApiClient', () {
     test('mengirim Bearer token dan membuang query kosong', () async {
       late http.Request seen;

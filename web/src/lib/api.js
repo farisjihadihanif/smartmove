@@ -52,6 +52,62 @@ export function networkError(online = typeof navigator === 'undefined' || naviga
     : new ApiError(0, tr('Kamu sedang offline'), 'OFFLINE')
 }
 
+// ── Server bangun tidur ─────────────────────────────────────────────────────
+// API di Render free tidur setelah ±15 menit tanpa trafik; permintaan pertama sesudahnya
+// bisa butuh ±60 detik. Selama itu klien menunggu lebih lama, menampilkan "Membangunkan
+// server…" (lihat ServerWakeBanner), dan mencoba ulang otomatis — bukan langsung galat.
+const MUNGKIN_TIDUR_MS = 14 * 60 * 1000 // tanpa respons selama ini → server mungkin tidur
+const TIMEOUT_BANGUN_MS = 70_000 // batas satu percobaan saat server mungkin tidur
+const BANGUN_MAKS_MS = 100_000 // total waktu mencoba ulang sebelum menyerah
+const TAMPIL_BANGUN_MS = 4_000 // permintaan lambat selama ini → tampilkan status bangun
+const JEDA_ULANG_MS = 3_000
+const STATUS_SEMENTARA = new Set([502, 503, 504])
+
+let terakhirOk = 0
+let membangunkan = false
+const pendengarBangun = new Set()
+
+/** Langganan status "server sedang bangun" (true/false). Mengembalikan fungsi berhenti. */
+export function onServerWaking(fn) {
+  pendengarBangun.add(fn)
+  fn(membangunkan)
+  return () => pendengarBangun.delete(fn)
+}
+function aturBangun(v) {
+  if (membangunkan === v) return
+  membangunkan = v
+  for (const fn of pendengarBangun) fn(v)
+}
+
+const tunggu = (ms, signal) =>
+  new Promise((resolve, reject) => {
+    const t = setTimeout(resolve, ms)
+    signal?.addEventListener('abort', () => {
+      clearTimeout(t)
+      reject(signal.reason ?? new DOMException('Aborted', 'AbortError'))
+    }, { once: true })
+  })
+
+/** Satu percobaan fetch. → Response, atau null bila gagal jaringan / habis waktu. */
+async function sekali(url, init, signal, mungkinTidur) {
+  const ctl = new AbortController()
+  const hentikan = () => ctl.abort(signal.reason)
+  if (signal?.aborted) hentikan()
+  signal?.addEventListener('abort', hentikan, { once: true })
+  const batas = mungkinTidur ? setTimeout(() => ctl.abort(), TIMEOUT_BANGUN_MS) : null
+  const lambat = mungkinTidur ? setTimeout(() => aturBangun(true), TAMPIL_BANGUN_MS) : null
+  try {
+    return await fetch(url, { ...init, signal: ctl.signal })
+  } catch (err) {
+    if (signal?.aborted) throw err?.name === 'AbortError' ? err : new DOMException('Aborted', 'AbortError')
+    return null
+  } finally {
+    clearTimeout(batas)
+    clearTimeout(lambat)
+    signal?.removeEventListener('abort', hentikan)
+  }
+}
+
 /**
  * Panggil API. Melempar ApiError { status, message, code } bila gagal
  * (format galat API_SPECS §1). `body` objek dikirim sebagai JSON; FormData apa adanya.
@@ -60,7 +116,6 @@ export async function request(path, { method = 'GET', query, body, signal, heade
   const init = {
     method,
     credentials: 'include',
-    signal,
     // Teks dari API (galat, sapaan, label) mengikuti bahasa pilihan (T-111).
     headers: { Accept: 'application/json', 'Accept-Language': bahasa, ...headers },
   }
@@ -71,13 +126,27 @@ export async function request(path, { method = 'GET', query, body, signal, heade
     init.body = JSON.stringify(body)
   }
 
+  const url = buildUrl(path, query)
+  // GET aman diulang. Selain GET hanya diulang bila jelas belum diproses API (502/503/504).
+  const bolehUlangGagalJaringan = method === 'GET' || method === 'HEAD'
+  const mulai = Date.now()
   let res
-  try {
-    res = await fetch(buildUrl(path, query), init)
-  } catch (err) {
-    if (err?.name === 'AbortError') throw err
-    throw networkError()
+  for (;;) {
+    const mungkinTidur = Date.now() - terakhirOk > MUNGKIN_TIDUR_MS
+    res = await sekali(url, init, signal, mungkinTidur)
+    const sementara = !res || STATUS_SEMENTARA.has(res.status)
+    const online = typeof navigator === 'undefined' || navigator.onLine !== false
+    const masihBangun = mungkinTidur || membangunkan
+    if (sementara && online && masihBangun && Date.now() - mulai < BANGUN_MAKS_MS && (res || bolehUlangGagalJaringan)) {
+      aturBangun(true)
+      await tunggu(JEDA_ULANG_MS, signal)
+      continue
+    }
+    break
   }
+  aturBangun(false)
+  if (!res) throw networkError()
+  if (!STATUS_SEMENTARA.has(res.status)) terakhirOk = Date.now()
 
   if (res.status === 204) return null
   const data = await res.json().catch(() => null)

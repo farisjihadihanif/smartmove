@@ -272,9 +272,9 @@ describe('event & konten', () => {
       .attach('gambar', PNG, 'helm.png');
     assert.equal(buat.status, 201);
     const g1 = buat.body.konten.gambar;
-    assert.match(g1, /^\/uploads\/campaign\/.+\.png$/);
+    assert.match(g1, /^\/api\/files\/[a-f0-9]{24}\.png$/);
     assert.equal(buat.body.konten.urutan, 2);
-    await fs.access(path.join(uploadDir, 'campaign', path.basename(g1)));
+    assert.equal((await request(app).get(g1)).status, 200);
 
     const ganti = await request(app)
       .patch(`/api/admin/contents/${buat.body.konten.id}`)
@@ -284,11 +284,11 @@ describe('event & konten', () => {
     assert.equal(ganti.status, 200);
     assert.equal(ganti.body.konten.aktif, false);
     assert.notEqual(ganti.body.konten.gambar, g1);
-    await assert.rejects(fs.access(path.join(uploadDir, 'campaign', path.basename(g1))));
+    assert.equal((await request(app).get(g1)).status, 404);
     assert.equal((await request(app).get('/api/campaign/contents?jenis=poster')).body.items.length, 0);
 
     await request(app).delete(`/api/admin/contents/${buat.body.konten.id}`).set('Authorization', a.auth).expect(204);
-    await assert.rejects(fs.access(path.join(uploadDir, 'campaign', path.basename(ganti.body.konten.gambar))));
+    assert.equal((await request(app).get(ganti.body.konten.gambar)).status, 404);
   });
 });
 

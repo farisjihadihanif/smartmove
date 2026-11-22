@@ -4,6 +4,7 @@ import { RouterProvider } from 'react-router-dom'
 import './index.css'
 import { AuthProvider } from './lib/auth.jsx'
 import { router } from './router.jsx'
+import ServerWakeBanner from './components/ServerWakeBanner.jsx'
 import { mulaiTema } from './lib/tema.js'
 
 mulaiTema()
@@ -12,6 +13,7 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <AuthProvider>
       <RouterProvider router={router} />
+      <ServerWakeBanner />
     </AuthProvider>
   </StrictMode>,
 )

@@ -386,6 +386,31 @@ describe('cron kedaluwarsa', () => {
     assert.deepEqual(st, { 'SM-LAMA-1': 'kedaluwarsa', 'SM-LAMA-2': 'lunas', 'SM-BARU': 'menunggu' });
     assert.equal((await User.findById(u.id)).poin, 5);
   });
+
+  test('kedaluwarsa malas saat dibaca (server tidur, cron tidak jalan)', async () => {
+    const u = await daftar('sari');
+    const lama = { user: u.id, layanan: { kode: 'X', nama: 'X' }, jumlah: 5000, createdAt: new Date(Date.now() - 2 * HARI) };
+    await Payment.create([
+      { ...lama, orderId: 'SM-MALAS-1' },
+      { ...lama, orderId: 'SM-MALAS-2' },
+      { ...lama, orderId: 'SM-MALAS-BARU', createdAt: new Date() },
+    ]);
+    jawabStatus = () => ({ status: 200, body: { status_code: '404' } });
+
+    const daftarRes = await request(app).get('/api/payments').set('Authorization', u.auth);
+    assert.equal(daftarRes.status, 200);
+    const st = Object.fromEntries(daftarRes.body.items.map((p) => [p.orderId, p.status]));
+    assert.deepEqual(st, { 'SM-MALAS-1': 'kedaluwarsa', 'SM-MALAS-2': 'kedaluwarsa', 'SM-MALAS-BARU': 'menunggu' });
+
+    await Payment.create({ ...lama, orderId: 'SM-MALAS-3' });
+    const detail = await request(app).get('/api/payments/SM-MALAS-3').set('Authorization', u.auth);
+    assert.equal(detail.body.payment.status, 'kedaluwarsa');
+
+    await Payment.create({ ...lama, orderId: 'SM-MALAS-4' });
+    const a = await daftar('pengawas', { admin: true });
+    const admin = await request(app).get('/api/admin/payments?q=SM-MALAS-4').set('Authorization', a.auth);
+    assert.equal(admin.body.items[0].status, 'kedaluwarsa');
+  });
 });
 
 describe('admin /admin/payment-services', () => {

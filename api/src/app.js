@@ -10,6 +10,7 @@ import { loadUser } from './middleware/auth.js';
 import { pasangBahasa } from './lib/i18n.js';
 import { createMailer } from './services/mail.js';
 import { createMidtrans } from './services/midtrans.js';
+import { berkasRouter } from './services/berkas.js';
 import { authRouter } from './routes/auth.js';
 import { usersRouter } from './routes/users.js';
 import { homeRouter } from './routes/home.js';
@@ -30,15 +31,23 @@ export function createApp(opts = {}) {
   const midtrans = cfg.midtransClient || createMidtrans(cfg);
   const app = express();
 
-  app.set('trust proxy', 1); // di belakang Nginx
+  app.set('trust proxy', cfg.trustProxy ?? 1); // di belakang proxy hosting (Render) / Nginx
   app.disable('x-powered-by');
+  // Cek kesehatan untuk Render (healthCheckPath), di luar rate limit & tanpa cookie.
+  app.get('/healthz', (req, res) => {
+    const db = mongoose.connection.readyState === 1;
+    res.status(db ? 200 : 503).json({ ok: db, db });
+  });
   app.use(pasangBahasa); // T-111: teks API ikut Accept-Language
   app.use(helmet());
   app.use(cors({ origin: cfg.clientOrigin, credentials: true }));
   app.use(express.json({ limit: '1mb' }));
   app.use(cookieParser());
 
-  // Foto profil. Boleh dimuat dari origin lain (web dev di port 5173, aplikasi mobile).
+  // Gambar unggahan di GridFS (foto profil, poster). Di luar limiter umum: di-cache lama & sering dimuat.
+  app.use('/api/files', berkasRouter());
+
+  // Berkas lama sebelum GridFS (disk). Boleh dimuat dari origin lain.
   app.use(
     '/uploads',
     (req, res, next) => {
@@ -72,7 +81,7 @@ export function createApp(opts = {}) {
   api.use('/campaign', campaignRouter());
   api.use('/payments', paymentsRouter(cfg, { midtrans }));
   api.use('/rewards', rewardsRouter());
-  api.use('/admin', adminRouter(cfg));
+  api.use('/admin', adminRouter(cfg, { midtrans }));
   // Satu kuota bersama untuk semua endpoint yang memanggil layanan peta.
   const mapLimit = rateLimit({
     windowMs: cfg.mapRateLimit.windowMs,

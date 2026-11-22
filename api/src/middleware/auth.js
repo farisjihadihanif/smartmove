@@ -15,8 +15,10 @@ export function signToken(user, cfg) {
 export function cookieOptions(cfg) {
   return {
     httpOnly: true,
-    sameSite: 'lax',
-    secure: cfg.nodeEnv === 'production',
+    // lax: web memanggil API lewat rewrite Vercel (satu domain). `none` hanya bila web
+    // memanggil API lintas domain langsung (VITE_API_URL); `none` selalu butuh Secure.
+    sameSite: cfg.cookieSameSite === 'none' ? 'none' : 'lax',
+    secure: cfg.nodeEnv === 'production' || cfg.cookieSameSite === 'none',
     path: '/',
   };
 }

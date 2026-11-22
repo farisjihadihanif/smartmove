@@ -25,6 +25,12 @@ after(async () => {
 });
 
 describe('app dasar', () => {
+  test('GET /healthz (Render) → 200 + db, di luar /api', async () => {
+    const res = await request(createApp()).get('/healthz');
+    assert.equal(res.status, 200);
+    assert.deepEqual(res.body, { ok: true, db: true });
+  });
+
   test('GET /api/health → ok + header helmet', async () => {
     const res = await request(createApp()).get('/api/health');
     assert.equal(res.status, 200);

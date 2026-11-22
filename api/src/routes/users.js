@@ -1,22 +1,19 @@
-import crypto from 'node:crypto';
-import fs from 'node:fs/promises';
-import path from 'node:path';
 import express from 'express';
 import User from '../models/User.js';
 import { jenisGambar, terimaGambar } from '../lib/gambar.js';
 import { httpError } from '../lib/httpError.js';
 import { hashPassword, checkPassword as cocok } from '../lib/password.js';
 import { str, checkUsername, checkPassword } from '../lib/validate.js';
+import { BERKAS_PREFIX, hapusBerkas, simpanBerkas } from '../services/berkas.js';
 import { requireAuth, publicUser, signToken, setAuthCookie } from '../middleware/auth.js';
 
 export const FOTO_MAX_BYTES = 2 * 1024 * 1024;
-export const AVATAR_PREFIX = '/uploads/avatars/';
+export const AVATAR_PREFIX = BERKAS_PREFIX; // GridFS (services/berkas.js)
 
 const FIELD_TEKS = { namaLengkap: 100, telepon: 20, alamat: 200, bio: 300 };
 
 export function usersRouter(cfg) {
   const r = express.Router();
-  const avatarDir = path.join(cfg.uploadDir, 'avatars');
 
   const terimaFoto = terimaGambar('foto', { maxBytes: FOTO_MAX_BYTES, label: 'foto' });
 
@@ -45,23 +42,18 @@ export function usersRouter(cfg) {
     if (req.file) {
       const ext = jenisGambar(req.file.buffer);
       if (!ext) throw httpError(400, 'Foto harus berupa gambar JPG, PNG, atau WEBP');
-      await fs.mkdir(avatarDir, { recursive: true });
-      const nama = `${user.id}-${crypto.randomBytes(6).toString('hex')}.${ext}`;
-      fotoBaru = path.join(avatarDir, nama);
-      await fs.writeFile(fotoBaru, req.file.buffer);
+      fotoBaru = await simpanBerkas(req.file.buffer, { ext, folder: 'avatars', pemilik: user._id });
       fotoLama = user.foto;
-      user.foto = AVATAR_PREFIX + nama;
+      user.foto = fotoBaru;
     }
 
     try {
       await user.save();
     } catch (err) {
-      if (fotoBaru) await fs.rm(fotoBaru, { force: true });
+      if (fotoBaru) await hapusBerkas(fotoBaru);
       throw err;
     }
-    if (fotoLama?.startsWith(AVATAR_PREFIX)) {
-      await fs.rm(path.join(avatarDir, path.basename(fotoLama)), { force: true });
-    }
+    if (fotoLama) await hapusBerkas(fotoLama, { uploadDir: cfg.uploadDir });
     res.json({ user: publicUser(user) });
   });
 

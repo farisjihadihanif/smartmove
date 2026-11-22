@@ -9,11 +9,13 @@ import 'screens/home/home_shell.dart';
 import 'screens/splash_screen.dart';
 import 'state.dart';
 import 'theme.dart';
+import 'widgets/server_wake_banner.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setupFonts();
-  final state = AppState(ApiClient());
+  // WakeUp: API gratis di Render bisa butuh ±1 menit untuk bangun (T-305).
+  final state = AppState(ApiClient(wakeUp: const WakeUp()));
   // Bahasa dipasang sebelum layar pertama supaya teks (dan Accept-Language) langsung benar.
   await state.muatBahasa();
   state
@@ -103,6 +105,10 @@ class _SmartMoveAppState extends State<SmartMoveApp>
         supportedLocales: const [Locale('id', 'ID'), Locale('en', 'US')],
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
         home: RootGate(splashDuration: widget.splashDuration),
+        builder: (context, child) => ServerWakeBanner(
+          waking: widget.state.api.waking,
+          child: child ?? const SizedBox.shrink(),
+        ),
       ),
     );
   }

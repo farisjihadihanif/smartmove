@@ -265,9 +265,9 @@ async function beriPoinPembayaran(p) {
  * Status final dari Midtrans diterapkan; selain itu (belum dibayar / tak ada) → `kedaluwarsa`.
  * → jumlah yang diproses.
  */
-export async function kedaluwarsakanPembayaran({ midtrans, now = Date.now(), logger = console } = {}) {
-  const lama = await Payment.find({ status: 'menunggu', createdAt: { $lt: new Date(now - KEDALUWARSA_MS) } })
-    .limit(500)
+export async function kedaluwarsakanPembayaran({ midtrans, now = Date.now(), logger = console, filter = {}, batas = 500 } = {}) {
+  const lama = await Payment.find({ ...filter, status: 'menunggu', createdAt: { $lt: new Date(now - KEDALUWARSA_MS) } })
+    .limit(batas)
     .lean();
   let diproses = 0;
   for (const p of lama) {
@@ -284,4 +284,36 @@ export async function kedaluwarsakanPembayaran({ midtrans, now = Date.now(), log
     }
   }
   return diproses;
+}
+
+/** Payment `menunggu` yang sudah lewat batas 24 jam (belum diproses cron). */
+export const basi = (p, now = Date.now()) =>
+  p?.status === 'menunggu' && new Date(p.createdAt).getTime() < now - KEDALUWARSA_MS;
+
+const COBA_LAGI_MS = 60 * 1000;
+const terakhirDicoba = new Map(); // orderId → waktu percobaan terakhir (hindari Midtrans tiap polling)
+
+/**
+ * Kedaluwarsa "malas" saat data dibaca. Hosting gratis (Render) menidurkan server setelah
+ * 15 menit tanpa trafik, jadi cron jam-an di server.js bisa tidak pernah jalan. Setiap
+ * daftar/detail pembayaran yang dibaca memproses item basinya dulu (sama seperti cron:
+ * dicocokkan dengan Midtrans, selain itu `kedaluwarsa`). → true bila ada yang diproses
+ * (pemanggil membaca ulang datanya).
+ */
+export async function kedaluwarsakanSaatBaca(items, { midtrans, now = Date.now(), logger = console } = {}) {
+  const ids = items
+    .filter((p) => basi(p, now) && !(now - (terakhirDicoba.get(p.orderId) ?? -Infinity) < COBA_LAGI_MS))
+    .map((p) => {
+      terakhirDicoba.set(p.orderId, now);
+      return p._id;
+    });
+  if (terakhirDicoba.size > 5000) terakhirDicoba.clear();
+  if (!ids.length) return false;
+  const n = await kedaluwarsakanPembayaran({ midtrans, now, logger, filter: { _id: { $in: ids } }, batas: ids.length }).catch(
+    (err) => {
+      logger.warn?.(`Kedaluwarsa saat baca gagal: ${err.message}`);
+      return 0;
+    },
+  );
+  return n > 0;
 }

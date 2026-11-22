@@ -281,7 +281,7 @@ describe('profil', () => {
     assert.equal(res.status, 409);
   });
 
-  test('unggah foto PNG (multipart) → disimpan & bisa diakses; foto lama dihapus', async () => {
+  test('unggah foto PNG (multipart) → disimpan di GridFS & bisa diakses; foto lama dihapus', async () => {
     const up = () =>
       request(app)
         .patch('/api/users/me')
@@ -292,16 +292,18 @@ describe('profil', () => {
     const a = await up();
     assert.equal(a.status, 200, JSON.stringify(a.body));
     assert.equal(a.body.user.namaLengkap, 'Budi Foto');
-    assert.match(a.body.user.foto, /^\/uploads\/avatars\/[a-f0-9]+-[a-f0-9]{12}\.png$/);
+    assert.match(a.body.user.foto, /^\/api\/files\/[a-f0-9]{24}\.png$/);
     const get = await request(app).get(a.body.user.foto);
     assert.equal(get.status, 200);
     assert.equal(get.headers['cross-origin-resource-policy'], 'cross-origin');
+    assert.equal(get.headers['content-type'], 'image/png');
+    assert.ok(Buffer.compare(get.body, PNG) === 0);
 
     const b = await up();
     assert.notEqual(b.body.user.foto, a.body.user.foto);
-    const files = await fs.readdir(path.join(uploadDir, 'avatars'));
-    assert.ok(files.includes(path.basename(b.body.user.foto)));
-    assert.ok(!files.includes(path.basename(a.body.user.foto)));
+    assert.equal((await request(app).get(b.body.user.foto)).status, 200);
+    assert.equal((await request(app).get(a.body.user.foto)).status, 404);
+    assert.equal((await request(app).get('/api/files/bukan-id.png')).status, 404);
   });
 
   test('file bukan gambar (walau mimetype image/png) → 400', async () => {

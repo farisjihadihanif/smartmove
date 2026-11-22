@@ -13,6 +13,7 @@ import {
   pembayaranPublik,
   terapkanNotifikasi,
   wib,
+  kedaluwarsakanSaatBaca,
 } from '../services/payments.js';
 import kota from '../cities/index.js';
 
@@ -81,16 +82,17 @@ export function paymentsRouter(cfg, { midtrans }) {
   r.get('/', requireAuth, async (req, res) => {
     const { page, limit, skip } = paginasi(req.query, { limit: 20, maks: 50 });
     const filter = { user: req.user._id };
-    const [items, total] = await Promise.all([
-      Payment.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
-      Payment.countDocuments(filter),
-    ]);
+    const ambil = () => Payment.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean();
+    let [items, total] = await Promise.all([ambil(), Payment.countDocuments(filter)]);
+    if (await kedaluwarsakanSaatBaca(items, { midtrans })) items = await ambil();
     res.json({ items: items.map((p) => pembayaranPublik(p, req.bahasa)), page, total });
   });
 
   async function milikSendiri(req) {
-    const p = await Payment.findOne({ orderId: String(req.params.orderId), user: req.user._id });
+    const cari = () => Payment.findOne({ orderId: String(req.params.orderId), user: req.user._id });
+    let p = await cari();
     if (!p) throw httpError(404, 'Transaksi tidak ditemukan');
+    if (await kedaluwarsakanSaatBaca([p], { midtrans })) p = await cari();
     return p;
   }
 

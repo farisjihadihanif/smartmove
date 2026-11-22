@@ -19,6 +19,10 @@ const config = {
     .filter(Boolean),
   // Kota aktif (src/cities). Bawaan: medan.
   city: env.CITY || 'medan',
+  // Jumlah proxy di depan API yang dipercaya untuk IP klien (Render: 1). Lihat DEPLOY.md.
+  trustProxy: env.TRUST_PROXY === undefined || env.TRUST_PROXY === '' ? 1 : Number(env.TRUST_PROXY),
+  // lax (bawaan) | none (web & API beda domain tanpa rewrite).
+  cookieSameSite: (env.COOKIE_SAMESITE || 'lax').toLowerCase(),
   appUrl: env.APP_URL || 'http://localhost:4200',
   dnsServers: (env.DNS_SERVERS || '')
     .split(',')
@@ -64,12 +68,17 @@ const config = {
   mapUserAgent: `SmartMoveMedan/1.0 (+${env.APP_URL || 'http://localhost:4200'})`,
   // console | smtp (lihat services/mail.js). Diabaikan di produksi.
   mailMode: env.MAIL_MODE || 'console',
+  // smtp (bawaan, dev lokal) | brevo | resend (API HTTP; Render free memblokir port SMTP).
+  mailProvider: (env.MAIL_PROVIDER || 'smtp').toLowerCase(),
+  mailFrom: env.MAIL_FROM || env.SMTP_FROM || env.SMTP_USER,
+  brevoApiKey: env.BREVO_API_KEY,
+  resendApiKey: env.RESEND_API_KEY,
   smtp: {
     user: env.SMTP_USER,
     pass: env.SMTP_PASS,
     from: env.SMTP_FROM || env.SMTP_USER,
   },
-  // Foto profil disimpan di disk dan disajikan di /uploads.
+  // Berkas lama sebelum GridFS (disk, /uploads). Unggahan baru disimpan di GridFS.
   uploadDir: env.UPLOAD_DIR || path.join(apiRoot, 'uploads'),
 };
 
@@ -77,6 +86,11 @@ export function assertConfig(cfg = config) {
   const missing = [];
   if (!cfg.mongoUrl) missing.push('MONGO_URL');
   if (!cfg.jwtSecret) missing.push('JWT_SECRET');
+  if (cfg.nodeEnv === 'production') {
+    // Origin web wajib diisi di produksi (cookie + CORS); bawaan localhost tidak berguna.
+    if (!env.CLIENT_ORIGIN) missing.push('CLIENT_ORIGIN');
+    if (!env.APP_URL) missing.push('APP_URL');
+  }
   if (missing.length) {
     throw new Error(`Variabel lingkungan wajib belum diisi: ${missing.join(', ')}`);
   }

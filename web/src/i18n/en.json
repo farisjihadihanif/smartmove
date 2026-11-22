@@ -773,5 +773,7 @@
   "Turunkan {0}": "Move {0} down",
   "Pilih {0}": "Choose {0}",
   "Kurangi {0}": "Fewer {0}",
-  "Tambah {0}": "More {0}"
+  "Tambah {0}": "More {0}",
+  "Membangunkan server…": "Waking up the server…",
+  "Server gratis sedang bangun, biasanya kurang dari 1 menit.": "The free server is waking up, usually in under a minute."
 }

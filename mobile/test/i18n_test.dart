@@ -22,13 +22,16 @@ void main() {
   setUpAll(() => aturKamus(_kamus()));
   tearDown(() => aturBahasa('id'));
 
-  test('tr: kunci = teks Indonesia, {0} diisi, belum diterjemahkan → apa adanya', () {
-    expect(tr('Sisa {0} kursi', [3]), 'Sisa 3 kursi');
-    aturBahasa('en');
-    expect(tr('Sisa {0} kursi', [3]), '3 seats left');
-    expect(tr('Teks yang belum ada'), 'Teks yang belum ada');
-    expect(tr('Mobil'), 'Car');
-  });
+  test(
+    'tr: kunci = teks Indonesia, {0} diisi, belum diterjemahkan → apa adanya',
+    () {
+      expect(tr('Sisa {0} kursi', [3]), 'Sisa 3 kursi');
+      aturBahasa('en');
+      expect(tr('Sisa {0} kursi', [3]), '3 seats left');
+      expect(tr('Teks yang belum ada'), 'Teks yang belum ada');
+      expect(tr('Mobil'), 'Car');
+    },
+  );
 
   test('angka, rupiah, tanggal & jam mengikuti bahasa', () {
     final t = DateTime.utc(2026, 11, 20, 0, 40); // 07.40 WIB, Jumat

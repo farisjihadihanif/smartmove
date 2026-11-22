@@ -539,5 +539,7 @@
   "{0}. Tidak ada uang sungguhan.": "{0}. No real money involved.",
   "{0}{1}\n\nKampanye keselamatan SmartMove Medan": "{0}{1}\n\nSmartMove Medan safety campaign",
   "{0}× pindah": "{0}× transfer",
-  "±{0} dari titik, {1}": "±{0} from the point, {1}"
+  "±{0} dari titik, {1}": "±{0} from the point, {1}",
+  "Membangunkan server…": "Waking up the server…",
+  "Server gratis sedang bangun, biasanya kurang dari 1 menit.": "The free server is waking up, usually in under a minute."
 }

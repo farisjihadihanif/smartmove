@@ -1,6 +1,3 @@
-import crypto from 'node:crypto';
-import fs from 'node:fs/promises';
-import path from 'node:path';
 import express from 'express';
 import Content from '../../models/Content.js';
 import Event from '../../models/Event.js';
@@ -8,12 +5,13 @@ import RoadCorridor from '../../models/RoadCorridor.js';
 import { jenisGambar, terimaGambar } from '../../lib/gambar.js';
 import { httpError } from '../../lib/httpError.js';
 import { eventPublik, JENIS_KONTEN, kontenPublik } from '../../services/campaign.js';
+import { BERKAS_PREFIX, hapusBerkas, simpanBerkas } from '../../services/berkas.js';
 import { panjangGaris } from '../../services/roadCorridors.js';
 import { bersih, bilangan, bool, garis, paginasi, pilihan, teks, titik, waktu, wajibId } from './bantu.js';
 
 // Admin jalan utama (koreksi geometri OSM), EventAlert, dan konten kampanye (T-208).
 
-export const POSTER_PREFIX = '/uploads/campaign/';
+export const POSTER_PREFIX = BERKAS_PREFIX; // GridFS (services/berkas.js)
 export const POSTER_MAX_BYTES = 3 * 1024 * 1024;
 const JENIS_EVENT = ['cfd', 'rekayasa_arus', 'acara', 'lainnya'];
 
@@ -49,20 +47,14 @@ function dariForm(req) {
 
 export function adminKontenRouter(cfg) {
   const r = express.Router();
-  const posterDir = path.join(cfg.uploadDir, 'campaign');
   const terimaPoster = terimaGambar('gambar', { maxBytes: POSTER_MAX_BYTES, label: 'gambar' });
 
   async function simpanGambar(file) {
     const ext = jenisGambar(file.buffer);
     if (!ext) throw httpError(400, 'Gambar harus berupa JPG, PNG, atau WEBP');
-    await fs.mkdir(posterDir, { recursive: true });
-    const nama = `${Date.now()}-${crypto.randomBytes(6).toString('hex')}.${ext}`;
-    await fs.writeFile(path.join(posterDir, nama), file.buffer);
-    return POSTER_PREFIX + nama;
+    return simpanBerkas(file.buffer, { ext, folder: 'campaign' });
   }
-  const hapusGambar = async (p) => {
-    if (p?.startsWith(POSTER_PREFIX)) await fs.rm(path.join(posterDir, path.basename(p)), { force: true });
-  };
+  const hapusGambar = (p) => hapusBerkas(p, { uploadDir: cfg.uploadDir });
 
   // ── Jalan utama (RoadCorridor) ──
   r.get('/road-corridors', async (req, res) => {

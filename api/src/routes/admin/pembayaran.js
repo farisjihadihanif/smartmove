@@ -5,7 +5,7 @@ import Redemption from '../../models/Redemption.js';
 import User from '../../models/User.js';
 import Voucher from '../../models/Voucher.js';
 import { httpError } from '../../lib/httpError.js';
-import { JENIS_LAYANAN, layananPublik, pembayaranPublik, pemilikPembayaran } from '../../services/payments.js';
+import { JENIS_LAYANAN, kedaluwarsakanSaatBaca, layananPublik, pembayaranPublik, pemilikPembayaran } from '../../services/payments.js';
 import { PAYMENT_STATUS } from '../../models/Payment.js';
 import { voucherPublik } from '../../services/rewards.js';
 import { bersih, bilangan, bool, paginasi, pilihan, teks, waktu, wajibId } from './bantu.js';
@@ -55,7 +55,7 @@ function bacaLayanan(b, { baru }) {
   return data;
 }
 
-export function adminPembayaranRouter() {
+export function adminPembayaranRouter(cfg, { midtrans } = {}) {
   const r = express.Router();
 
   // GET /admin/payment-services?q=&jenis=&page
@@ -177,8 +177,12 @@ export function adminPembayaranRouter() {
       const users = await User.find({ username: re }).select('_id').limit(50).lean();
       filter.$or = [{ orderId: re }, { 'layanan.nama': re }, { user: { $in: users.map((u) => u._id) } }];
     }
+    const ambil = () =>
+      Payment.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).populate('user', 'username').lean();
+    // Kedaluwarsa malas dulu (server gratis bisa tidur sehingga cron tidak jalan).
+    await kedaluwarsakanSaatBaca(await ambil(), { midtrans });
     const [items, total, ringkas] = await Promise.all([
-      Payment.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).populate('user', 'username').lean(),
+      ambil(),
       Payment.countDocuments(filter),
       Payment.aggregate([{ $group: { _id: '$status', n: { $sum: 1 }, jumlah: { $sum: '$jumlah' } } }]),
     ]);
