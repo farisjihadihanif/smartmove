@@ -1,0 +1,18 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "npm ci --omit=dev",
+  "outputDirectory": "public",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/api/index"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/pembayaran",
+      "schedule": "0 17 * * *"
+    }
+  ]
+}
