@@ -44,14 +44,28 @@ async function cronPembayaran(req, res) {
   res.end(JSON.stringify({ ok: true, diproses: n }));
 }
 
+// Penyebab kegagalan start dalam bentuk aman untuk ditampilkan: nama variabel
+// atau jenis error saja, tanpa isi MONGO_URL atau rahasia lain.
+function alasanGagal(err) {
+  const pesan = String(err?.message ?? '');
+  if (pesan.startsWith('Variabel lingkungan wajib belum diisi')) return pesan;
+  const nama = err?.name ?? 'Error';
+  if (nama === 'MongoParseError' || /Invalid scheme|URI/i.test(pesan)) return 'Format MONGO_URL salah';
+  if (nama === 'MongoServerSelectionError' || /ENOTFOUND|ECONNREFUSED|ETIMEDOUT/.test(pesan)) {
+    return 'Tidak bisa terhubung ke MongoDB: cek Network Access Atlas (0.0.0.0/0) dan nama cluster di MONGO_URL';
+  }
+  if (/auth|Authentication/i.test(pesan)) return 'Login MongoDB gagal: cek username/password di MONGO_URL';
+  return `Kesalahan saat start (${nama})`;
+}
+
 export default async function handler(req, res) {
   try {
     await persiapkan();
   } catch (err) {
-    console.error(err.message);
+    console.error(err);
     res.statusCode = 503;
     res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ message: 'Server belum siap, coba lagi sebentar lagi' }));
+    res.end(JSON.stringify({ message: 'Server belum siap, coba lagi sebentar lagi', alasan: alasanGagal(err) }));
     return;
   }
   if (req.url.split('?')[0] === '/api/cron/pembayaran') return cronPembayaran(req, res);
