@@ -50,6 +50,12 @@ android {
         }
     }
 
+    // Lint bawaan AGP crash saat menganalisis plugin image_picker_android
+    // (NoSuchMethodError List.removeLast). Lint tetap bisa dijalankan manual.
+    lint {
+        checkReleaseBuilds = false
+    }
+
     buildTypes {
         release {
             // Falls back to the debug key so `flutter run --release` works without key.properties.
