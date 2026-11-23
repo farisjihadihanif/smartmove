@@ -98,7 +98,7 @@ class _SmartMoveAppState extends State<SmartMoveApp>
     return AppScope(
       state: widget.state,
       child: MaterialApp(
-        title: 'SmartMove Medan',
+        title: 'SmartMove',
         debugShowCheckedModeBanner: false,
         theme: buildTheme(gelap: gelap),
         locale: localeAktif,
