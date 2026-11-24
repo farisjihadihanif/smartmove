@@ -12,7 +12,7 @@ Aplikasi mobilitas kota Medan: peta dan rute (OpenStreetMap), transportasi umum,
 
 Website Deployment on: https://smartmoved.vercel.app
 
-Mobile APP availible Version v.01 on release
+The mobile APP v.01 version available on release
 
 ## Copyright
 
