@@ -8,6 +8,11 @@ Aplikasi mobilitas kota Medan: peta dan rute (OpenStreetMap), transportasi umum,
 | `web/`    | Web React + Vite                                                     |
 | `mobile/` | Aplikasi Flutter (Android)                                           |
 
+## Website and Mobile APP
+
+Website Deployment on: https://smartmoved.vercel.app
+Mobile APP availible Version v.01 on release
+
 ## Copyright
 
 © 2026 Faris Jihadi Hanif Lubis. All rights reserved.
