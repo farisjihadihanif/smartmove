@@ -6,6 +6,7 @@ import PageShell from '../../components/PageShell.jsx'
 import { fileUrl } from '../../lib/api.js'
 import { useApiGet } from '../../lib/useApiGet.js'
 import { tr } from '../../lib/i18n.js'
+import { revealList } from '../../lib/reveal.js'
 
 // Poster kampanye (T-207): galeri poster aktif; ketuk → tampilan penuh + Bagikan / Unduh.
 export default function Poster() {
@@ -21,26 +22,30 @@ export default function Poster() {
         {status === 'ok' && items.length === 0 && (
           <EmptyState icon={ImageIcon} title={tr('Belum ada poster')} message={tr('Poster kampanye keselamatan dari pengelola SmartMove akan muncul di sini.')} />
         )}
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 lg:gap-6">
-          {items.map((p) => (
-            <li key={p.id}>
-              <button
-                type="button"
-                onClick={() => setBuka(p)}
-                className="group block w-full overflow-hidden rounded-2xl bg-surface-nav text-left ring-1 ring-ink/[0.06] transition hover:ring-pill-via/40"
-              >
-                {p.gambar ? (
-                  <img src={fileUrl(p.gambar)} alt="" loading="lazy" className="aspect-[3/4] w-full object-cover transition group-hover:scale-[1.02]" />
-                ) : (
-                  <span className="grid aspect-[3/4] place-items-center text-ink/30">
-                    <ImageIcon size={40} aria-hidden="true" />
-                  </span>
-                )}
-                <span className="block px-3 py-2.5 text-[14px] font-semibold leading-snug">{p.judul}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
+        {items.length > 0 && (
+          <ul ref={revealList} className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 lg:gap-6">
+            {items.map((p) => (
+              <li key={p.id} className="fx-card rounded-2xl">
+                <button
+                  type="button"
+                  onClick={() => setBuka(p)}
+                  className="block w-full overflow-hidden rounded-2xl bg-surface-nav text-left ring-1 ring-ink/[0.06]"
+                >
+                  {p.gambar ? (
+                    <span className="fx-zoom block overflow-hidden">
+                      <img src={fileUrl(p.gambar)} alt="" loading="lazy" className="aspect-[3/4] w-full object-cover" />
+                    </span>
+                  ) : (
+                    <span className="grid aspect-[3/4] place-items-center text-ink/30">
+                      <ImageIcon size={40} aria-hidden="true" />
+                    </span>
+                  )}
+                  <span className="block px-3 py-2.5 text-[14px] font-semibold leading-snug">{p.judul}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
       {buka && <Penampil poster={buka} onTutup={() => setBuka(null)} />}
     </PageShell>

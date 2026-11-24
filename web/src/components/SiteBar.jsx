@@ -12,11 +12,11 @@ import { tr } from '../lib/i18n.js'
 export default function SiteBar({ signedIn, unread = 0, onNotifications, className = '' }) {
   return (
     <div className={`hidden min-h-touch items-center justify-between gap-6 lg:flex ${className}`}>
-      <Link to="/" className="flex items-center gap-3 rounded-full pr-2">
+      <Link to="/" className="fx-none flex items-center gap-3 rounded-full pr-2">
         <span className="grid size-11 place-items-center rounded-full bg-white/85">
           <img src={logo} alt="" width="34" height="26" className="w-[34px]" />
         </span>
-        <span className="font-serif text-lg leading-none">{tr('SmartMove Medan')}</span>
+        <span className="fx-line font-serif text-lg leading-none">{tr('SmartMove Medan')}</span>
       </Link>
       <div className="flex items-center gap-3">
         <TopNav />

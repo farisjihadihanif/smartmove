@@ -16,6 +16,7 @@ import { PESAN_DIGABUNG, PESAN_TERKIRIM, teksBagikanLaluLintas } from '../lib/la
 import { useAuth } from '../lib/useAuth.js'
 import { useLaluLintas } from '../lib/useLaluLintas.js'
 import { tr } from '../lib/i18n.js'
+import { revealUp } from '../lib/reveal.js'
 
 // Live Traffic Information (mockup hal. 6, PRD §6.2, T-205).
 // Tab Estimasi Waktu: waktu tempuh jalan utama + kotak "12 mnt / 4,9 km" di peta.
@@ -276,7 +277,7 @@ export default function LaluLintas() {
               />
             ) : estimasi ? (
               <>
-                <h2 className="font-serif text-[1.375rem] leading-tight">{tr('Jalan utama sekarang')}</h2>
+                <h2 ref={revealUp} className="font-serif text-[1.375rem] leading-tight">{tr('Jalan utama sekarang')}</h2>
                 <TrafficLegend className="mb-2 mt-2" />
                 <DaftarKoridor state={koridor} pilih={pilih} onPilih={setPilih} onRetry={muatUlang} />
               </>
@@ -292,7 +293,7 @@ export default function LaluLintas() {
                   />
                 ) : (
                   <>
-                    <h2 className="font-serif text-[1.375rem] leading-tight">
+                    <h2 ref={revealUp} className="font-serif text-[1.375rem] leading-tight">
                       {laporan.length ? tr("{0} laporan warga di area ini", { 0: laporan.length }) : tr('Belum ada laporan di area ini')}
                     </h2>
                     <p className="mt-1 text-[14px] leading-relaxed text-ink/65">

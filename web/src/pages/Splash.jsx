@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import logo from '../assets/brand/logo.webp'
 import { markWelcomeSeen } from '../lib/welcome.js'
 import { tr } from '../lib/i18n.js'
+import { revealList } from '../lib/reveal.js'
 
 // Fitur unggulan, teks dari poster (mockup hal. 1); ikon garis menggantikan centang clip-art.
 const FITUR = [
@@ -63,7 +64,7 @@ export default function Splash() {
           </p>
         </div>
 
-        <ul className="mt-8 rounded-[1.75rem] bg-olive px-5 py-2 text-white shadow-[0_18px_40px_-20px_rgb(74_68_40/0.7)] lg:col-start-2 lg:row-span-4 lg:row-start-1 lg:mt-0 lg:self-center lg:px-8 lg:py-4">
+        <ul ref={revealList} className="mt-8 rounded-[1.75rem] bg-olive px-5 py-2 text-white shadow-[0_18px_40px_-20px_rgb(74_68_40/0.7)] lg:col-start-2 lg:row-span-4 lg:row-start-1 lg:mt-0 lg:self-center lg:px-8 lg:py-4">
           {FITUR.map(([Icon, text]) => (
             <li key={text} className="flex items-center gap-4 border-b border-white/15 py-4 last:border-0 lg:py-6">
               <span className="grid size-11 shrink-0 place-items-center rounded-full bg-white text-olive lg:size-12">

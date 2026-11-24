@@ -3,6 +3,8 @@ import ErrorBanner from '../../components/ErrorBanner.jsx'
 import { Judul } from '../../components/admin/ui.jsx'
 import { useApiGet } from '../../lib/useApiGet.js'
 import { tr, locale } from '../../lib/i18n.js'
+import CountUp from '../../components/CountUp.jsx'
+import { revealList, revealUp } from '../../lib/reveal.js'
 
 // Ringkasan dasbor admin: angka utama + daftar yang perlu dicek.
 export default function Ringkasan() {
@@ -41,30 +43,30 @@ export default function Ringkasan() {
   return (
     <>
       <Judul>{tr('Ringkasan')}</Judul>
-      <dl className="grid grid-cols-2 gap-x-6 gap-y-6 border-b border-ink/10 pb-8 md:grid-cols-3">
+      <dl ref={revealList} className="grid grid-cols-2 gap-x-6 gap-y-6 border-b border-ink/10 pb-8 md:grid-cols-3">
         {angka.map((a) => (
           <div key={a.label}>
             <dt className="text-sm text-ink/65">{a.label}</dt>
             <dd className="mt-1 font-serif text-[2.25rem] leading-none tabular-nums">
               {a.to ? (
                 <Link to={a.to} className="hover:text-ink-violet">
-                  {a.nilai.toLocaleString(locale)}
+                  <CountUp value={a.nilai} />
                 </Link>
               ) : (
-                a.nilai.toLocaleString(locale)
+                <CountUp value={a.nilai} />
               )}
             </dd>
             {a.ket && <dd className="mt-1 text-xs text-ink/55">{a.ket}</dd>}
           </div>
         ))}
       </dl>
-      <h2 className="mt-8 font-serif text-xl">{tr('Perlu dicek')}</h2>
-      <ul className="mt-2 divide-y divide-ink/[0.06]">
+      <h2 ref={revealUp} className="mt-8 font-serif text-xl">{tr('Perlu dicek')}</h2>
+      <ul ref={revealList} className="mt-2 divide-y divide-ink/[0.06]">
         {cek.map((c) => (
           <li key={c.to}>
             <Link to={c.to} className="flex min-h-touch items-center justify-between gap-4 py-3 text-[15px] hover:text-ink-violet">
               <span>{c.teks}</span>
-              <span className="shrink-0 text-sm font-semibold text-ink-violet">{tr('Buka')}</span>
+              <span className="shrink-0 text-sm font-semibold text-ink-violet"><span className="fx-line">{tr('Buka')}</span></span>
             </Link>
           </li>
         ))}

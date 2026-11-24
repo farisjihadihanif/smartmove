@@ -1,0 +1,176 @@
+/* Sistem gerak: hover, tekan, dan kemunculan saat digulir.
+   Hover memakai `translate`/`scale`, kemunculan memakai `transform` → keduanya tidak saling menimpa.
+   Bayangan = pseudo-elemen yang di-fade (opacity), bukan animasi box-shadow. */
+:root {
+  --hover-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --hover-move: 450ms;
+  --hover-color: 250ms;
+  --press: 100ms;
+  --fx-shadow-card: 0 18px 34px -14px rgb(65 57 111 / 0.42), 0 4px 12px -4px rgb(65 57 111 / 0.2);
+  --fx-shadow-btn: 0 8px 14px -5px rgb(65 57 111 / 0.45);
+}
+:root[data-theme="dark"] {
+  --fx-shadow-card: 0 18px 36px -12px rgb(0 0 0 / 0.8), 0 0 0 1px rgb(201 184 242 / 0.16);
+  --fx-shadow-btn: 0 8px 16px -4px rgb(0 0 0 / 0.75);
+}
+
+/* Di layer: utilitas posisi (absolute, fixed) tetap menang. */
+@layer components {
+  .fx-card,
+  .fx-row,
+  .fx-line,
+  :is(a.rounded-full, button.rounded-full, .fx-btn):not(.fx-none, nav li > a) {
+    position: relative;
+  }
+  .fx-line {
+    display: inline-block;
+  }
+}
+
+.fx-card,
+.fx-row,
+:is(a.rounded-full, button.rounded-full, .fx-btn):not(.fx-none, nav li > a) {
+  isolation: isolate;
+}
+
+/* Kartu (.fx-card), baris daftar tanpa latar (.fx-row), tombol/tautan kapsul (semua .rounded-full). */
+:is(.fx-card, .fx-row)::after,
+:is(a.rounded-full, button.rounded-full, .fx-btn):not(.fx-none, nav li > a)::after {
+  content: "";
+  position: absolute;
+  /* Lebih rendah sejauh angkatan, supaya kursor di tepi bawah tidak keluar-masuk. */
+  inset: 0 0 -4px;
+  z-index: -1;
+  border-radius: inherit;
+  opacity: 0;
+  box-shadow: var(--fx-shadow-card);
+}
+.fx-row::after {
+  inset: 0 var(--fx-inset, 0px) -4px;
+  border-radius: var(--fx-radius, 1rem);
+  background: var(--color-card);
+}
+:is(a.rounded-full, button.rounded-full, .fx-btn):not(.fx-none, nav li > a)::after {
+  inset: 0 0 -2px;
+  box-shadow: var(--fx-shadow-btn);
+}
+
+/* Garis bawah tautan & menu. */
+.fx-line::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 -2px;
+  height: 2px;
+  border-radius: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+:is(a, button):focus-visible .fx-line::after,
+.fx-line:focus-visible::after {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Tekan: juga untuk layar sentuh. */
+  :is(a.rounded-full, button.rounded-full, .fx-btn):not(.fx-none, nav li > a) {
+    transition:
+      translate var(--hover-move) var(--hover-ease),
+      scale var(--press) ease-out,
+      opacity var(--hover-color) ease-out,
+      color var(--hover-color) ease-out,
+      background-color var(--hover-color) ease-out;
+  }
+  :is(a.rounded-full, button.rounded-full, .fx-btn):not(.fx-none, nav li > a, :disabled):active {
+    scale: 0.97;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  :is(.fx-card, .fx-row) {
+    transition:
+      translate var(--hover-move) var(--hover-ease),
+      color var(--hover-color) ease-out,
+      background-color var(--hover-color) ease-out;
+  }
+  :is(.fx-card, .fx-row)::after,
+  :is(a.rounded-full, button.rounded-full, .fx-btn):not(.fx-none, nav li > a)::after {
+    transition: opacity var(--hover-move) var(--hover-ease);
+  }
+  :is(.fx-card, .fx-row):hover {
+    translate: 0 -4px;
+  }
+  :is(a.rounded-full, button.rounded-full, .fx-btn):not(.fx-none, nav li > a, :disabled, [class*="-translate-"]):hover {
+    translate: 0 -2px;
+  }
+  :is(.fx-card, .fx-row):hover::after,
+  :is(a.rounded-full, button.rounded-full, .fx-btn):not(.fx-none, nav li > a, :disabled):hover::after {
+    opacity: 1;
+  }
+
+  .fx-zoom img,
+  :is(.fx-card, .fx-row, a, button) svg {
+    transition:
+      translate var(--hover-move) var(--hover-ease),
+      scale var(--hover-move) var(--hover-ease),
+      rotate var(--hover-color) var(--hover-ease);
+  }
+  :is(.fx-card, .fx-row):hover .fx-zoom img {
+    scale: 1.05;
+  }
+  :is(a, button):not(:disabled):hover svg,
+  .fx-row:hover > svg {
+    scale: 1.1;
+  }
+  :is(a, button):not(:disabled):hover svg:is(.lucide-chevron-right, .lucide-arrow-right) {
+    scale: none;
+    translate: 4px 0;
+  }
+  :is(a, button):not(:disabled):hover svg:is(.lucide-chevron-left, .lucide-arrow-left) {
+    scale: none;
+    translate: -4px 0;
+  }
+
+  .fx-line::after {
+    transition: transform var(--hover-move) var(--hover-ease);
+  }
+  :is(a, button):hover .fx-line::after,
+  .fx-line:is(a, button):hover::after {
+    transform: scaleX(1);
+  }
+}
+
+/* Reduced motion: hover tetap terlihat (bayangan & garis), tanpa gerakan. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: reduce) {
+  :is(.fx-card, .fx-row):hover::after,
+  :is(a.rounded-full, button.rounded-full, .fx-btn):not(.fx-none, nav li > a, :disabled):hover::after {
+    opacity: 1;
+  }
+  :is(a, button):hover .fx-line::after,
+  .fx-line:is(a, button):hover::after {
+    transform: scaleX(1);
+  }
+}
+
+/* Kemunculan (lib/reveal.js). Atribut dipasang JS saja; tanpa JS isi selalu terlihat.
+   `geser-*` = sudah di layar saat dipasang: hanya bergeser, tidak pernah disembunyikan. */
+#root {
+  overflow-x: clip;
+}
+@media screen and (prefers-reduced-motion: no-preference) {
+  [data-reveal="tunggu"] {
+    opacity: 0;
+  }
+  [data-reveal="muncul"] {
+    animation: reveal-muncul 520ms var(--hover-ease) var(--reveal-delay, 0ms) backwards;
+  }
+  [data-reveal="geser"] {
+    animation: reveal-geser 520ms var(--hover-ease) var(--reveal-delay, 0ms) backwards;
+  }
+}
+@keyframes reveal-muncul {
+  from { opacity: 0; transform: var(--reveal-dari, translateY(20px)); }
+}
+@keyframes reveal-geser {
+  from { transform: var(--reveal-dari, translateY(20px)); }
+}

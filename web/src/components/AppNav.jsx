@@ -29,7 +29,7 @@ export function BottomNav({ className = '' }) {
                   >
                     <Icon size={22} strokeWidth={isActive ? 2.4 : 2} aria-hidden="true" />
                   </span>
-                  <span className={`text-xs ${isActive ? 'font-bold text-ink' : 'font-medium text-ink/65'}`}>{label}</span>
+                  <span className={`fx-line text-xs ${isActive ? 'font-bold text-ink' : 'font-medium text-ink/65'}`}>{label}</span>
                 </>
               )}
             </NavLink>
@@ -56,7 +56,7 @@ export function TopNav({ className = '' }) {
               }
             >
               <Icon size={18} aria-hidden="true" />
-              {label}
+              <span className="fx-line">{label}</span>
             </NavLink>
           </li>
         ))}

@@ -20,6 +20,7 @@ import {
 } from '../lib/trip.js'
 import { hariWib } from '../lib/wib.js'
 import { tr } from '../lib/i18n.js'
+import { revealList, revealUp } from '../lib/reveal.js'
 
 // Trip Planner (DESIGN §3, gaya kartu Trip Planner mockup hal. 3): rencana berikutnya di kartu
 // gradasi pink → ungu, daftar rencana per hari seperti garis waktu, form asal/tujuan/moda/jam.
@@ -125,13 +126,13 @@ export default function TripPlanner() {
 
           {grup.length > 0 && (
             <section aria-labelledby="judul-rencana" className="mt-8 lg:mt-10">
-              <h2 id="judul-rencana" className="font-serif text-2xl">
+              <h2 ref={revealUp} id="judul-rencana" className="font-serif text-2xl">
                 {tr('Rencanamu')}
               </h2>
               {grup.map((g) => (
                 <section key={g.kunci} aria-label={g.judul} className="mt-5">
-                  <h3 className="text-sm font-bold text-ink-violet">{g.judul}</h3>
-                  <ol className="mt-2">
+                  <h3 ref={revealUp} className="text-sm font-bold text-ink-violet">{g.judul}</h3>
+                  <ol ref={revealList} className="mt-2">
                     {g.items.map((t) => (
                       <ItemRencana key={t.id} trip={t} onUbah={() => bukaForm(t)} onHapus={() => hapus(t)} diubah={form?.trip?.id === t.id} />
                     ))}
@@ -379,8 +380,8 @@ function ItemRencana({ trip, onUbah, onHapus, diubah, lewat = false, now }) {
   const Ikon = IKON_MODA[trip.moda]
   return (
     <li
-      className={`relative grid grid-cols-[3.5rem_minmax(0,1fr)] gap-x-3 border-b border-ink/[0.07] py-4 last:border-b-0 lg:grid-cols-[4.5rem_minmax(0,1fr)] lg:gap-x-5 ${
-        diubah ? 'rounded-2xl bg-lilac-wash/25 px-2 lg:-mx-3 lg:px-3' : ''
+      className={`fx-row relative grid grid-cols-[3.5rem_minmax(0,1fr)] gap-x-3 border-b border-ink/[0.07] py-4 last:border-b-0 lg:grid-cols-[4.5rem_minmax(0,1fr)] lg:gap-x-5 ${
+        diubah ? 'rounded-2xl bg-lilac-wash/25 px-2 lg:-mx-3 lg:px-3' : '[--fx-inset:-0.75rem]'
       }`}
     >
       <div className="pt-0.5">

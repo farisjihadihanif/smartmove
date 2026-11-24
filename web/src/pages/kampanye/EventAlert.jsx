@@ -11,6 +11,7 @@ import PageShell from '../../components/PageShell.jsx'
 import { infoJenisEvent, JENIS_EVENT, rentangEvent } from '../../lib/kampanye.js'
 import { useApiGet } from '../../lib/useApiGet.js'
 import { tr } from '../../lib/i18n.js'
+import { revealList, revealUp } from '../../lib/reveal.js'
 
 // EventAlert (T-207): event lalu lintas (CFD, rekayasa arus, acara) yang berlangsung & mendatang,
 // penanda di peta untuk event berlokasi. ?id= memilih event (dari hub / notifikasi).
@@ -129,8 +130,8 @@ export default function EventAlert() {
             )}
             {kelompok.map((k) => (
               <section key={k.judul} className="mb-5 last:mb-0">
-                <h2 className="font-serif text-[1.375rem] leading-tight">{k.judul}</h2>
-                <ul className="mt-2">
+                <h2 ref={revealUp} className="font-serif text-[1.375rem] leading-tight">{k.judul}</h2>
+                <ul ref={revealList} className="mt-2">
                   {k.items.map((e) => (
                     <ItemEvent key={e.id} e={e} now={now} aktif={e.id === pilihId} onPilih={() => pilihEvent(e.id === pilihId ? null : e.id)} />
                   ))}
@@ -164,8 +165,8 @@ function ItemEvent({ e, now, aktif, onPilih }) {
         type="button"
         aria-pressed={aktif}
         onClick={onPilih}
-        className={`-mx-2 flex w-[calc(100%+1rem)] items-start gap-3 rounded-2xl px-2 py-3 text-left transition ${
-          aktif ? 'bg-[color:rgb(218_184_246/0.35)]' : 'hover:bg-ink/[0.035]'
+        className={`fx-row -mx-2 flex w-[calc(100%+1rem)] items-start gap-3 rounded-2xl px-2 py-3 text-left ${
+          aktif ? 'bg-[color:rgb(218_184_246/0.35)]' : ''
         }`}
       >
         <span aria-hidden="true" className="mt-1.5 size-3 shrink-0 rounded-full ring-2 ring-white" style={{ backgroundColor: j.warna }} />

@@ -8,6 +8,7 @@ import PilihTema from '../components/PilihTema.jsx'
 import { api, fileUrl } from '../lib/api.js'
 import { useAuth } from '../lib/useAuth.js'
 import { tr } from '../lib/i18n.js'
+import { revealUp } from '../lib/reveal.js'
 
 const FOTO_MAKS = 2 * 1024 * 1024
 const BULAN = [tr('Januari'), tr('Februari'), tr('Maret'), tr('April'), tr('Mei'), tr('Juni'), tr('Juli'), tr('Agustus'), tr('September'), tr('Oktober'), tr('November'), tr('Desember')]
@@ -103,7 +104,7 @@ function Identitas({ user }) {
           }}
         />
       </div>
-      <h2 className="mt-4 font-serif text-[1.75rem] leading-tight">{nama}</h2>
+      <h2 ref={revealUp} className="mt-4 font-serif text-[1.75rem] leading-tight">{nama}</h2>
       <p className="text-[15px] text-ink/65">@{user.username}</p>
       <p className="text-[14px] text-ink/55">{user.email}</p>
       {user.createdAt && <p className="mt-1 text-[13px] text-ink/50">{tr('Bergabung')} {sejak(user.createdAt)}</p>}
@@ -115,9 +116,11 @@ function Identitas({ user }) {
 
 function BarisTautan({ to, icon: Icon, children }) {
   return (
-    <Link to={to} className="flex min-h-[3.5rem] items-center gap-3 border-t border-ink/[0.07] text-[15px] font-semibold hover:text-ink-violet">
+    <Link to={to} className="fx-row flex min-h-[3.5rem] items-center gap-3 border-t border-ink/[0.07] text-[15px] font-semibold [--fx-inset:-0.75rem] hover:text-ink-violet">
       <Icon size={20} className="text-ink-violet" aria-hidden="true" />
-      <span className="flex-1">{children}</span>
+      <span className="flex-1">
+        <span className="fx-line">{children}</span>
+      </span>
       <ChevronRight size={18} className="text-ink/40" aria-hidden="true" />
     </Link>
   )
@@ -186,7 +189,7 @@ function FormProfil({ user }) {
 
   return (
     <form onSubmit={simpan} aria-labelledby="judul-profil" className="max-w-xl">
-      <h2 id="judul-profil" className="font-serif text-[1.5rem] leading-tight">
+      <h2 ref={revealUp} id="judul-profil" className="font-serif text-[1.5rem] leading-tight">
         {tr('Profil')}
       </h2>
       <div className="mt-4 space-y-4">
@@ -296,7 +299,7 @@ function FormPassword() {
 
   return (
     <form onSubmit={simpan} aria-labelledby="judul-password" className="max-w-xl border-t border-ink/[0.07] pt-8">
-      <h2 id="judul-password" className="font-serif text-[1.5rem] leading-tight">
+      <h2 ref={revealUp} id="judul-password" className="font-serif text-[1.5rem] leading-tight">
         {tr('Ganti password')}
       </h2>
       <p className="mt-1 text-[14px] text-ink/60">{tr('Setelah diganti, perangkat lain yang masuk dengan akun ini otomatis keluar.')}</p>

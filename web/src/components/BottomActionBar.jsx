@@ -22,7 +22,7 @@ export default function BottomActionBar({ actions = [], children, className = ''
               type="button"
               onClick={onClick}
               disabled={disabled}
-              className={`flex h-12 min-w-0 max-w-[10rem] flex-1 items-center justify-center gap-2 rounded-full px-3 text-[0.9375rem] font-semibold shadow-[0_4px_12px_rgb(0_0_0/0.25)] transition-transform active:scale-[0.97] disabled:opacity-50 ${
+              className={`flex h-12 min-w-0 max-w-[10rem] flex-1 items-center justify-center gap-2 rounded-full px-3 text-[0.9375rem] font-semibold shadow-[0_4px_12px_rgb(0_0_0/0.25)] disabled:opacity-50 ${
                 variant === 'pill' ? 'bg-pill text-white' : 'bg-action-pill text-ink-violet'
               }`}
             >

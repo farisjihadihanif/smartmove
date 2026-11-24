@@ -61,7 +61,7 @@ export default function Laporan() {
                 href={`https://www.openstreetmap.org/?mlat=${r.lokasi.lat}&mlon=${r.lokasi.lng}#map=17/${r.lokasi.lat}/${r.lokasi.lng}`}
                 target="_blank"
                 rel="noreferrer"
-                className="font-semibold text-ink-violet underline-offset-2 hover:underline"
+                className="fx-line font-semibold text-ink-violet"
               >
                 {tr('Lihat peta')}
               </a>

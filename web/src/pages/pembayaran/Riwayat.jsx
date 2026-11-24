@@ -9,6 +9,7 @@ import { IKON_JENIS } from '../../components/pembayaran/ikon.js'
 import { STATUS, rupiah, waktuLengkap } from '../../lib/pembayaran.js'
 import { useApiGet } from '../../lib/useApiGet.js'
 import { tr } from '../../lib/i18n.js'
+import { revealList } from '../../lib/reveal.js'
 
 const WARNA_STATUS = {
   lancar: 'bg-traffic-lancar/12 text-[#1D6B3D] ring-traffic-lancar/40',
@@ -61,14 +62,14 @@ export default function RiwayatPembayaran() {
         )}
         {status === 'ok' && data.items.length > 0 && (
           <>
-            <ul>
+            <ul ref={revealList}>
               {data.items.map((p) => {
                 const Ikon = IKON_JENIS[p.layanan.jenis] ?? Ticket
                 return (
                   <li key={p.orderId} className="border-b border-ink/[0.07] last:border-b-0">
                     <Link
                       to={`/pembayaran/${p.orderId}`}
-                      className="grid grid-cols-[2.75rem_minmax(0,1fr)_auto] items-center gap-3 py-4 hover:bg-lilac-wash/15"
+                      className="fx-row grid grid-cols-[2.75rem_minmax(0,1fr)_auto] items-center gap-3 py-4 [--fx-inset:-0.75rem]"
                     >
                       <span className="grid size-11 place-items-center rounded-full bg-icon-blue text-white">
                         <Ikon size={22} aria-hidden="true" />

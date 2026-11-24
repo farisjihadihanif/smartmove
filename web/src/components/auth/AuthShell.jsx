@@ -3,6 +3,7 @@ import { ArrowLeft, Eye, EyeOff, Megaphone, Route, Ticket, TrafficCone } from 'l
 import { Link } from 'react-router-dom'
 import logo from '../../assets/brand/logo.webp'
 import { tr } from '../../lib/i18n.js'
+import { revealList } from '../../lib/reveal.js'
 
 // Fitur unggulan dari poster (mockup hal. 1) – tampil di panel kiri versi desktop.
 const FITUR = [
@@ -40,7 +41,7 @@ export function AuthShell({ title, subtitle, back, children }) {
           <p className="max-w-[14ch] font-serif text-[clamp(2.5rem,3.6vw,3.5rem)] leading-[1.05]">
             {tr('Permudah kegiatanmu di Medan')}
           </p>
-          <ul className="mt-10 max-w-md divide-y divide-white/20 border-y border-white/20">
+          <ul ref={revealList} className="mt-10 max-w-md divide-y divide-white/20 border-y border-white/20">
             {FITUR.map(([Icon, text]) => (
               <li key={text} className="flex items-center gap-4 py-3.5 text-[0.975rem]">
                 <Icon size={22} strokeWidth={1.75} className="shrink-0 text-white/90" aria-hidden="true" />
@@ -144,7 +145,7 @@ export function AuthButton({ busy, children, className = '', ...props }) {
       type="submit"
       disabled={busy}
       aria-busy={busy || undefined}
-      className={`${buttonBase} bg-login-button text-white shadow-[0_6px_18px_-6px_rgb(115_36_169/0.7)] hover:brightness-110 active:scale-[0.99] disabled:opacity-70 ${className}`}
+      className={`${buttonBase} bg-login-button text-white shadow-[0_6px_18px_-6px_rgb(115_36_169/0.7)] hover:brightness-110 disabled:opacity-70 ${className}`}
       {...props}
     >
       {busy ? tr('Tunggu sebentar…') : children}
@@ -182,7 +183,7 @@ export function AuthFooter({ children }) {
 }
 
 export const linkClass =
-  'font-semibold text-login-button underline decoration-login-button/35 underline-offset-4 hover:decoration-login-button'
+  'fx-line font-semibold text-login-button underline decoration-login-button/35 underline-offset-4'
 
 // Ikon padat seperti di mockup (lucide hanya garis).
 export function PersonSolid({ size = 24, ...props }) {

@@ -27,6 +27,8 @@ import { useAuth } from '../lib/useAuth.js'
 import { useNotifications } from '../lib/useNotifications.js'
 import { jamAtauTanggal, jamWib, salamWib } from '../lib/wib.js'
 import { tr, locale } from '../lib/i18n.js'
+import CountUp from '../components/CountUp.jsx'
+import { revealLeft, revealList, revealUp } from '../lib/reveal.js'
 
 // Beranda (mockup hal. 3): sapaan + jam Medan, lonceng, cari, 4 menu utama, Trip Planner,
 // lalu ringkasan poin & event yang sedang berlangsung (data GET /home, API_SPECS §5).
@@ -157,6 +159,7 @@ export default function Home() {
           <div>
             <nav
               aria-label={tr('Menu utama')}
+              ref={revealList}
               className="grid grid-cols-2 gap-x-1 gap-y-1 rounded-[1.75rem] bg-surface-menu px-1 py-3 ring-1 ring-ink-violet/[0.06] lg:grid-cols-4 lg:px-3 lg:py-6"
             >
               {MENU.map(({ to, label, icon: Icon }) => (
@@ -190,8 +193,8 @@ export default function Home() {
 /** Pengganti ringkasan poin untuk tamu: ajakan masuk/daftar. */
 function GuestCard() {
   return (
-    <section className="rounded-[1.5rem] bg-card px-5 py-5 ring-1 ring-ink/[0.08] lg:px-6 lg:py-6">
-      <h2 className="font-serif text-xl leading-snug">{tr('Simpan perjalanan & kumpulkan poin')}</h2>
+    <section ref={revealUp} className="fx-card rounded-[1.5rem] bg-card px-5 py-5 ring-1 ring-ink/[0.08] lg:px-6 lg:py-6">
+      <h2 ref={revealUp} className="font-serif text-xl leading-snug">{tr('Simpan perjalanan & kumpulkan poin')}</h2>
       <p className="mt-1.5 text-[15px] leading-relaxed text-ink/70">
         {tr('Masuk untuk memakai Trip Planner, Rewards, dan pembayaran tiket.')}
       </p>
@@ -240,25 +243,27 @@ function Avatar({ user }) {
 
 function TripPlannerCard() {
   return (
-    <Link
-      to="/trip-planner"
-      className="bg-trip-card grain group relative mt-6 flex min-h-[7.5rem] items-center gap-4 overflow-hidden rounded-[1.75rem] py-4 pl-4 pr-3 text-white shadow-[0_14px_30px_-16px_rgb(95_63_115/0.9)] lg:mt-8 lg:min-h-[10rem] lg:gap-6 lg:px-8"
-    >
-      <span className="grid size-16 shrink-0 place-items-center rounded-2xl bg-white/90 shadow-[0_4px_14px_rgb(95_63_115/0.35)] lg:size-24 lg:rounded-3xl">
-        <img src={logo} alt="" width="52" height="40" className="w-[46px] lg:w-[68px]" />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block font-serif text-2xl leading-tight drop-shadow-[0_1px_2px_rgb(65_57_111/0.35)] lg:text-4xl">
-          {tr('Trip Planner')}
+    <div className="fx-card mt-6 rounded-[1.75rem] lg:mt-8">
+      <Link
+        to="/trip-planner"
+        className="bg-trip-card grain group relative flex min-h-[7.5rem] items-center gap-4 overflow-hidden rounded-[1.75rem] py-4 pl-4 pr-3 text-white shadow-[0_14px_30px_-16px_rgb(95_63_115/0.9)] lg:min-h-[10rem] lg:gap-6 lg:px-8"
+      >
+        <span ref={revealLeft} className="fx-zoom grid size-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-white/90 shadow-[0_4px_14px_rgb(95_63_115/0.35)] lg:size-24 lg:rounded-3xl">
+          <img src={logo} alt="" width="52" height="40" className="w-[46px] lg:w-[68px]" />
         </span>
-        <span className="mt-1 block font-serif text-[15px] leading-snug text-white/95 lg:mt-2 lg:text-lg">
-          {tr('Buat perencanaan terbaik untuk setiap perjalananmu')}
+        <span className="min-w-0 flex-1">
+          <span className="block font-serif text-2xl leading-tight drop-shadow-[0_1px_2px_rgb(65_57_111/0.35)] lg:text-4xl">
+            {tr('Trip Planner')}
+          </span>
+          <span className="mt-1 block font-serif text-[15px] leading-snug text-white/95 lg:mt-2 lg:text-lg">
+            {tr('Buat perencanaan terbaik untuk setiap perjalananmu')}
+          </span>
         </span>
-      </span>
-      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white/20 transition group-hover:bg-card/30 lg:size-12">
-        <ChevronRight size={22} aria-hidden="true" />
-      </span>
-    </Link>
+        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white/20 transition group-hover:bg-card/30 lg:size-12">
+          <ChevronRight size={22} aria-hidden="true" />
+        </span>
+      </Link>
+    </div>
   )
 }
 
@@ -266,7 +271,7 @@ function PointsLink({ poin, loading }) {
   return (
     <Link
       to="/rewards"
-      className="flex items-center gap-4 rounded-[1.5rem] bg-card px-4 py-4 ring-1 ring-ink/[0.08] transition hover:ring-ink-violet/30 lg:flex-col lg:items-start lg:gap-3 lg:px-6 lg:py-6"
+      className="fx-card flex items-center gap-4 rounded-[1.5rem] bg-card px-4 py-4 ring-1 ring-ink/[0.08] lg:flex-col lg:items-start lg:gap-3 lg:px-6 lg:py-6"
     >
       <span className="grid size-12 shrink-0 place-items-center rounded-full bg-traffic-padat/15 text-[#9A5B00]">
         <Gift size={22} aria-hidden="true" />
@@ -277,7 +282,7 @@ function PointsLink({ poin, loading }) {
         ) : (
           <>
             <span className="block font-serif text-2xl leading-tight lg:text-4xl">
-              {(poin?.saldo ?? 0).toLocaleString(locale)} {tr('poin')}
+              <CountUp value={poin?.saldo ?? 0} /> {tr('poin')}
             </span>
             <span className="block text-sm text-ink/65">
               {poin?.bulanIni ? tr("+{0} bulan ini", { 0: poin.bulanIni.toLocaleString(locale) }) : tr('Kumpulkan dari perjalanan & pembayaran')}
@@ -293,10 +298,10 @@ function PointsLink({ poin, loading }) {
 function OngoingEvents({ events, now }) {
   return (
     <section aria-labelledby="event-title">
-      <h2 id="event-title" className="px-1 text-base font-bold">
+      <h2 ref={revealUp} id="event-title" className="px-1 text-base font-bold">
         {tr('Sedang berlangsung')}
       </h2>
-      <ul className="mt-2 divide-y divide-ink/[0.07] rounded-[1.5rem] bg-card px-4 ring-1 ring-ink/[0.08]">
+      <ul ref={revealList} className="fx-card mt-2 divide-y divide-ink/[0.07] rounded-[1.5rem] bg-card px-4 ring-1 ring-ink/[0.08]">
         {events.map((e) => {
           const Icon = EVENT_ICON[e.jenis] ?? Info
           return (

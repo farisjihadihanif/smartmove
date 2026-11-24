@@ -9,6 +9,8 @@ import { api } from '../lib/api.js'
 import { useApiGet } from '../lib/useApiGet.js'
 import { jamAtauTanggal } from '../lib/wib.js'
 import { tr, locale } from '../lib/i18n.js'
+import CountUp from '../components/CountUp.jsx'
+import { revealList, revealUp } from '../lib/reveal.js'
 
 const TAB = [
   { value: 'tukar', label: tr('Tukar poin') },
@@ -40,26 +42,26 @@ export default function Rewards() {
       <div className="grid grid-cols-[minmax(0,1fr)] gap-8 pt-5 lg:grid-cols-[20rem_minmax(0,1fr)] lg:gap-10 lg:pt-8">
         <aside className="lg:sticky lg:top-6 lg:self-start">
           <section aria-labelledby="judul-saldo" className="bg-trip-card grain relative overflow-hidden rounded-[1.75rem] px-5 py-5 text-white shadow-[0_14px_30px_-16px_rgb(95_63_115/0.9)] lg:px-6 lg:py-7">
-            <h2 id="judul-saldo" className="font-serif text-[15px] text-white/90 drop-shadow-[0_1px_2px_rgb(65_57_111/0.35)]">
+            <h2 ref={revealUp} id="judul-saldo" className="font-serif text-[15px] text-white/90 drop-shadow-[0_1px_2px_rgb(65_57_111/0.35)]">
               {tr('Poin kamu')}
             </h2>
             {saldo === undefined ? (
               <span className="mt-1 block h-14 w-32 animate-pulse rounded-xl bg-white/25" aria-label={tr('Memuat saldo')} />
             ) : (
               <p className="font-serif text-[3.5rem] leading-none tracking-tight drop-shadow-[0_1px_2px_rgb(65_57_111/0.35)] lg:text-[4.5rem]">
-                {poin(saldo)}
+                <CountUp value={saldo} />
               </p>
             )}
           </section>
           <section aria-labelledby="judul-cara" className="mt-5 px-1">
-            <h2 id="judul-cara" className="text-sm font-bold">
+            <h2 ref={revealUp} id="judul-cara" className="text-sm font-bold">
               {tr('Cara dapat poin')}
             </h2>
-            <ul className="mt-2 space-y-3 text-[14px] leading-snug text-ink/75">
+            <ul ref={revealList} className="mt-2 space-y-3 text-[14px] leading-snug text-ink/75">
               <li className="flex gap-3">
                 <TicketCheck size={20} className="mt-0.5 shrink-0 text-pill-via" aria-hidden="true" />
                 <span>
-                  <Link to="/pembayaran" className="font-semibold text-ink-violet hover:underline">
+                  <Link to="/pembayaran" className="fx-line font-semibold text-ink-violet">
                     {tr('Pesan tiket atau parkir')}
                   </Link>
                   {tr(': 1 poin tiap Rp1.000 setelah lunas (simulasi).')}
@@ -68,7 +70,7 @@ export default function Rewards() {
               <li className="flex gap-3">
                 <MessageSquareHeart size={20} className="mt-0.5 shrink-0 text-pill-via" aria-hidden="true" />
                 <span>
-                  <Link to="/kampanye/umpan-balik" className="font-semibold text-ink-violet hover:underline">
+                  <Link to="/kampanye/umpan-balik" className="fx-line font-semibold text-ink-violet">
                     {tr('Kirim umpan balik')}
                   </Link>
                   {tr(': 5 poin, sekali seminggu.')}
@@ -130,15 +132,15 @@ function Katalog({ saldo, onDitukar, onLihatSaya }) {
 
   return (
     <section aria-labelledby="judul-katalog">
-      <h2 id="judul-katalog" className="font-serif text-[1.5rem] leading-tight">
+      <h2 ref={revealUp} id="judul-katalog" className="font-serif text-[1.5rem] leading-tight">
         {tr('Tukar poin')}
       </h2>
       {hasil && (
         <div role="status" className="sheet-fade mt-4 rounded-[1.25rem] bg-traffic-lancar/10 px-4 py-4 ring-1 ring-traffic-lancar/35">
           <p className="font-semibold text-[#1D6B3D]">{tr('Voucher ditukar:')} {hasil.voucher?.nama}</p>
           <p className="mt-1 font-serif text-[1.5rem] tracking-[0.06em] text-ink-violet">{hasil.kode}</p>
-          <button type="button" onClick={onLihatSaya} className="mt-1 min-h-touch text-sm font-semibold text-ink-violet hover:underline">
-            {tr('Lihat di Voucher saya')}
+          <button type="button" onClick={onLihatSaya} className="mt-1 min-h-touch text-sm font-semibold text-ink-violet">
+            <span className="fx-line">{tr('Lihat di Voucher saya')}</span>
           </button>
         </div>
       )}
@@ -156,12 +158,12 @@ function Katalog({ saldo, onDitukar, onLihatSaya }) {
         <EmptyState icon={Gift} title={tr('Belum ada voucher')} message={tr('Voucher baru akan muncul di sini. Sambil menunggu, kumpulkan poinnya dulu.')} className="mt-6" />
       )}
       {status === 'ok' && data.items.length > 0 && (
-        <ul className="mt-4 grid gap-4 xl:grid-cols-2">
+        <ul ref={revealList} className="mt-4 grid gap-4 xl:grid-cols-2">
           {data.items.map((v) => {
             const kurang = saldo !== undefined && saldo < v.poin
             const bisa = v.tersedia && !kurang
             return (
-              <li key={v.id}>
+              <li key={v.id} className="fx-card rounded-[1.25rem]">
                 <Kupon
                   redup={!v.tersedia}
                   kiri={
@@ -242,7 +244,7 @@ function VoucherSaya() {
 
   return (
     <section aria-labelledby="judul-saya">
-      <h2 id="judul-saya" className="font-serif text-[1.5rem] leading-tight">
+      <h2 ref={revealUp} id="judul-saya" className="font-serif text-[1.5rem] leading-tight">
         {tr('Voucher saya')}
       </h2>
       {status === 'galat' && <ErrorBanner error={error} onRetry={muatUlang} className="mt-4" />}
@@ -251,11 +253,11 @@ function VoucherSaya() {
         <EmptyState icon={TicketPercent} title={tr('Belum ada voucher')} message={tr('Tukar poinmu di Tukar poin, vouchernya tersimpan di sini.')} className="mt-6" />
       )}
       {status === 'ok' && data.items.length > 0 && (
-        <ul className="mt-4 grid gap-4 xl:grid-cols-2">
+        <ul ref={revealList} className="mt-4 grid gap-4 xl:grid-cols-2">
           {data.items.map((r) => {
             const st = STATUS_VOUCHER[r.status] ?? STATUS_VOUCHER.dipakai
             return (
-              <li key={r.id}>
+              <li key={r.id} className="fx-card rounded-[1.25rem]">
                 <Kupon
                   redup={r.status !== 'aktif'}
                   kiri={<TicketPercent size={30} strokeWidth={1.75} aria-hidden="true" />}
@@ -317,7 +319,7 @@ function Riwayat() {
 
   return (
     <section aria-labelledby="judul-riwayat">
-      <h2 id="judul-riwayat" className="font-serif text-[1.5rem] leading-tight">
+      <h2 ref={revealUp} id="judul-riwayat" className="font-serif text-[1.5rem] leading-tight">
         {tr('Riwayat poin')}
       </h2>
       {status === 'galat' && <ErrorBanner error={error} onRetry={muatUlang} className="mt-4" />}
@@ -326,11 +328,11 @@ function Riwayat() {
         <EmptyState icon={Gift} title={tr('Belum ada poin')} message={tr('Poin pertamamu datang dari pemesanan yang lunas atau umpan balik.')} className="mt-6" />
       )}
       {status === 'ok' && data.items.length > 0 && (
-        <ul className="mt-3">
+        <ul ref={revealList} className="mt-3">
           {data.items.map((l) => {
             const tambah = l.jumlah > 0
             return (
-              <li key={l.id} className="flex items-center gap-4 border-b border-ink/[0.07] py-3.5 last:border-b-0">
+              <li key={l.id} className="fx-row flex items-center gap-4 border-b [--fx-inset:-0.75rem] border-ink/[0.07] py-3.5 last:border-b-0">
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold">{l.label}</p>
                   <p className="text-[13px] text-ink/55">{jamAtauTanggal(l.createdAt, now)}</p>

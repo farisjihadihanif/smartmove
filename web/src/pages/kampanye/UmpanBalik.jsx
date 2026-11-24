@@ -7,6 +7,7 @@ import { api } from '../../lib/api.js'
 import { FITUR, LABEL_RATING } from '../../lib/kampanye.js'
 import { useAuth } from '../../lib/useAuth.js'
 import { tr } from '../../lib/i18n.js'
+import { revealUp } from '../../lib/reveal.js'
 
 // Umpan Balik (T-207): rating 1–5, fitur (opsional), komentar ≤ 1000 → POST /campaign/feedback.
 // Tamu melihat ajakan masuk (umpan balik tercatat per pengguna).
@@ -22,7 +23,7 @@ export default function UmpanBalik() {
 function AjakMasuk() {
   return (
     <div className="rounded-3xl bg-lilac-wash/25 p-6 text-center">
-      <h2 className="font-serif text-[1.375rem]">{tr('Masuk dulu untuk memberi masukan')}</h2>
+      <h2 ref={revealUp} className="font-serif text-[1.375rem]">{tr('Masuk dulu untuk memberi masukan')}</h2>
       <p className="mx-auto mt-2 max-w-[34ch] text-[15px] leading-relaxed text-ink/70">
         {tr('Satu akun bisa mengirim beberapa masukan, jadi kami bisa menindaklanjutinya.')}
       </p>
@@ -58,7 +59,7 @@ function Form() {
   if (status.selesai) {
     return (
       <div role="status" className="sheet-fade rounded-3xl bg-lilac-wash/25 p-6 text-center">
-        <h2 className="font-serif text-[1.5rem]">{tr('Terima kasih!')}</h2>
+        <h2 ref={revealUp} className="font-serif text-[1.5rem]">{tr('Terima kasih!')}</h2>
         <p className="mx-auto mt-2 max-w-[34ch] text-[15px] leading-relaxed text-ink/70">
           {tr('Masukanmu sudah terkirim dan akan dibaca tim SmartMove Medan.')}
           {status.poin > 0 && tr(" Kamu dapat +{0} poin.", { 0: status.poin })}
@@ -97,7 +98,7 @@ function Form() {
               aria-checked={rating === n}
               aria-label={tr("{0} dari 5, {1}", { 0: n, 1: LABEL_RATING[n].toLowerCase() })}
               onClick={() => setRating(n)}
-              className="grid size-12 place-items-center rounded-full transition hover:bg-traffic-padat/10 active:scale-90"
+              className="grid size-12 place-items-center rounded-full transition hover:bg-traffic-padat/10"
             >
               <Star
                 size={34}

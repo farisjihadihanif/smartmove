@@ -29,6 +29,7 @@ import kota from '../lib/kota.js'
 import { useAuth } from '../lib/useAuth.js'
 import { useMediaQuery } from '../lib/useNotifications.js'
 import { tr } from '../lib/i18n.js'
+import { revealList, revealUp } from '../lib/reveal.js'
 
 const LANGKAH = [
   { value: 'pilih', label: tr('Pilih transportasi') },
@@ -157,9 +158,9 @@ export default function Pembayaran() {
       {user && (
         <Link
           to="/pembayaran/riwayat"
-          className="mb-1 flex min-h-touch items-center gap-2 text-sm font-semibold text-ink-violet hover:underline"
+          className="mb-1 flex min-h-touch items-center gap-2 text-sm font-semibold text-ink-violet"
         >
-          <History size={18} aria-hidden="true" /> {tr('Riwayat pemesanan')}
+          <History size={18} aria-hidden="true" /> <span className="fx-line">{tr('Riwayat pemesanan')}</span>
           <ChevronRight size={16} aria-hidden="true" />
         </Link>
       )}
@@ -187,9 +188,9 @@ export default function Pembayaran() {
           <button
             type="button"
             onClick={() => setSemuaLayanan(!semuaLayanan)}
-            className="min-h-touch font-semibold text-ink-violet hover:underline"
+            className="min-h-touch font-semibold text-ink-violet"
           >
-            {semuaLayanan ? tr('Hanya rute ini') : tr('Lihat semua')}
+            <span className="fx-line">{semuaLayanan ? tr('Hanya rute ini') : tr('Lihat semua')}</span>
           </button>
         </p>
       )}
@@ -205,7 +206,7 @@ export default function Pembayaran() {
         />
       )}
       {status === 'ok' && items.length > 0 && (
-        <ul className="mt-3">
+        <ul ref={revealList} className="mt-3">
           {items.map((s) => (
             <BarisLayanan
               key={s.kode}
@@ -227,7 +228,7 @@ export default function Pembayaran() {
       aria-labelledby="judul-biaya"
       className={`${!desktop && langkah !== 'biaya' ? 'hidden' : ''} lg:sticky lg:top-6 lg:self-start lg:rounded-[1.75rem] lg:bg-card lg:p-6 lg:shadow-[0_16px_40px_-24px_rgb(65_57_111/0.6)] lg:ring-1 lg:ring-ink-violet/10`}
     >
-      <h2 id="judul-biaya" className="font-serif text-[1.5rem] leading-tight">
+      <h2 ref={revealUp} id="judul-biaya" className="font-serif text-[1.5rem] leading-tight">
         {tr('Estimasi biaya')}
       </h2>
       {!layanan || !pilihan?.waktu ? (
@@ -238,7 +239,7 @@ export default function Pembayaran() {
         <Ringkasan layanan={layanan} waktu={pilihan.waktu} jumlah={jumlah} setJumlah={setJumlah} total={total} />
       )}
 
-      <fieldset className="mt-7 min-w-0">
+      <fieldset ref={revealUp} className="mt-7 min-w-0">
         <legend className="text-sm font-semibold">{tr('Metode pembayaran')}</legend>
         <ul className="mt-1">
           {GRUP_METODE.map((g) => (
@@ -380,7 +381,7 @@ function JenisChips({ value, onChange }) {
     <div
       role="group"
       aria-label={tr('Jenis layanan')}
-      className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] lg:mx-0 lg:flex-wrap lg:px-0"
+      className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] lg:mx-0 lg:flex-wrap lg:overflow-visible lg:px-0"
     >
       {opsi.map((j) => {
         const on = value === j.value
@@ -416,7 +417,7 @@ function PitaTanggal({ value, onChange, hariIni }) {
       <div
         role="radiogroup"
         aria-label={tr('Tanggal')}
-        className="-mx-4 mt-2 flex gap-2 overflow-x-auto px-4 pb-2 [scrollbar-width:none] lg:mx-0 lg:px-0"
+        className="-mx-4 mt-1 flex gap-2 overflow-x-auto px-4 pb-2 pt-1 [scrollbar-width:none] lg:mx-0 lg:px-0"
       >
         {hari.map((t) => {
           const { hari: h, tgl, bulan } = pecahTanggal(t)
@@ -429,7 +430,7 @@ function PitaTanggal({ value, onChange, hariIni }) {
               aria-checked={on}
               aria-label={`${t === hariIni ? tr('Hari ini, ') : ''}${h} ${tgl} ${bulan}`}
               onClick={() => onChange(t)}
-              className={`flex w-[3.75rem] shrink-0 flex-col items-center rounded-2xl py-2 transition ${
+              className={`fx-btn flex w-[3.75rem] shrink-0 flex-col items-center rounded-2xl py-2 ${
                 on
                   ? 'bg-pill text-white shadow-[0_6px_14px_-6px_rgb(114_13_129/0.8)]'
                   : 'bg-card text-ink ring-1 ring-ink/10 hover:bg-lilac-wash/30'
@@ -461,7 +462,7 @@ function BarisLayanan({ layanan, tanggal, terpilih, jam, onPilih, onJam }) {
         type="button"
         aria-expanded={terpilih}
         onClick={onPilih}
-        className="grid w-full grid-cols-[2.75rem_minmax(0,1fr)_auto] items-center gap-3 py-4 text-left"
+        className="fx-row grid w-full grid-cols-[2.75rem_minmax(0,1fr)_auto] items-center gap-3 py-4 text-left lg:[--fx-inset:-0.75rem]"
       >
         <span className="grid size-11 place-items-center rounded-full bg-icon-blue text-white">
           <Ikon size={22} aria-hidden="true" />

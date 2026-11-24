@@ -10,6 +10,7 @@ import { api } from '../../lib/api.js'
 import { STATUS, bagikan, rupiah, ruteLayanan, satuanLabel, teksBagikan, waktuLengkap } from '../../lib/pembayaran.js'
 import { useMediaQuery } from '../../lib/useNotifications.js'
 import { tr } from '../../lib/i18n.js'
+import { revealUp } from '../../lib/reveal.js'
 
 const SELANG_MS = 5000 // baca status dari server SmartMove
 const CEK_TIAP = 3 // tiap 3 kali (±15 dtk) minta server menanyakan Midtrans (webhook tak sampai ke dev)
@@ -155,7 +156,7 @@ export default function StatusPembayaran() {
 function RingkasanPesanan({ p }) {
   return (
     <section aria-label={tr('Ringkasan pesanan')} className="px-1">
-      <h2 className="font-serif text-[1.25rem] leading-tight">{p.layanan.nama}</h2>
+      <h2 ref={revealUp} className="font-serif text-[1.25rem] leading-tight">{p.layanan.nama}</h2>
       <p className="text-[14px] text-ink/65">{ruteLayanan(p.layanan)}</p>
       <dl className="mt-3 grid grid-cols-2 gap-3 text-[14px]">
         <div className="col-span-2">
@@ -184,7 +185,7 @@ function Gagal({ p }) {
         <CircleAlert size={20} aria-hidden="true" />
         {STATUS[p.status]?.label ?? p.status}
       </p>
-      <h2 className="mt-2 font-serif text-[1.5rem] leading-tight">{p.layanan.nama}</h2>
+      <h2 ref={revealUp} className="mt-2 font-serif text-[1.5rem] leading-tight">{p.layanan.nama}</h2>
       <p className="mt-1 text-[14px] text-ink/65">
         {ruteLayanan(p.layanan)}, {rupiah(p.jumlah)}
       </p>

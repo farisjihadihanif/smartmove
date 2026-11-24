@@ -59,7 +59,7 @@ export default function AdminShell() {
                   }
                 >
                   <Icon size={18} aria-hidden="true" />
-                  {label}
+                  <span className="fx-line">{label}</span>
                 </NavLink>
               </li>
             ))}

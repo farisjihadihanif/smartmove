@@ -9,6 +9,7 @@ import Rambu from '../components/kampanye/Rambu.jsx'
 import { cocok, infoJenisEvent, rentangEvent } from '../lib/kampanye.js'
 import { useApiGet } from '../lib/useApiGet.js'
 import { tr } from '../lib/i18n.js'
+import { revealList, revealUp } from '../lib/reveal.js'
 
 // Traffic Mitigation Campaign (mockup hal. 7, PRD §6.5, T-207): grid 2×2 menu kampanye,
 // kolom cari menyaring tips & EventAlert, dan event yang sedang berlangsung.
@@ -45,7 +46,7 @@ export default function Kampanye() {
       }
     >
       <div className="lg:grid lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:gap-12 lg:pt-10">
-        <nav aria-label={tr('Menu kampanye')} className="grid grid-cols-2 gap-x-2 gap-y-4 pt-6 lg:pt-0">
+        <nav ref={revealList} aria-label={tr('Menu kampanye')} className="grid grid-cols-2 gap-x-2 gap-y-4 pt-6 lg:pt-0">
           {MENU.map((m) => (
             <MenuTile key={m.to} variant="pill" to={m.to} label={m.label} icon={m.icon} />
           ))}
@@ -56,23 +57,25 @@ export default function Kampanye() {
             <HasilCari q={q} hasil={hasil} now={now} />
           ) : (
             <section aria-labelledby="judul-berlangsung">
-              <h2 id="judul-berlangsung" className="font-serif text-[1.375rem] leading-tight">
+              <h2 ref={revealUp} id="judul-berlangsung" className="font-serif text-[1.375rem] leading-tight">
                 {tr('Sedang berlangsung')}
               </h2>
               {events.status === 'galat' && <ErrorBanner error={events.error} onRetry={events.muatUlang} className="mt-3" />}
               {events.status === 'ok' && berlangsung.length === 0 && (
                 <p className="mt-2 text-[15px] leading-relaxed text-ink/65">
                   {tr('Tidak ada event lalu lintas saat ini.')}{' '}
-                  <Link to="/kampanye/event" className="font-semibold text-ink-violet underline-offset-2 hover:underline">
+                  <Link to="/kampanye/event" className="fx-line font-semibold text-ink-violet">
                     {tr('Lihat jadwal mendatang')}
                   </Link>
                 </p>
               )}
-              <ul className="mt-2">
-                {berlangsung.map((e) => (
-                  <BarisEvent key={e.id} e={e} now={now} />
-                ))}
-              </ul>
+              {berlangsung.length > 0 && (
+                <ul ref={revealList} className="mt-2">
+                  {berlangsung.map((e) => (
+                    <BarisEvent key={e.id} e={e} now={now} />
+                  ))}
+                </ul>
+              )}
             </section>
           )}
         </div>
@@ -87,7 +90,7 @@ function BarisEvent({ e, now }) {
     <li>
       <Link
         to={`/kampanye/event?id=${e.id}`}
-        className="-mx-2 flex min-h-touch items-center gap-3 rounded-2xl px-2 py-3 transition hover:bg-ink/[0.035]"
+        className="fx-row -mx-2 flex min-h-touch items-center gap-3 rounded-2xl px-2 py-3"
       >
         <span aria-hidden="true" className="relative grid size-3 shrink-0 place-items-center">
           {e.status === 'berlangsung' && <span className="absolute size-3 animate-ping rounded-full opacity-40 motion-reduce:animate-none" style={{ backgroundColor: j.warna }} />}
@@ -112,13 +115,13 @@ function HasilCari({ q, hasil, now }) {
       {kosong && <p className="text-[15px] leading-relaxed text-ink/65">{tr('Tidak ada tips atau event yang cocok dengan “')}{q.trim()}”.</p>}
       {hasil.tips.length > 0 && (
         <>
-          <h2 className="font-serif text-[1.375rem] leading-tight">{tr('Tips')}</h2>
-          <ul className="mt-2">
+          <h2 ref={revealUp} className="font-serif text-[1.375rem] leading-tight">{tr('Tips')}</h2>
+          <ul ref={revealList} className="mt-2">
             {hasil.tips.map((t) => (
               <li key={t.id}>
                 <Link
                   to={`/kampanye/tips#${t.id}`}
-                  className="-mx-2 flex min-h-touch items-center gap-3 rounded-2xl px-2 py-3 transition hover:bg-ink/[0.035]"
+                  className="fx-row -mx-2 flex min-h-touch items-center gap-3 rounded-2xl px-2 py-3"
                 >
                   <Rambu kecil />
                   <span className="min-w-0 flex-1 truncate text-[15px] font-semibold">{t.judul}</span>
@@ -131,8 +134,8 @@ function HasilCari({ q, hasil, now }) {
       )}
       {hasil.events.length > 0 && (
         <>
-          <h2 className="mt-6 font-serif text-[1.375rem] leading-tight">{tr('Event')}</h2>
-          <ul className="mt-2">
+          <h2 ref={revealUp} className="mt-6 font-serif text-[1.375rem] leading-tight">{tr('Event')}</h2>
+          <ul ref={revealList} className="mt-2">
             {hasil.events.map((e) => (
               <BarisEvent key={e.id} e={e} now={now} />
             ))}

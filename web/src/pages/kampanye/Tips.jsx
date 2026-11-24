@@ -7,6 +7,7 @@ import PageShell from '../../components/PageShell.jsx'
 import Rambu from '../../components/kampanye/Rambu.jsx'
 import { useApiGet } from '../../lib/useApiGet.js'
 import { tr } from '../../lib/i18n.js'
+import { revealLeft, revealList, revealUp } from '../../lib/reveal.js'
 
 // Tips Keselamatan (T-207): konten `tips` aktif dari admin, urut `urutan`.
 export default function Tips() {
@@ -28,17 +29,21 @@ export default function Tips() {
         {status === 'ok' && items.length === 0 && (
           <EmptyState icon={ShieldAlert} title={tr('Belum ada tips')} message={tr('Tips keselamatan dari pengelola SmartMove akan muncul di sini.')} />
         )}
-        <ul className="divide-y divide-ink/[0.07]">
-          {items.map((t) => (
-            <li key={t.id} id={t.id} className={`flex gap-4 py-5 ${hash === `#${t.id}` ? 'rounded-2xl bg-lilac-wash/20 px-3' : ''}`}>
-              <Rambu className="mt-0.5" />
-              <div className="min-w-0">
-                <h2 className="font-serif text-[1.25rem] leading-snug">{t.judul}</h2>
-                {t.isi && <p className="mt-1.5 max-w-[60ch] text-[15px] leading-relaxed text-ink/75">{t.isi}</p>}
-              </div>
-            </li>
-          ))}
-        </ul>
+        {items.length > 0 && (
+          <ul ref={revealList} className="divide-y divide-ink/[0.07]">
+            {items.map((t) => (
+              <li key={t.id} id={t.id} className={`fx-row flex gap-4 py-5 [--fx-inset:-1rem] ${hash === `#${t.id}` ? 'rounded-2xl bg-lilac-wash/20 px-3' : ''}`}>
+                <span ref={revealLeft} className="shrink-0">
+                  <Rambu className="mt-0.5" />
+                </span>
+                <div className="min-w-0">
+                  <h2 ref={revealUp} className="font-serif text-[1.25rem] leading-snug">{t.judul}</h2>
+                  {t.isi && <p className="mt-1.5 max-w-[60ch] text-[15px] leading-relaxed text-ink/75">{t.isi}</p>}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </PageShell>
   )

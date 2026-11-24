@@ -24,7 +24,7 @@ export default function HasilCari({ hasil, onPilih, onTutup }) {
               <button
                 type="button"
                 onClick={() => onPilih(t)}
-                className="flex min-h-touch w-full items-center gap-3 rounded-2xl px-2 py-2 text-left transition hover:bg-ink/[0.04]"
+                className="fx-row flex min-h-touch w-full items-center gap-3 rounded-2xl px-2 py-2 text-left"
               >
                 <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[color:rgb(218_184_246/0.45)] text-ink-violet">
                   <MapPin size={18} aria-hidden="true" />
